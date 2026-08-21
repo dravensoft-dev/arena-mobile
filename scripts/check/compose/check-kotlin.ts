@@ -1,8 +1,10 @@
-/* Kotlin compiles, and the unit tests beside it pass. This is one of the two gates that
- * cannot run on every host: it needs a JDK, and the Gradle wrapper downloads the distribution
- * on first use. Where the JDK is missing it exits 2 and the sweep reports INCOMPLETE, and a
- * workflow sets CI=true so the same absence is a failure there. The deadline is generous by
- * intent, because the first run on a cold runner fetches a distribution over the network. */
+/* Kotlin compiles, and the unit tests beside it pass. It needs a JDK, so where one is missing
+ * it exits 2 and the sweep reports INCOMPLETE; a workflow sets CI=true and the same absence
+ * fails there. The deadline is generous because a cold runner fetches a distribution first.
+ * The two tasks are not one variant read twice: AGP 9 creates a unit test component only for
+ * the build type under test, which is debug, so testReleaseUnitTest does not exist and the
+ * release variant is proved by assembling it. Asking for both is what makes the gate say that
+ * the artifact that ships compiles AND that the suite beside it runs. */
 
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -20,7 +22,7 @@ export const COMPILE = deadline(
   'a cold runner downloads the Gradle distribution, then the Android and Compose artifacts, before it compiles anything; the compile itself is seconds and the fetch is what the span is for',
 );
 
-export const TASKS = [':compose:assembleRelease', ':compose:testReleaseUnitTest'];
+export const TASKS = [':compose:assembleRelease', ':compose:testDebugUnitTest'];
 
 export const node = {
   name: 'check:kotlin',

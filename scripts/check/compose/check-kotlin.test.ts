@@ -8,8 +8,8 @@ test('the wait is a deadline carrying why it is that size, and never a bare numb
   expect(COMPILE.why).toContain('cold runner');
 });
 
-test('the gate compiles the release variant and runs the suite beside it', () => {
-  expect(TASKS).toEqual([':compose:assembleRelease', ':compose:testReleaseUnitTest']);
+test('the gate assembles what ships and runs the suite where AGP 9 creates one', () => {
+  expect(TASKS).toEqual([':compose:assembleRelease', ':compose:testDebugUnitTest']);
 });
 
 test('the wrapper is in the tree, and a build that resolves its own Gradle is one nobody pinned', () => {
