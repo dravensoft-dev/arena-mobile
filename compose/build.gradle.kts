@@ -1,5 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -48,7 +46,7 @@ dependencies {
 }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = false)
+    publishToMavenCentral(automaticRelease = false)
     signAllPublications()
 
     coordinates(group.toString(), "arena-compose", version.toString())
