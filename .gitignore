@@ -1,0 +1,66 @@
+# Build output. Anchored, every one of them: an unanchored `build/` also matches
+# `scripts/build/`, the phase directory, and would silently drop a new script added there.
+/compose/build/
+/.gradle/
+/build/
+/.build/
+/dist/
+/.cache/
+local.properties
+
+# The contract payload, fetched from the registry by scripts/generate/contracts/fetch-contracts.ts
+# and named by repo.config.json. It is reproducible from the pin over HTTPS, so committing it
+# would carry a second copy of a version that already has a single authority.
+/.contracts/
+
+# What a generated file is NOT. Every emitted Kotlin and Swift file is TRACKED, which is the
+# opposite of what Arena does with `frameworks/**/*.generated.*`, and it is the architecture
+# rather than a preference: the property this repository exists to hold is that a clone with
+# no JS toolchain at all builds both libraries, and that is only true while the emit stays
+# committed. UNTRACKED in scripts/check/mobile/check-generated.ts is what names an exception,
+# and it is empty. Nothing here excludes a `.generated.` name.
+
+# Xcode and SwiftPM local state
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+.swiftpm/
+
+# Specs and implementation plans, deleted once executed. What survives is the commit, the
+# gate and the AGENTS.md, never the plan. check:citations refuses a tracked document citing
+# a file under here, since an ignored path is one no clone can follow.
+/docs/
+
+# The JS tooling's own installed tree
+node_modules/
+.pnp
+.pnp.js
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# SDD scratch (ledger, task briefs, review packages) is machine-local, not product.
+.superpowers/
+
+# Claude Code local settings and task lock, machine-local, not product.
+.claude/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Misc
+coverage/

@@ -1,0 +1,48 @@
+name: Publish arena-compose
+
+on:
+  workflow_run:
+    workflows: ["arena-mobile main"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+
+      - name: Ask the guard
+        id: guard
+        run: bun scripts/ci/arena/publish-guard.ts
+
+      - name: The version, the README and the tag agree
+        if: steps.guard.outputs.publish == 'true'
+        run: bun scripts/check/arena/check-release.ts
+
+      - uses: actions/setup-java@v5
+        if: steps.guard.outputs.publish == 'true'
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.guard.outputs.publish == 'true'
+
+      - name: Publish to the Central Portal
+        if: steps.guard.outputs.publish == 'true'
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+        run: ./gradlew :compose:publishToMavenCentral --no-configuration-cache

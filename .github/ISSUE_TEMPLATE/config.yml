@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: A value is wrong, missing, or should be something else
+    url: https://github.com/dravensoft-dev/arena/issues/new/choose
+    about: A colour, a spacing step, a duration or a delay is decided in Arena's contracts. Open it there; raising the pin here is the whole of the follow-up.
+  - name: A security vulnerability
+    url: https://github.com/dravensoft-dev/arena-mobile/security/advisories/new
+    about: Private vulnerability reporting. A public issue is world-readable the moment it exists.
+  - name: How do I use this
+    url: https://github.com/dravensoft-dev/arena-mobile/discussions
+    about: A question about consuming the libraries, rather than a defect in them.

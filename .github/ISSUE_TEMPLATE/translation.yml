@@ -1,0 +1,43 @@
+name: A value crosses wrongly
+description: A token reaches a native symbol with the wrong type, the wrong unit, or not at all.
+labels: [translation]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the report this repository exists to receive. Every mistake in the unit bridge
+        compiles and draws, and the sizes are wrong by a ratio nobody measured, so a report
+        that names the token and the number is worth more than one that names the screen.
+  - type: input
+    id: token
+    attributes:
+      label: The token
+      description: Its path in the contract, such as `fs.md` or `dz.ctl-h`.
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer
+      options: [Compose, SwiftUI, both]
+    validations:
+      required: true
+  - type: input
+    id: emitted
+    attributes:
+      label: What it emits today
+      placeholder: "public val fsMd: Dp = 15.dp"
+    validations:
+      required: true
+  - type: input
+    id: expected
+    attributes:
+      label: What it owes instead, and why
+      placeholder: "TextUnit in sp, because the contract puts it on the scales axis"
+    validations:
+      required: true
+  - type: textarea
+    id: measurement
+    attributes:
+      label: The measurement
+      description: The ratio it is wrong by, or the setting that shows it. A screenshot at the largest accessibility text size is worth the most here.

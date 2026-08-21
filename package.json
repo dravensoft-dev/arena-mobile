@@ -1,0 +1,36 @@
+{
+  "name": "arena-mobile",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.3.14",
+  "scripts": {
+    "build": "bun scripts/graph/run-build.ts",
+    "build:release": "bun scripts/graph/run-build.ts --force --assert-full",
+    "check": "bun scripts/check/arena/check-all.ts",
+    "test": "bun scripts/ci/arena/run-suite.ts all",
+    "generate:contracts": "bun scripts/generate/contracts/fetch-contracts.ts",
+    "generate:tokens": "bun scripts/generate/arena/generate-tokens.ts",
+    "check:pin": "bun scripts/check/contracts/check-pin.ts",
+    "check:catalogue": "bun scripts/check/contracts/check-catalogue.ts",
+    "check:user-scale": "bun scripts/check/contracts/check-user-scale.ts",
+    "check:emit": "bun scripts/check/arena/check-emit.ts",
+    "check:coverage": "bun scripts/check/arena/check-coverage.ts",
+    "check:collisions": "bun scripts/check/arena/check-collisions.ts",
+    "check:literals": "bun scripts/check/arena/check-literals.ts",
+    "check:doc-comments": "bun scripts/check/arena/check-doc-comments.ts",
+    "check:docs": "bun scripts/check/arena/check-docs.ts",
+    "check:citations": "bun scripts/check/arena/check-citations.ts",
+    "check:generated": "bun scripts/check/arena/check-generated.ts",
+    "check:community": "bun scripts/check/arena/check-community.ts",
+    "check:agents": "bun scripts/check/arena/check-agents.ts",
+    "check:deadlines": "bun scripts/check/arena/check-deadlines.ts",
+    "check:graph": "bun scripts/check/arena/check-graph.ts",
+    "check:portability": "bun scripts/check/arena/check-portability.ts",
+    "check:kotlin": "bun scripts/check/compose/check-kotlin.ts",
+    "check:swift": "bun scripts/check/swiftui/check-swift.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "1.3.14",
+    "typescript": "6.0.3"
+  }
+}

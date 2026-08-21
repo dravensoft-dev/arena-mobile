@@ -1,0 +1,49 @@
+name: Release notes
+
+on:
+  workflow_run:
+    workflows: ["arena-mobile main"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The tag to describe, as vx.y.z
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  describe:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+
+      - name: Which tag this commit reaches
+        id: tag
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=$(git tag --points-at HEAD | head -n1)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Write the page
+        if: steps.tag.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          contracts=$(bun -e "console.log(require('./repo.config.json')['arena-contracts-version'])")
+          gh release create "${{ steps.tag.outputs.tag }}" \
+            --title "arena-mobile ${{ steps.tag.outputs.tag }}" \
+            --generate-notes \
+            --notes-start-tag "$(git tag --sort=-v:refname | sed -n 2p)" \
+            --notes "Generated from @dravensoft/arena-contracts@${contracts}." \
+            || gh release edit "${{ steps.tag.outputs.tag }}" --notes "Generated from @dravensoft/arena-contracts@${contracts}."

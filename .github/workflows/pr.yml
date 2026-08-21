@@ -1,0 +1,83 @@
+name: arena-mobile PR
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - name: Fetch the pinned contracts and emit
+        run: bun run build:release
+      - name: The emit is idempotent
+        run: git diff --exit-code
+
+  test-tooling:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run build:release
+      - run: bun run check --domain=contracts
+      - run: bun run check --domain=arena
+      - run: bun run test
+
+  test-compose:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run check --domain=compose
+
+  test-swiftui:
+    needs: build
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run check --domain=swiftui
+
+  pr-gate:
+    if: always()
+    needs: [build, test-tooling, test-compose, test-swiftui]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every job above is success or skipped
+        run: |
+          results='${{ join(needs.*.result, ' ') }}'
+          echo "results: $results"
+          for one in $results; do
+            case "$one" in
+              success|skipped) ;;
+              *) echo "a required job reported $one"; exit 1 ;;
+            esac
+          done

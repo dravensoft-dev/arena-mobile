@@ -1,0 +1,23 @@
+[versions]
+agp = "9.3.1"
+kotlin = "2.4.10"
+composeBom = "2026.08.00"
+jvmToolchain = "21"
+compileSdk = "37"
+minSdk = "24"
+mavenPublish = "0.37.0"
+
+[libraries]
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+compose-animation-core = { group = "androidx.compose.animation", name = "animation-core" }
+compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+compose-ui-text = { group = "androidx.compose.ui", name = "ui-text" }
+compose-ui-unit = { group = "androidx.compose.ui", name = "ui-unit" }
+kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }

@@ -1,0 +1,46 @@
+name: Defect
+description: Something in this repository is wrong, incomplete, or unverified.
+labels: [defect]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A **value** being wrong belongs to Arena and not here. This form is for the emit, the
+        themes, the tooling and the build.
+  - type: input
+    id: version
+    attributes:
+      label: arena-mobile version
+      description: The `version` in `repo.config.json`, or the tag you depend on.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: contracts
+    attributes:
+      label: Contract version
+      description: The `arena-contracts-version` in `repo.config.json`.
+      placeholder: 10.2.0
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer
+      options: [Compose, SwiftUI, both, the tooling]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens, and what you expected instead
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: The smallest thing that shows it
+      description: A snippet, a gate's output, or the command you ran.
+      render: shell
+    validations:
+      required: true
