@@ -1,7 +1,8 @@
 import { test, expect } from 'bun:test';
 import {
-  UNMARKED, UNTRACKED, bannerProblems, carriageReturnProblems, namingProblems,
-  staleUnmarkedProblems, staleUntrackedProblems, trackingProblems, zeroTrackedProblem,
+  UNMARKED, UNTRACKED, bannerProblems, carriageReturnProblems, crlfPatterns, declaredCrlf,
+  matchesAttribute, namingProblems, staleCrlfProblems, staleUnmarkedProblems,
+  staleUntrackedProblems, trackingProblems, zeroTrackedProblem,
 } from './check-generated.ts';
 import { COMMAND } from '../../lib/arena/emit.ts';
 import { TARGETS } from '../../generate/arena/generate-tokens.ts';
@@ -38,6 +39,26 @@ test('a tracked text file carrying a carriage return fails, which .gitattributes
   expect(carriageReturnProblems(['a.kt'], () => Buffer.from('one\ntwo\n'))).toEqual([]);
   expect(carriageReturnProblems(['a.kt'], () => Buffer.from('one\r\ntwo\n'))[0]).toContain('carriage return');
   expect(carriageReturnProblems(['a.jar'], () => Buffer.from('one\r\n'))).toEqual([]);
+});
+
+test('the exception is derived from .gitattributes and never kept as a second list', () => {
+  const attributes = '* text=auto eol=lf\n# a comment eol=crlf\ngradlew.bat text eol=crlf\n';
+  expect(crlfPatterns(attributes)).toEqual(['gradlew.bat']);
+  expect(matchesAttribute('gradlew.bat', 'gradlew.bat')).toBe(true);
+  expect(matchesAttribute('gradlew.bat', 'a/b/gradlew.bat')).toBe(true);
+  expect(matchesAttribute('*.bat', 'a/x.bat')).toBe(true);
+  expect(matchesAttribute('gradle/wrapper/x', 'gradle/wrapper/x')).toBe(true);
+  expect(matchesAttribute('gradlew.bat', 'gradlew')).toBe(false);
+  const allowed = declaredCrlf(['gradlew', 'gradlew.bat'], attributes);
+  expect([...allowed]).toEqual(['gradlew.bat']);
+  expect(carriageReturnProblems(['gradlew.bat'], () => Buffer.from('one\r\n'), allowed)).toEqual([]);
+  expect(carriageReturnProblems(['gradlew'], () => Buffer.from('one\r\n'), allowed)[0]).toContain('carriage return');
+});
+
+test('a CRLF declaration matching no tracked file excepts nothing, and fails', () => {
+  const attributes = 'gradlew.bat text eol=crlf\n';
+  expect(staleCrlfProblems(['gradlew.bat'], attributes)).toEqual([]);
+  expect(staleCrlfProblems(['gradlew'], attributes)[0]).toContain('excepts nothing');
 });
 
 test('git reporting nothing tracked is a failure and not an empty repository', () => {

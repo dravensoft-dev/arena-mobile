@@ -33,9 +33,11 @@ export const UNTRACKED = new Map<string, string>([
 
 export const BINARY_EXTENSIONS = ['.jar', '.png', '.woff2', '.ttf', '.otf', '.zip', '.tgz', '.pdf'];
 
+export const GITATTRIBUTES = '.gitattributes';
+
 export const node = {
   name: 'check:generated',
-  reads: ['.gitattributes', '.gitignore', ...TARGETS],
+  reads: [GITATTRIBUTES, '.gitignore', ...TARGETS],
   writes: [],
   feeds: [],
 };
@@ -80,11 +82,41 @@ export function staleUntrackedProblems(tracked: Set<string>) {
   });
 }
 
-export function carriageReturnProblems(tracked: readonly string[], read: (path: string) => Buffer) {
+export function crlfPatterns(gitattributes: string) {
+  return gitattributes
+    .split('\n')
+    .filter((line) => !line.trimStart().startsWith('#') && /\beol=crlf\b/.test(line))
+    .map((line) => line.trim().split(/\s+/)[0])
+    .filter(Boolean);
+}
+
+export function matchesAttribute(pattern: string, path: string) {
+  const body = pattern.includes('/') ? pattern : `**/${pattern}`;
+  const expression = body
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .split('**/')
+    .map((part) => part.replace(/\*/g, '[^/]*'))
+    .join('(?:.*/)?');
+  return new RegExp(`^${expression}$`).test(path);
+}
+
+export function declaredCrlf(tracked: readonly string[], gitattributes: string) {
+  const patterns = crlfPatterns(gitattributes);
+  return new Set(tracked.filter((path) => patterns.some((pattern) => matchesAttribute(pattern, path))));
+}
+
+export function carriageReturnProblems(tracked: readonly string[], read: (path: string) => Buffer, allowed = new Set<string>()) {
   return tracked
     .filter((path) => !BINARY_EXTENSIONS.some((ext) => path.endsWith(ext)))
+    .filter((path) => !allowed.has(path))
     .filter((path) => read(path).includes(0x0d))
-    .map((path) => `${path} is a tracked text file carrying a carriage return, and .gitattributes declares every one of them LF`);
+    .map((path) => `${path} is a tracked text file carrying a carriage return, and ${GITATTRIBUTES} declares it LF`);
+}
+
+export function staleCrlfProblems(tracked: readonly string[], gitattributes: string) {
+  return crlfPatterns(gitattributes)
+    .filter((pattern) => !tracked.some((path) => matchesAttribute(pattern, path)))
+    .map((pattern) => `${GITATTRIBUTES} declares ${pattern} as CRLF, and no tracked file matches it. An exception covering nothing excepts nothing`);
 }
 
 export function zeroTrackedProblem(tracked: readonly string[]) {
@@ -101,6 +133,8 @@ function main() {
     process.exit(1);
   }
   const set = new Set(tracked);
+  const gitattributes = readFileSync(join(root, GITATTRIBUTES), 'utf8');
+  const crlf = declaredCrlf(tracked, gitattributes);
   const zero = zeroTrackedProblem(tracked);
   const errs = [
     ...(zero ? [zero] : []),
@@ -109,7 +143,8 @@ function main() {
     ...trackingProblems(TARGETS, set),
     ...staleUnmarkedProblems(set),
     ...staleUntrackedProblems(set),
-    ...carriageReturnProblems(tracked, (path) => readFileSync(join(root, path))),
+    ...carriageReturnProblems(tracked, (path) => readFileSync(join(root, path)), crlf),
+    ...staleCrlfProblems(tracked, gitattributes),
   ];
   if (errs.length) {
     console.error(`check-generated: ${errs.length} problem(s)\n`);
@@ -119,7 +154,8 @@ function main() {
   console.log(
     `check-generated: ${TARGETS.length} emitted file(s) named, bannered and tracked, `
     + `${UNMARKED.size} file(s) that can carry neither with a reason, ${UNTRACKED.size} ignored output(s) with a reason, `
-    + `and ${tracked.length} tracked file(s) carrying no carriage return`,
+    + `and ${tracked.length - crlf.size} tracked text file(s) carrying no carriage return beside the `
+    + `${crlf.size} ${GITATTRIBUTES} declares CRLF`,
   );
 }
 
