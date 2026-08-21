@@ -70,16 +70,64 @@ tag and `repo.config.json` from disagreeing.
 
 ## 4. The bootstrap, which nothing here can take for you
 
-A package publishing to Maven Central for the first time needs three moves made by hand, and
-none of them is a script:
+A package publishing to Maven Central for the first time needs four moves made by hand, in
+this order, and none of them is a script.
 
-1. An account on **central.sonatype.com**, and the `org.dravensoft` namespace verified with a
-   TXT record on `dravensoft.org`.
-2. A **GPG** key: generated, its public half on a keyserver, its private half and passphrase
-   in the repository secrets beside the Central token.
-3. **The first publish dispatched by hand.** `workflow_run` reaches only a workflow already
-   registered on the default branch, so the push that first puts one there cannot dispatch it,
-   and re-running that push replays the original event rather than asking the question again.
+**The namespace.** An account on **central.sonatype.com**, then *View Namespaces* and
+*Add Namespace* for `org.dravensoft`. The portal shows a verification key, and it goes into a
+`TXT` record on the apex of `dravensoft.org`, which is the exact domain the namespace inverts
+to. Nothing that serves a subdomain is touched, and an existing `TXT` there is not replaced:
+several records with one name coexist and each verifier reads its own. Wait until
+`dig +short TXT dravensoft.org` returns it before pressing *Verify Namespace*, because
+verifying early caches the `NXDOMAIN` and the wait becomes the record's own time to live.
 
-[`.github/workflows/AGENTS.md`](./.github/workflows/AGENTS.md) states the gap and what the
-guard asks once it is closed.
+**The token.** *View Account*, then *Generate User Token*. The portal presents it as a Maven
+`settings.xml` fragment and no such file exists here, because this repository publishes from
+Gradle: what the fragment carries is the pair the next step wants.
+
+**The key.** `gpg --full-generate-key`, RSA and RSA, 4096 bits, then the public half to a
+keyserver. **Send it over `hkps`**, as `gpg --keyserver hkps://keyserver.ubuntu.com
+--send-keys <fingerprint>`: the default is `hkp` on port 11371, which is commonly filtered,
+and a send that never arrives reports nothing. Central accepts `keyserver.ubuntu.com`,
+`keys.openpgp.org` and `pgp.mit.edu`, and the first is the one worth reaching, because
+`keys.openpgp.org` withholds a key's identity until its address is verified and serves it with
+no user id until then. Read back what a keyserver actually holds over HTTPS rather than with
+`--recv-keys`, whose one error message covers both "it is not there" and "I could not reach
+it":
+
+```bash
+curl -s "https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x<fingerprint>" \
+  | gpg --show-keys
+```
+
+**The secrets.** Four, by the names `.github/workflows/maven-publish.yml` maps to the Gradle
+properties the publish plugin reads:
+
+| secret | what it holds |
+|---|---|
+| `CENTRAL_TOKEN_USERNAME` | the `username` from the portal's fragment |
+| `CENTRAL_TOKEN_PASSWORD` | the `password` from it, which is shown once |
+| `SIGNING_KEY` | `gpg --export-secret-keys --armor <fingerprint>`, with its header and footer lines |
+| `SIGNING_PASSWORD` | the key's passphrase |
+
+Shred the exported key afterwards. The copy that matters is in the keyring, and an export left
+in a temporary directory is a private signing key any local account can read.
+
+## 5. What the first release does not need
+
+**A manual dispatch, unless the event is missed.** Every publish workflow is dispatchable by
+hand, and `.github/workflows/AGENTS.md` says why that path has to exist: `workflow_run`
+reaches only a workflow already registered on the default branch. What that does NOT mean is
+that the first release always needs it. A push that lands the workflows on the default branch
+and fires the guarded run in one go is answered normally, because the files are registered
+before that run completes. Reach for `gh workflow run` when the run finished and nothing
+followed it, not before.
+
+**Anything at all for Swift.** SwiftPM resolves a package from the repository at a git tag, so
+the tag pushed in step 3 is the whole of that release. There is no registry, no account and no
+signature, and `Package.swift` carries no version for the same reason.
+
+**A click, if you want none.** The deployment lands in the portal as `USER_MANAGED` and waits,
+because `compose/build.gradle.kts` passes `automaticRelease = false`. Review it under
+*Deployments* and press *Publish*; it reaches `repo1.maven.org` within the hour and the search
+index later. Pass `automaticRelease = true` to give that up.
