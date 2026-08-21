@@ -37,8 +37,8 @@ export function readmeProblems(readme: string, version: string) {
 }
 
 export function packageSwiftProblems(source: string) {
-  return /\bversion\s*:/.test(source)
-    ? ['Package.swift states a version. SwiftPM reads the git tag, so a second number here is one nothing resolves and everything can disagree with']
+  return /^\s*version\s*:/m.test(source)
+    ? ['Package.swift states a package version. SwiftPM reads the git tag, so a second number here is one nothing resolves and everything can disagree with']
     : [];
 }
 

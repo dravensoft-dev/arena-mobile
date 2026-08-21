@@ -9,9 +9,13 @@ test('the README pair is found by exact match, so the heading and the label are 
   expect(readmeProblems(`${README_HEADING}\n- arena-mobile 0.1.0\n`, '0.1.0')[0]).toContain('must not be reworded');
 });
 
-test('Package.swift carries no version, because SwiftPM reads the tag', () => {
+test('Package.swift carries no package version, because SwiftPM reads the tag', () => {
   expect(packageSwiftProblems('let package = Package(name: "ArenaTokens")')).toEqual([]);
-  expect(packageSwiftProblems('version: "0.1.0"')[0]).toContain('SwiftPM reads the git tag');
+  expect(packageSwiftProblems('    version: "0.1.0"')[0]).toContain('SwiftPM reads the git tag');
+});
+
+test('the tools version is not a package version, and reading one for the other reddens every push', () => {
+  expect(packageSwiftProblems('// swift-tools-version: 6.2\nlet package = Package(name: "ArenaTokens")')).toEqual([]);
 });
 
 test('before the tag exists the gate says so and hands over the command that creates it', () => {
