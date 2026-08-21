@@ -6,6 +6,7 @@ jvmToolchain = "21"
 compileSdk = "37"
 minSdk = "24"
 mavenPublish = "0.37.0"
+junit = "4.13.2"
 
 [libraries]
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -14,7 +15,8 @@ compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 compose-ui-text = { group = "androidx.compose.ui", name = "ui-text" }
 compose-ui-unit = { group = "androidx.compose.ui", name = "ui-unit" }
-kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }

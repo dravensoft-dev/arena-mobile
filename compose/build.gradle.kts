@@ -39,7 +39,8 @@ dependencies {
     api(libs.compose.ui.text)
     api(libs.compose.ui.unit)
     api(libs.compose.animation.core)
-    testImplementation(libs.kotlin.test)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test.junit)
 }
 
 mavenPublishing {
