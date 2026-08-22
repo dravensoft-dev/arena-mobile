@@ -4,7 +4,7 @@
  * themes, and three files declare the dz ladder for three densities, so a flat emit would
  * have each of them silently overwrite the last. */
 
-import { byCodeUnit } from '../../utils/compare.ts';
+import { byCodeUnit, sortedByCodeUnit } from '../../utils/compare.ts';
 import { identifierFor } from './identifier.ts';
 import { bridge, type Emitted } from './bridge.ts';
 import { inScope, type Density, type Theme, type Token } from '../contracts/payload.ts';
@@ -42,6 +42,44 @@ export function tripleSlash(description: string | undefined, indent: string) {
 
 export function flatten(description: string | undefined) {
   return (description ?? '').replace(/\s+/g, ' ').trim();
+}
+
+export const REPHRASED = new Map<string, { was: string; text: string; why: string }>([
+  [
+    'layout.bar',
+    {
+      was: "The height of a fixed bottom navigation bar, the row of destinations a\nphone shell puts at the foot of the screen. It is read from outside the bar as often\nas inside it: the page reserves it as bottom padding so the last row is not covered,\nand a stack of toasts sits above it rather than under it, so a bar whose height only\nthe bar knows is a number retyped in three files. The safe-area inset is NOT included:\nadd var(--pad-safe-bottom) to it, since a value that already carried the inset could\nnot be used as a plain height. Not script-readable: nothing computes a position from\nit, a stylesheet holds every use, and a number bound at import time could not\nre-densify.",
+      text: "The height of a fixed bottom navigation bar, the row of destinations a\nphone shell puts at the foot of the screen. It is read from outside the bar as often\nas inside it: the page reserves it as bottom padding so the last row is not covered,\nand a stack of toasts sits above it rather than under it, so a bar whose height only\nthe bar knows is a number retyped in three files. The safe-area inset is NOT included:\nadd the bottom safe area to it, which ArenaSafeArea.bottom composes, since a value that\nalready carried the inset could not be used as a plain height. Nothing computes a\nposition from it, and a value bound at import time could not re-densify.",
+      why: "the clause that goes names var(--pad-safe-bottom), a custom property this library composes as ArenaSafeArea.bottom instead, and a stylesheet that holds every use, which is the web layer describing where its own call sites live. Every claim the sentence makes about the height is true here and stays",
+    },
+  ],
+  [
+    'z.nav',
+    {
+      was: "Fixed page navigation: a bottom bar, a sticky top bar. Arena draws one of these, ArenaBottomNav, and the slot is not there for it: it is there because the invariant is system-wide and a consumer's own shell is part of the system, so a host's sticky header and Arena's bar interleave with Arena's overlays by design rather than by DOM order. That was the reason before any component carried it and it is the reason still; what changed is only that the set of things standing on this step is no longer empty. Below dropdown, so an ArenaMenu opened from the bar covers it rather than resolving by DOM order, which is the failure this family was created to end. Anything drawn against this slot also reads --pad-safe-bottom, in contracts/design/environment.css, and --layout-bar for its own height",
+      text: "Fixed page navigation: a bottom bar, a sticky top bar. Arena draws one of these, ArenaBottomNav, and the slot is not there for it: it is there because the invariant is system-wide and a consumer's own shell is part of the system, so a host's sticky header and Arena's bar interleave with Arena's overlays by design rather than by stacking order. That was the reason before any component carried it and it is the reason still; what changed is only that the set of things standing on this step is no longer empty. Below dropdown, so an ArenaMenu opened from the bar covers it rather than resolving by the order it was drawn in, which is the failure this family was created to end. Anything drawn against this slot also reads the bottom safe area, which ArenaSafeArea.bottom composes, and layoutBar for its own height",
+      why: "DOM order is the web spelling of the thing a stacking slot exists to overrule, and the last clause names a custom property and a file in the Arena repository. Both of the values it points at exist here, as ArenaSafeArea.bottom and as layoutBar, so each name is replaced by the thing it named",
+    },
+  ],
+]);
+
+export function docTextFor(name: string, description: string | undefined, rephrased = REPHRASED) {
+  return rephrased.get(name)?.text ?? description;
+}
+
+export function staleRephrasedProblems(
+  tokens: readonly { name: string; description?: string }[],
+  rephrased = REPHRASED,
+) {
+  const carried = new Map(tokens.map((token) => [token.name, token.description]));
+  return sortedByCodeUnit([...rephrased].flatMap(([name, { was, why }]) => {
+    if (!carried.has(name)) {
+      return [`REPHRASED names ${name}, and the payload declares no token by that name: ${why}`];
+    }
+    if (flatten(carried.get(name)) === flatten(was)) return [];
+    return [`REPHRASED carries a stale copy of ${name}'s $description, so the replacement below was `
+      + `written against text the contract no longer has and is emitted over the new one unread: ${why}`];
+  }));
 }
 
 function emitted(tokens: Token[], drop: number) {

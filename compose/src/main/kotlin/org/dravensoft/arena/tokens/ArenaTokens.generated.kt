@@ -260,10 +260,9 @@ public object ArenaTokens {
      * as inside it: the page reserves it as bottom padding so the last row is not covered,
      * and a stack of toasts sits above it rather than under it, so a bar whose height only
      * the bar knows is a number retyped in three files. The safe-area inset is NOT included:
-     * add var(--pad-safe-bottom) to it, since a value that already carried the inset could
-     * not be used as a plain height. Not script-readable: nothing computes a position from
-     * it, a stylesheet holds every use, and a number bound at import time could not
-     * re-densify.
+     * add the bottom safe area to it, which ArenaSafeArea.bottom composes, since a value that
+     * already carried the inset could not be used as a plain height. Nothing computes a
+     * position from it, and a value bound at import time could not re-densify.
      */
     public val layoutBar: Dp = 64.dp
     /** The width of the console shell's navigation column. */
@@ -409,7 +408,7 @@ public object ArenaTokens {
     public val zModal: Float = 1000f
     /** ArenaConfirmDialog, which opens from an ArenaDialog */
     public val zModalNested: Float = 1050f
-    /** Fixed page navigation: a bottom bar, a sticky top bar. Arena draws one of these, ArenaBottomNav, and the slot is not there for it: it is there because the invariant is system-wide and a consumer's own shell is part of the system, so a host's sticky header and Arena's bar interleave with Arena's overlays by design rather than by DOM order. That was the reason before any component carried it and it is the reason still; what changed is only that the set of things standing on this step is no longer empty. Below dropdown, so an ArenaMenu opened from the bar covers it rather than resolving by DOM order, which is the failure this family was created to end. Anything drawn against this slot also reads --pad-safe-bottom, in contracts/design/environment.css, and --layout-bar for its own height */
+    /** Fixed page navigation: a bottom bar, a sticky top bar. Arena draws one of these, ArenaBottomNav, and the slot is not there for it: it is there because the invariant is system-wide and a consumer's own shell is part of the system, so a host's sticky header and Arena's bar interleave with Arena's overlays by design rather than by stacking order. That was the reason before any component carried it and it is the reason still; what changed is only that the set of things standing on this step is no longer empty. Below dropdown, so an ArenaMenu opened from the bar covers it rather than resolving by the order it was drawn in, which is the failure this family was created to end. Anything drawn against this slot also reads the bottom safe area, which ArenaSafeArea.bottom composes, and layoutBar for its own height */
     public val zNav: Float = 800f
     /** the coachmark and the scrim beneath it: one slot, two uses. The scrim takes the slot and the coachmark is drawn inside it, so the two are separated by containment rather than by a second number; nothing else on the page may sit between them, which is what a single slot means here */
     public val zOnboarding: Float = 1200f

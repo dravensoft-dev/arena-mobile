@@ -10,7 +10,10 @@ import { isMainModule } from '../../utils/main-module.ts';
 import { repoRoot } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR, DENSITIES, loadTokens, readManifest, resolveAliases, THEMES, type Token } from '../../lib/contracts/payload.ts';
 import { staleUnmappedProblems, type Emitted } from '../../lib/arena/bridge.ts';
-import { banner, densityTokens, kdoc, scaleTokens, shapeProblems, themeTokens, tripleSlash } from '../../lib/arena/emit.ts';
+import {
+  banner, densityTokens, docTextFor, kdoc, scaleTokens, shapeProblems, staleRephrasedProblems,
+  themeTokens, tripleSlash,
+} from '../../lib/arena/emit.ts';
 
 export const KOTLIN_DIR = 'compose/src/main/kotlin/org/dravensoft/arena/tokens';
 export const SWIFT_DIR = 'swiftui/Sources/ArenaTokens';
@@ -60,7 +63,7 @@ function kotlinHeader(fields: Emitted[], extra: string[] = []) {
 
 function kotlinObject(fields: Emitted[]) {
   const body = fields.flatMap((field) => [
-    ...kdoc(field.token.description, '    '),
+    ...kdoc(docTextFor(field.token.name, field.token.description), '    '),
     `    public val ${field.identifier}: ${field.kotlinType} = ${field.kotlinLiteral}`,
   ]);
   return [kotlinHeader(fields), 'public object ArenaTokens {', ...body, '}', ''].join('\n');
@@ -68,7 +71,7 @@ function kotlinObject(fields: Emitted[]) {
 
 function kotlinRecord(name: string, fields: Emitted[], instances: { name: string; fields: Emitted[] }[]) {
   const members = fields.flatMap((field, index) => [
-    ...kdoc(field.token.description, '    '),
+    ...kdoc(docTextFor(field.token.name, field.token.description), '    '),
     `    public val ${field.identifier}: ${field.kotlinType},${index === fields.length - 1 ? '' : ''}`,
   ]);
   const last = members.length - 1;
@@ -96,7 +99,7 @@ function swiftHeader() {
 
 function swiftEnum(fields: Emitted[]) {
   const body = fields.flatMap((field) => [
-    ...tripleSlash(field.token.description, '    '),
+    ...tripleSlash(docTextFor(field.token.name, field.token.description), '    '),
     `    public static let ${field.identifier}: ${field.swiftType} = ${field.swiftLiteral}`,
   ]);
   return [swiftHeader(), 'public enum ArenaTokens {', ...body, '}', ''].join('\n');
@@ -104,7 +107,7 @@ function swiftEnum(fields: Emitted[]) {
 
 function swiftRecord(name: string, fields: Emitted[], instances: { name: string; fields: Emitted[] }[]) {
   const members = fields.flatMap((field) => [
-    ...tripleSlash(field.token.description, '    '),
+    ...tripleSlash(docTextFor(field.token.name, field.token.description), '    '),
     `    public let ${field.identifier}: ${field.swiftType}`,
   ]);
   const parameters = fields.map((field, index) => `        ${field.identifier}: ${field.swiftType}${index === fields.length - 1 ? '' : ','}`);
@@ -165,7 +168,7 @@ export function tokensOf(root = repoRoot) {
 
 function main() {
   const tokens = tokensOf();
-  const problems = [...shapeProblems(tokens), ...staleUnmappedProblems(tokens)];
+  const problems = [...shapeProblems(tokens), ...staleUnmappedProblems(tokens), ...staleRephrasedProblems(tokens)];
   if (problems.length) {
     console.error(`generate-tokens: ${problems.length} problem(s) in the pinned payload\n`);
     for (const problem of problems) console.error(`  ${problem}`);

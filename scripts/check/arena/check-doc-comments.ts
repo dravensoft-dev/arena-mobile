@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
-import { flatten, densityTokens, scaleTokens, themeTokens } from '../../lib/arena/emit.ts';
+import { docTextFor, flatten, densityTokens, scaleTokens, staleRephrasedProblems, themeTokens } from '../../lib/arena/emit.ts';
 import { apiKotlinDocs, apiSwiftDocs, docProblems, kotlinDocs, swiftDocs } from '../../lib/arena/doc-comments.ts';
 import { TARGETS, tokensOf } from '../../generate/arena/generate-tokens.ts';
 import { API_TARGETS, apiTypesOf } from '../../generate/arena/generate-api-types.ts';
@@ -25,7 +25,10 @@ export const node = {
 };
 
 function owedFrom(fields: Emitted[]) {
-  return new Map(fields.map((field) => [field.identifier, flatten(field.token.description)]));
+  return new Map(fields.map((field) => [
+    field.identifier,
+    flatten(docTextFor(field.token.name, field.token.description)),
+  ]));
 }
 
 export function owedByFile(tokens: ReturnType<typeof tokensOf>, types: ReturnType<typeof apiTypesOf>) {
@@ -61,6 +64,7 @@ function main() {
     counted += found.size;
     errs.push(...docProblems(target, found, expected));
   }
+  errs.push(...staleRephrasedProblems(tokensOf(root)));
   const zero = zeroDocProblem(counted);
   if (zero) errs.unshift(zero);
   if (errs.length) {
