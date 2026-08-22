@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test';
-import { componentNames, node, passLine, zeroProblems } from './check-behaviour.ts';
+import { componentNameOf, componentNames, node, passLine, zeroProblems } from './check-behaviour.ts';
 import { COMPONENTS_PREFIX } from '../../lib/contracts/api-types.ts';
 
 const manifest = (contracts: string[]) => ({ name: '@dravensoft/arena-contracts', version: '10.2.2', contracts });
@@ -28,4 +28,9 @@ test('the pass line names what was looked at, and says what a green run does not
   expect(line).toContain('5 recorded absence');
   expect(line).toContain('never that any component behaves');
   expect(line).toContain('is not a symbol anything here compiled');
+});
+
+test('a component name is the stem of a catalogue entry, and a malformed entry fails loudly', () => {
+  expect(componentNameOf(`${COMPONENTS_PREFIX}ArenaButton.json`)).toBe('ArenaButton');
+  expect(() => componentNameOf(`${COMPONENTS_PREFIX}ArenaButton`)).toThrow('naming no .json file');
 });

@@ -38,10 +38,16 @@ export function zeroProblems({ patterns, keys, components }: { patterns: number;
   return errs;
 }
 
+export function componentNameOf(entry: string) {
+  const found = /([^/]+)\.json$/.exec(entry);
+  if (!found) throw new Error(`${entry} is a catalogue entry naming no .json file, so no component name reads out of it`);
+  return found[1] as string;
+}
+
 export function componentNames(manifest: ContractManifest) {
   return sortedByCodeUnit(manifest.contracts
     .filter((path) => path.startsWith(COMPONENTS_PREFIX))
-    .map((path) => path.slice(COMPONENTS_PREFIX.length).replace(/\.json$/, '')));
+    .map(componentNameOf));
 }
 
 export function passLine(
