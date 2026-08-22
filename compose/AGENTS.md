@@ -106,6 +106,26 @@ drawing through `Modifier.minimumInteractiveComponentSize()` and through a hit a
 a smaller painted shape: a switch's pill stays at its drawn height and answers a thumb through
 that box. Measure the box.
 
+## The inset arrives from the caller, and `safeDrawing` is which one
+
+`WindowInsets.safeDrawing` is the set to hand to
+`org.dravensoft.arena.tokens.ArenaSafeArea`, and it lives in
+`androidx.compose.foundation.layout`, which this library does not depend on:
+[`compose/build.gradle.kts`](./build.gradle.kts) lists the runtime, the three `ui-` artifacts and the
+animation core, and nothing else. That is why the seam takes the value rather than reading it,
+and it is the reason a consumer writes
+`WindowInsets.safeDrawing.asPaddingValues().calculateBottomPadding()` at the call site.
+
+**`safeDrawing` reports nothing until the app has gone edge to edge.** An activity that has not
+called `enableEdgeToEdge` has its insets consumed by the decor, so every edge arrives as zero and
+what applies is the floor. Nothing fails, nothing warns, and the layout is correct for an app
+drawing inside the system bars, which is the point: the floor is the value for a device that
+reports none.
+
+**The horizontal pair is `start` and `end` here as well.** `PaddingValues` resolves them with
+`calculateStartPadding(layoutDirection)`, so the value the seam returns is applied without
+anybody converting a side by hand.
+
 ## What this layer does not carry
 
 No component, and no answer to the style plugin tier. `explicitApi()` is on and

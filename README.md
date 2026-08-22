@@ -24,6 +24,24 @@ producing the unit it obliges.
 rung of it clears the 44 points Apple asks and its control height clears the 48 Android asks.
 Compact clears neither and is the expert density, for a reader pointing with a mouse.
 
+**The device's own geometry, composed rather than guessed.** A screen with a notch, a home
+indicator or a cutout reports an inset, and Arena states the floor that applies when it reports
+none. `ArenaSafeArea` composes the two, per edge, and the floor is a default a component pinned
+to that edge can raise. The library asks the platform nothing: the inset is the toolkit's to
+report, which keeps this a package of values.
+
+```kotlin
+val insets = WindowInsets.safeDrawing.asPaddingValues()
+
+Modifier.padding(bottom = ArenaSafeArea.bottom(insets.calculateBottomPadding()))
+```
+
+```swift
+GeometryReader { proxy in
+    content.padding(.bottom, ArenaSafeArea.bottom(proxy.safeAreaInsets.bottom))
+}
+```
+
 **A build with no JavaScript in it.** The generator is the only thing that reads the contract
 payload; Gradle and SwiftPM compile Kotlin and Swift that are already in the tree. A clone
 with no Bun, no Node and no network builds both libraries.

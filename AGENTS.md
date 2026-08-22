@@ -113,6 +113,48 @@ grounds Arena set those bars against. `ROLES` in `scripts/check/arena/check-comp
 why a member is gated or only reported, and `OWED` beside it names every ratio the contract does not
 hold yet, with the token asked for, failing the moment a raised pin brings one in.
 
+## What the device's own geometry is
+
+**Arena composes the device's own geometry in the same stylesheet the contract set does not
+carry**, as `max(var(--sp-3), env(safe-area-inset-bottom))` and three siblings. `env()` is a
+value and a unit to nobody: it has none until there is a screen, so there is nothing for DTCG to
+hold and nothing for the emit to carry. What crosses is the expression and the floor, and both
+toolkits report the inset better than a browser does.
+
+**So the library composes and never reads the device.** `ArenaSafeArea` on each layer takes the
+inset the caller already has and returns it composed with the floor, and asking the platform is
+the caller's. Reading it here would add a Compose artifact this repository does not depend on,
+put a layout container inside a package of values on the SwiftUI side, and replace an expression
+a test can measure with one that needs a screen.
+
+**A floor is what applies when the device reports nothing, and a floor of nothing is a floor.**
+Only the bottom edge carries a step, because a bar flush against the foot of a screen is
+unreachable rather than merely tight; the other three carry zero, which is Arena stating that
+those edges owe nothing rather than Arena saying nothing about them.
+
+**A component pinned to a viewport edge pays that edge's inset itself, and the frame a consumer
+draws around Arena pays for what it draws.** The seam is declared for the reason `--z-nav` and
+`--layout-bar` are: the shell a consumer builds is part of the system, and the alternative is
+every consumer inventing the expression. **The floor is a default and not a constant**, because a
+component may need more than the system reports, which is what Arena's own skip link does.
+
+**It is not theme state, so it travels through no theme.** `colors`, `density` and `fonts` reach
+a tree through `ArenaTheme` and through the SwiftUI environment because each is a decision the
+consumer makes once about how Arena looks. Geometry is not one: it changes with the screen, the
+orientation and the window, and the toolkit already publishes it on a channel built for that. A
+composition local or an environment key here would be a second and staler copy of it, so the
+seam carries no provider, no local and no key.
+
+**The two horizontal edges are `start` and `end` and not `left` and `right`.** The web names them
+physically because CSS resolves the reading direction itself; here the value goes straight to a
+padding API and both padding APIs are already relative to it.
+
+`bun run check:environment` holds it: both layers carry the same edges over the same floors, each
+floor is the emitted identifier of the token named rather than one that merely looks right, every
+floor is on the `fixed` axis because a gutter grows with no reader's text setting, and the body
+composes rather than replaces. `FLOORS` in `scripts/check/arena/check-environment.ts` carries why
+each edge floors where it does.
+
 ## Where a new document goes
 
 **The contributor branch is this file**, and it answers [the convention published for that

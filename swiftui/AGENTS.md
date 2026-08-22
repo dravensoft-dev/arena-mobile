@@ -131,6 +131,22 @@ for the reason
 area is not the drawn one. Comfortable is the default density and every rung of it clears the
 44 points Apple asks, which is a claim about the token and not yet about a screen.
 
+## The safe area is applied before the seam sees it
+
+SwiftUI insets a view by the safe area on its own, so `ArenaSafeArea` is for a view that has
+ignored it: `.ignoresSafeArea()` and then a padding composed here. Applying both is padding the
+same gutter twice.
+
+**The number is a `GeometryProxy`'s and there is no environment key for it.** At the iOS
+deployment target this package holds, `GeometryProxy.safeAreaInsets` is the whole of how a view
+learns the inset, and `safeAreaPadding` is above that floor. **A proxy inside a view the parent
+already inset reports zeros**, which reads as a device with no cutout and is not one, so the
+reader goes where the safe area has not been consumed yet.
+
+**`EdgeInsets` names the horizontal pair the way the seam does**, as leading and trailing,
+already resolved for the reading direction, which is why `ArenaSafeArea.start(_:floor:)` takes
+`safeAreaInsets.leading` with nothing converted between them.
+
 ## Increased contrast, and what is refused
 
 Three cases have an answer and one does not: every `bw` role moves to `bw-strong`, the scrim's
