@@ -69,6 +69,22 @@ half comes back as 128 parts in 255. A test comparing one asserts within a step 
 `compose/src/test/kotlin/org/dravensoft/arena/ArenaCompositionTest.kt` carries the reason in the one
 header a test file is allowed.
 
+## The seam takes a face and never a name
+
+Android resolves no bundled face from a family name, so the emitted `String` reaches a system
+face or nothing at all. `compose/src/main/kotlin/org/dravensoft/arena/tokens/ArenaFonts.kt` is
+where a consumer hands over what they built from `R.font`, provided the way the colours and the
+density are, and the member is a resolved `FontFamily`.
+
+**There is deliberately no resolution query here.** What arrives is already resolved, so nothing
+can fail at draw time and there is nothing to ask. SwiftUI takes a name and therefore carries
+one, which [`../swiftui/AGENTS.md`](../swiftui/AGENTS.md) states.
+
+**The system default is not chosen here.** A contracted `fontFamily` carries a CSS generic tail
+the emit drops, and that tail is the only statement anywhere about which face a family falls
+back to, so `mono` falls back to `FontFamily.Monospace` and the other two to `FontFamily.Default`.
+`check:fonts` measures each one against its own contracted tail.
+
 ## The cap, and what it does not mean
 
 `ArenaScale.CAP` bounds the geometry derived from a control floor and leaves the text alone.

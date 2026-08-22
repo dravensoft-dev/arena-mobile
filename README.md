@@ -69,9 +69,34 @@ before that is written is shipping the half a browser used to do for free.
 style plugin tier is web in mechanism: the question Arena's role contract states ports and
 the answer does not.
 
-**No font binary.** The type tokens name a family; registering Archivo, Familjen Grotesk and
-Spline Sans Mono as platform resources is the consumer's, and [`DOUBTS.md`](./DOUBTS.md) says
-what that costs.
+**No font binary, and a seam to hand one over.** A face is the skin tier, and the skin is the
+consuming project's: Arena's own packages exclude the binaries for the same reason. The type
+tokens name the families, registering them as an Android resource or an iOS `UIAppFonts` entry
+is yours, and `ArenaFonts` is where a registered face reaches Arena's type roles. Until one
+arrives both layers draw the system face, which is the generic each family's contracted
+fallback names.
+
+```kotlin
+val archivo = FontFamily(Font(R.font.archivo))
+
+ArenaTheme(fonts = ArenaFonts(display = archivo, body = familjenGrotesk, mono = splineSansMono)) {
+    Text("Arena", fontFamily = ArenaTheme.fonts.display, fontSize = ArenaTokens.fsMd)
+}
+```
+
+```swift
+Text("Arena")
+    .font(ArenaFonts.registered.display.font(size: ArenaScale.text(ArenaTokens.fsMd)))
+    .arenaTheme(fonts: .registered)
+```
+
+On iOS a family name resolves against what the process registered and falls back to the system
+face in silence, so `ArenaFonts.unresolved()` names the ones it did not find and a test of your
+own asserts the registration happened:
+
+```swift
+#expect(ArenaFonts.registered.unresolved().isEmpty)
+```
 
 ## Which version am I getting
 

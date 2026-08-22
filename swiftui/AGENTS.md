@@ -76,6 +76,27 @@ so the two layers arrive at one colour by two different sentences.
 ink held back that way fades together with everything drawn beside it, which is a different picture.
 A level is a colour that carries an alpha, never a modifier on the view that draws it.
 
+## The seam takes a name, and a size arriving at it has already been scaled
+
+A family registered through `UIAppFonts` or through the font manager resolves by name, so the
+emitted constant is already the whole mechanism and
+`swiftui/Sources/ArenaTokens/ArenaFonts.swift` takes a face that is a system generic or a name.
+The Compose layer resolves no bundled face from a name and takes a `FontFamily` instead, which
+[`../compose/AGENTS.md`](../compose/AGENTS.md) states.
+
+**`Font.custom(_:size:)` scales with Dynamic Type on its own and `Font.system(size:)` does not.**
+A size reaching this seam has already been through
+`swiftui/Sources/ArenaTokens/ArenaScale.swift:text(_:)`, so it is resolved with
+`Font.custom(_:fixedSize:)` and the type scale scales once. The obvious spelling scales it
+twice here and once on Compose, from a call site that reads correctly on both, which is why
+`check:fonts` refuses a `.custom(` that carries no `fixedSize:`.
+
+**A name nobody registered falls back to the system face in silence**, which no gate on this
+side can reach, because what is registered is a property of the consumer's process.
+`swiftui/Sources/ArenaTokens/ArenaFonts.swift:unresolved()` names the families the process does
+not resolve, so a consumer's own test asserts the registration rather than a reviewer noticing
+the wrong face.
+
 ## `none` is a contract value and `Optional` already has one
 
 Several emitted enums declare a case `none`, because `none` is a value the contract authors and

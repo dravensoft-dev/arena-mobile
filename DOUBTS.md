@@ -66,19 +66,6 @@ and a sibling cited by its bare filename.
 
 ## Filed
 
-**The font binaries are not carried and no target registers a face.** `font.display`,
-`font.body` and `font.mono` emit the family NAME with the CSS generic tail dropped, which is
-the whole of what a `fontFamily` value can say off the web. Arena ships `.woff2`, which loads
-on neither platform. What it costs: a consumer that does not register Archivo, Familjen
-Grotesk and Spline Sans Mono as an Android resource or an iOS `UIAppFonts` entry gets the
-system face and no error, so the type scale is right and the type is not. Re-derive the names
-with:
-
-```bash
-bun -e "import {tokensOf} from './scripts/generate/arena/generate-tokens.ts'; \
-  for (const t of tokensOf()) if (t.type === 'fontFamily') console.log(t.name, t.value)"
-```
-
 **A contracted `number` crosses as a `Double`, whatever it counts.** The API contract states one
 numeric form and no width, so `ArenaSeries.values`, a continuous measurement, and
 `ArenaTablePage.index`, a page number, are the same form in the contract and the same type in
