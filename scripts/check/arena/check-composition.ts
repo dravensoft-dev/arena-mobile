@@ -36,7 +36,7 @@ export type Role =
   | { kind: 'ground'; swept: boolean; why: string }
   | { kind: 'ink'; gate: number | null; why: string };
 
-export const ROLES = new Map<string, Role>([
+export const COMPOSED = new Map<string, Role>([
   ['bg', { kind: 'ground', swept: true, why: 'the page, and one of the two grounds Arena set its own bars against' }],
   ['surfaceCard', { kind: 'ground', swept: true, why: 'the elevated surface, and the other ground Arena set its bars against' }],
   ['surfaceRaised', { kind: 'ground', swept: false, why: 'base-300 is a panel rather than a reading surface, and Arena states no bar against it. One invented here would fail a palette this repository consumes rather than a mapping it wrote' }],
@@ -93,7 +93,7 @@ export function resolutionProblems(aliases: Map<string, string>, members: Set<st
   const errs: string[] = [];
   for (const [name, target] of aliases) {
     if (!members.has(target)) errs.push(`${name} points at ${target}, which ArenaColorScheme does not declare`);
-    if (!ROLES.has(name)) errs.push(`${name} is composed and ROLES does not say whether it is ink or ground, so no bar reaches it`);
+    if (!COMPOSED.has(name)) errs.push(`${name} is composed and COMPOSED does not say whether it is ink or ground, so no bar reaches it`);
   }
   return sortedByCodeUnit(errs);
 }
@@ -101,11 +101,11 @@ export function resolutionProblems(aliases: Map<string, string>, members: Set<st
 export function contrastProblems(aliases: Map<string, string>, colours: Record<string, Rgb>, theme: string) {
   const errs: string[] = [];
   const grounds = [...aliases].filter(([name]) => {
-    const role = ROLES.get(name);
+    const role = COMPOSED.get(name);
     return role?.kind === 'ground' && role.swept;
   });
   for (const [name, target] of aliases) {
-    const role = ROLES.get(name);
+    const role = COMPOSED.get(name);
     if (!role || role.kind !== 'ink' || role.gate === null) continue;
     const ink = colours[target];
     if (!ink) continue;
@@ -122,11 +122,11 @@ export function contrastProblems(aliases: Map<string, string>, colours: Record<s
 
 export function measured(aliases: Map<string, string>) {
   const grounds = [...aliases.keys()].filter((name) => {
-    const role = ROLES.get(name);
+    const role = COMPOSED.get(name);
     return role?.kind === 'ground' && role.swept;
   });
   const inks = [...aliases.keys()].filter((name) => {
-    const role = ROLES.get(name);
+    const role = COMPOSED.get(name);
     return role?.kind === 'ink' && role.gate !== null;
   });
   return grounds.length * inks.length + PAIRS.length;
@@ -134,7 +134,7 @@ export function measured(aliases: Map<string, string>) {
 
 export function zeroMeasuredProblem(counted: number) {
   if (counted > 0) return null;
-  return 'measured 0 inks against a bar, so ROLES has every member reported and none gated, and a gate that measures nothing passes over anything';
+  return 'measured 0 inks against a bar, so COMPOSED has every member reported and none gated, and a gate that measures nothing passes over anything';
 }
 
 export function pairProblems(aliases: Map<string, string>, colours: Record<string, Rgb>, theme: string) {
@@ -151,6 +151,13 @@ export function pairProblems(aliases: Map<string, string>, colours: Record<strin
     errs.push(`${theme}: ${ink} on ${fill} is ${ratio.toFixed(2)}:1 against a bar of ${gate}:1. ${why}`);
   }
   return sortedByCodeUnit(errs);
+}
+
+export function staleComposedProblems(aliases: Map<string, string>) {
+  return sortedByCodeUnit([...COMPOSED].flatMap(([name, role]) => (aliases.has(name)
+    ? []
+    : [`COMPOSED names ${name}, which neither layer composes. An entry outliving its member carries `
+      + `a bar over nothing and a reason nobody can act on: ${role.why}`])));
 }
 
 export function staleOwedProblems(tokens: readonly { name: string }[]) {
@@ -192,6 +199,7 @@ function main() {
     ...(nothing ? [nothing] : []),
     ...parityProblems(kotlin, swift),
     ...resolutionProblems(kotlin, members),
+    ...staleComposedProblems(kotlin),
     ...THEMES.flatMap((theme) => [
       ...contrastProblems(kotlin, colourTable(tokens, theme), theme),
       ...pairProblems(kotlin, colourTable(tokens, theme), theme),

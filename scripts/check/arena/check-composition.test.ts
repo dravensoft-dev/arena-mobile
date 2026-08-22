@@ -1,7 +1,7 @@
 import { test, expect } from 'bun:test';
 import {
   aliasesIn, contrastProblems, measured, OWED, PAIRS, pairProblems, parityProblems,
-  resolutionProblems, ROLES, staleOwedProblems, zeroCompositionProblem, zeroMeasuredProblem,
+  resolutionProblems, COMPOSED, staleComposedProblems, staleOwedProblems, zeroCompositionProblem, zeroMeasuredProblem,
 } from './check-composition.ts';
 
 const KOTLIN = [
@@ -34,7 +34,7 @@ test('an alias pointing at a member the scheme does not declare fails', () => {
 });
 
 test('every alias says whether it is ink or ground, and one that does not fails', () => {
-  for (const name of aliasesIn(KOTLIN).keys()) expect(ROLES.has(name)).toBe(true);
+  for (const name of aliasesIn(KOTLIN).keys()) expect(COMPOSED.has(name)).toBe(true);
   const orphan = resolutionProblems(new Map([['mystery', 'base100']]), new Set(['base100']));
   expect(orphan[0]).toContain('mystery');
 });
@@ -65,20 +65,20 @@ test('a content colour illegible on the fill this table maps it onto fails', () 
 });
 
 test('a ground Arena set no bar against is carried with its reason and never swept', () => {
-  const raised = ROLES.get('surfaceRaised');
-  const input = ROLES.get('surfaceInput');
-  const fill = ROLES.get('dangerFill');
+  const raised = COMPOSED.get('surfaceRaised');
+  const input = COMPOSED.get('surfaceInput');
+  const fill = COMPOSED.get('dangerFill');
   for (const role of [raised, input, fill]) {
     expect(role?.kind).toBe('ground');
     expect(role?.kind === 'ground' && role.swept).toBe(false);
     expect(role?.why.length).toBeGreaterThan(0);
   }
-  expect(ROLES.get('bg')?.kind === 'ground' && ROLES.get('bg')?.swept).toBe(true);
+  expect(COMPOSED.get('bg')?.kind === 'ground' && COMPOSED.get('bg')?.swept).toBe(true);
 });
 
 test('a separator is reported and not gated, because 1.4.11 measures a control boundary', () => {
   for (const name of ['border', 'borderStrong', 'accent', 'focusRing']) {
-    const role = ROLES.get(name);
+    const role = COMPOSED.get(name);
     expect(role?.kind).toBe('ink');
     expect(role?.kind === 'ink' && role.gate).toBeNull();
     expect(role?.why).toContain('NOT GATED');
@@ -90,6 +90,17 @@ test('a table with every member reported and none gated measures nothing and fai
   expect(measured(aliases)).toBe(1 * 1 + PAIRS.length);
   expect(zeroMeasuredProblem(measured(new Map([['bg', 'base100']])) - PAIRS.length)).toContain('measured 0 inks');
   expect(zeroMeasuredProblem(1)).toBeNull();
+});
+
+test('an entry outliving the member it describes fails, and the map holds itself', () => {
+  const whole = new Map([...COMPOSED.keys()].map((name) => [name, 'base100']));
+  expect(staleComposedProblems(whole)).toEqual([]);
+  const shrunk = new Map(whole);
+  shrunk.delete('danger');
+  const stale = staleComposedProblems(shrunk);
+  expect(stale).toHaveLength(1);
+  expect(stale[0]).toContain('danger');
+  expect(stale[0]).toContain('neither layer composes');
 });
 
 test('the map of what waits on a pin fails the moment the pin brings it', () => {
