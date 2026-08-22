@@ -24,6 +24,13 @@ test('arithmetic is not a design value and stays allowed', () => {
   expect(scan('min(text(floor), floor * cap)')).toEqual([]);
 });
 
+test('a ratio handed to an alpha is a design value and not arithmetic', () => {
+  expect(scan('val muted = baseContent.copy(alpha = 0.62f)')[0]).toContain('a ratio held back from a colour');
+  expect(scan('let muted = baseContent.opacity(0.62)')).toHaveLength(1);
+  expect(scan('public fun Color.held(ratio: Float): Color = copy(alpha = alpha * ratio)')).toEqual([]);
+  expect(scan('func held(_ ratio: CGFloat) -> Color { opacity(ratio) }')).toEqual([]);
+});
+
 test('a rule reaching nothing is a rule this gate cannot tell from a clean tree', () => {
   expect(zeroScanProblem(0)).toContain('0 hand-authored native sources');
   expect(zeroScanProblem(1)).toBeNull();

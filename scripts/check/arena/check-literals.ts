@@ -31,6 +31,7 @@ export const BANNED = [
   { pattern: /#[0-9a-fA-F]{6}\b/, what: 'a hex colour' },
   { pattern: /\bColor\s*\(\s*(?:red\s*=|\.sRGB|red:)/, what: 'a colour built from components' },
   { pattern: /\bFontWeight\s*\(\s*\d/, what: 'a font weight written as a literal' },
+  { pattern: /(?:alpha\s*=|\.opacity\s*\(|\.held\s*\()\s*\d*\.?\d+f?/, what: 'a ratio held back from a colour written as a literal' },
 ];
 
 export function literalProblems(files: { file: string; source: string }[]) {
