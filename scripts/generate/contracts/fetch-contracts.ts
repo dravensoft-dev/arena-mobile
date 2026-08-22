@@ -47,7 +47,7 @@ export const node = {
     'generate:tokens', 'generate:api-types',
     'check:pin', 'check:catalogue', 'check:coverage', 'check:api-types', 'check:user-scale',
     'check:literals',
-    'check:behaviour', 'check:composition', 'check:fonts',
+    'check:behaviour', 'check:composition', 'check:fonts', 'check:environment',
   ],
 };
 
