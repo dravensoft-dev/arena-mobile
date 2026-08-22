@@ -86,3 +86,20 @@ test('the two filters read what they say they read', () => {
   expect(inScope(tokens, 'dark').map((one) => one.name)).toEqual(['a']);
   expect(dimensions(tokens).map((one) => one.name)).toEqual(['b']);
 });
+
+test('a family carrying a weight range surfaces it, and one without it surfaces nothing', () => {
+  const tree = {
+    font: {
+      $type: 'fontFamily',
+      display: {
+        $value: ['Archivo', 'system-ui', 'sans-serif'],
+        $extensions: { 'com.dravensoft.arena': { weights: [400, 900] } },
+      },
+      body: { $value: ['Familjen Grotesk', 'system-ui', 'sans-serif'] },
+    },
+  };
+  const tokens = collect(tree, [], 'contracts/design/typography.json', {}, []);
+  const byName = new Map(tokens.map((token) => [token.name, token]));
+  expect(byName.get('font.display')?.weights).toEqual([400, 900]);
+  expect(byName.get('font.body')?.weights).toBeUndefined();
+});

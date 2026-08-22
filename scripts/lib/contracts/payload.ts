@@ -58,6 +58,7 @@ export type Token = {
   script?: boolean;
   cssUnit?: string;
   values?: string[];
+  weights?: [number, number];
 };
 
 type Node = Record<string, unknown>;
@@ -112,6 +113,7 @@ export function collect(node: Node, trail: string[], file: string, inherited: Pa
       script: own.script === true ? true : undefined,
       cssUnit: own.cssUnit as string | undefined,
       values: own.values as string[] | undefined,
+      weights: own.weights as [number, number] | undefined,
     });
     return into;
   }
