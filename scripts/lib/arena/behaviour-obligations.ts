@@ -2,7 +2,10 @@
  * does not: a requirement's value names attributes and elements, and a platform with no
  * implicit mapping owes the capability underneath instead. So each entry restates the
  * capability with no web in it and each layer answers with a symbol or refuses with a reason,
- * and a refusal is inherited by every binding rather than retyped into each one. */
+ * and a refusal is inherited by every binding rather than retyped into each one.
+ * A symbol here is NAMED and not verified: no toolchain compiles a reference to one until a
+ * component exists, so the register is one spelling per symbol and a suite holds that, which
+ * is what a grep over a component's source will need when there is one to grep. */
 
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { elementRoles, requirementKeys, type Pattern } from '../contracts/behaviour.ts';
@@ -18,24 +21,24 @@ const NO_MACHINE_READER = 'nothing reads an application the way a crawler reads 
   + 'is the rule that copy would break';
 
 export const ROLES = new Map<string, Record<Layer, string>>([
-  ['alert', { compose: 'liveRegion = LiveRegionMode.Assertive', swiftui: 'AccessibilityNotification.Announcement' }],
-  ['alertdialog', { compose: 'Modifier.semantics { dialog() }', swiftui: '.accessibilityAddTraits(.isModal)' }],
-  ['banner', { compose: 'Modifier.semantics { isTraversalGroup = true }', swiftui: '.accessibilityElement(children: .contain)' }],
+  ['alert', { compose: 'LiveRegionMode.Assertive', swiftui: 'AccessibilityNotification.Announcement' }],
+  ['alertdialog', { compose: 'SemanticsPropertyReceiver.dialog', swiftui: '.accessibilityAddTraits(.isModal)' }],
+  ['banner', { compose: 'SemanticsProperties.IsTraversalGroup', swiftui: '.accessibilityElement(children: .contain)' }],
   ['button', { compose: 'Role.Button', swiftui: '.accessibilityAddTraits(.isButton)' }],
   ['checkbox', { compose: 'Role.Checkbox', swiftui: '.accessibilityAddTraits(.isToggle)' }],
   ['combobox', { compose: 'Role.DropdownList', swiftui: '.accessibilityRepresentation' }],
-  ['contentinfo', { compose: 'Modifier.semantics { isTraversalGroup = true }', swiftui: '.accessibilityElement(children: .contain)' }],
-  ['dialog', { compose: 'Modifier.semantics { dialog() }', swiftui: '.accessibilityAddTraits(.isModal)' }],
-  ['group', { compose: 'Modifier.semantics(mergeDescendants = false) { isTraversalGroup = true }', swiftui: '.accessibilityElement(children: .contain)' }],
-  ['listbox', { compose: 'Modifier.selectableGroup()', swiftui: '.accessibilityElement(children: .contain)' }],
-  ['main', { compose: 'Modifier.semantics { isTraversalGroup = true; traversalIndex = 0f }', swiftui: '.accessibilityElement(children: .contain)' }],
-  ['navigation', { compose: 'Modifier.semantics { isTraversalGroup = true }', swiftui: '.accessibilityElement(children: .contain)' }],
-  ['progressbar', { compose: 'progressBarRangeInfo', swiftui: '.accessibilityValue' }],
-  ['status', { compose: 'liveRegion = LiveRegionMode.Polite', swiftui: 'AccessibilityNotification.Announcement' }],
+  ['contentinfo', { compose: 'SemanticsProperties.IsTraversalGroup', swiftui: '.accessibilityElement(children: .contain)' }],
+  ['dialog', { compose: 'SemanticsPropertyReceiver.dialog', swiftui: '.accessibilityAddTraits(.isModal)' }],
+  ['group', { compose: 'SemanticsProperties.IsTraversalGroup', swiftui: '.accessibilityElement(children: .contain)' }],
+  ['listbox', { compose: 'Modifier.selectableGroup', swiftui: '.accessibilityElement(children: .contain)' }],
+  ['main', { compose: 'SemanticsProperties.TraversalIndex', swiftui: '.accessibilityElement(children: .contain)' }],
+  ['navigation', { compose: 'SemanticsProperties.IsTraversalGroup', swiftui: '.accessibilityElement(children: .contain)' }],
+  ['progressbar', { compose: 'SemanticsProperties.ProgressBarRangeInfo', swiftui: '.accessibilityValue' }],
+  ['status', { compose: 'LiveRegionMode.Polite', swiftui: 'AccessibilityNotification.Announcement' }],
   ['switch', { compose: 'Role.Switch', swiftui: '.accessibilityAddTraits(.isToggle)' }],
-  ['textbox', { compose: 'Modifier.semantics { editableText }', swiftui: '.accessibilityTextContentType' }],
-  ['toolbar', { compose: 'Modifier.semantics { isTraversalGroup = true }', swiftui: '.accessibilityElement(children: .contain)' }],
-  ['tooltip', { compose: 'Modifier.semantics { paneTitle }', swiftui: '.accessibilityHint' }],
+  ['textbox', { compose: 'SemanticsProperties.EditableText', swiftui: '.accessibilityTextContentType' }],
+  ['toolbar', { compose: 'SemanticsProperties.IsTraversalGroup', swiftui: '.accessibilityElement(children: .contain)' }],
+  ['tooltip', { compose: 'SemanticsProperties.PaneTitle', swiftui: '.accessibilityHint' }],
 ]);
 
 export const OBLIGATIONS = new Map<string, Obligation>([
@@ -46,7 +49,7 @@ export const OBLIGATIONS = new Map<string, Obligation>([
   }],
   ['alternative.table', {
     capability: 'every plotted number is reachable without seeing the drawing',
-    compose: { symbol: 'Modifier.semantics { contentDescription }' },
+    compose: { symbol: 'SemanticsProperties.ContentDescription' },
     swiftui: { symbol: '.accessibilityChartDescriptor' },
   }],
   ['content.noAutoDismiss', {
@@ -86,7 +89,7 @@ export const OBLIGATIONS = new Map<string, Obligation>([
   }],
   ['focus.trap', {
     capability: 'while the surface is up, nothing behind it is reachable',
-    compose: { symbol: 'Modifier.semantics { dialog() }' },
+    compose: { symbol: 'SemanticsPropertyReceiver.dialog' },
     swiftui: { symbol: '.accessibilityAddTraits(.isModal)' },
   }],
   ['focus.unaffected', {
@@ -181,7 +184,7 @@ export const OBLIGATIONS = new Map<string, Obligation>([
   }],
   ['roles.aria-modal', {
     capability: 'everything behind the surface is unreachable while it is up',
-    compose: { symbol: 'Modifier.semantics { dialog() }' },
+    compose: { symbol: 'SemanticsPropertyReceiver.dialog' },
     swiftui: { symbol: '.accessibilityAddTraits(.isModal)' },
   }],
   ['roles.article', {
@@ -231,7 +234,7 @@ export const OBLIGATIONS = new Map<string, Obligation>([
   }],
   ['roles.group', {
     capability: 'a set of controls is read as one set rather than as unrelated neighbours',
-    compose: { symbol: 'Modifier.semantics(mergeDescendants = false) { isTraversalGroup = true }' },
+    compose: { symbol: 'SemanticsProperties.IsTraversalGroup' },
     swiftui: { symbol: '.accessibilityElement(children: .contain)' },
   }],
   ['roles.haspopup', {

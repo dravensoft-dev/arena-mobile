@@ -1,11 +1,13 @@
 import { test, expect } from 'bun:test';
 import {
-  LAYERS, OBLIGATIONS, ROLES, answerFor, refusedKeys,
+  LAYERS, OBLIGATIONS, ROLES, answerFor, isRefused, refusedKeys,
   staleObligationProblems, staleRoleProblems, unmappedRoleProblems, untranslatedProblems,
 } from './behaviour-obligations.ts';
 import { type Pattern } from '../contracts/behaviour.ts';
 
 const patterns = (over: Pattern[]) => new Map(over.map((p) => [p.name as string, p]));
+
+const isSymbol = (answer: Parameters<typeof isRefused>[0]): answer is { symbol: string } => !isRefused(answer);
 
 test('every key any pattern declares is translated, and every entry names a key some pattern declares', () => {
   const declared = patterns([{ name: 'x', requires: { 'roles.element': 'switch' } }]);
@@ -43,6 +45,39 @@ test('a capability is stated with no web in it, so no capability names an attrib
   for (const [, obligation] of OBLIGATIONS) {
     expect(obligation.capability).not.toMatch(web);
   }
+});
+
+test('a symbol is one spelling, because it is the key a grep over a source will use', () => {
+  const composeSymbols = [
+    ...[...ROLES.values()].map((answers) => answers.compose),
+    ...[...OBLIGATIONS.values()].map((o) => o.compose).filter(isSymbol).map((a) => a.symbol),
+  ];
+  for (const symbol of composeSymbols) {
+    expect(symbol).not.toMatch(/[{}]/);
+    expect(symbol).not.toMatch(/=/);
+  }
+  const swiftSymbols = [
+    ...[...ROLES.values()].map((answers) => answers.swiftui),
+    ...[...OBLIGATIONS.values()].map((o) => o.swiftui).filter(isSymbol).map((a) => a.symbol),
+  ];
+  for (const symbol of swiftSymbols) expect(symbol).toMatch(/^(\.|[A-Z])/);
+});
+
+test('one concept is spelled one way across both maps, so a grep for it finds every source', () => {
+  const byLower = new Map<string, Set<string>>();
+  const collect = (symbol: string) => {
+    const key = symbol.toLowerCase().replace(/[^a-z]/g, '');
+    if (!byLower.has(key)) byLower.set(key, new Set());
+    (byLower.get(key) as Set<string>).add(symbol);
+  };
+  for (const answers of ROLES.values()) { collect(answers.compose); collect(answers.swiftui); }
+  for (const obligation of OBLIGATIONS.values()) {
+    for (const layer of LAYERS) {
+      const answer = obligation[layer];
+      if (isSymbol(answer)) collect(answer.symbol);
+    }
+  }
+  for (const [, spellings] of byLower) expect([...spellings]).toHaveLength(1);
 });
 
 test('the refused set is small, named, and readable per layer', () => {
