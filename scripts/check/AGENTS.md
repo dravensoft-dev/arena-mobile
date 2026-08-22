@@ -83,7 +83,7 @@ from `GATES` and fails this table when the two disagree.
 | domain | gates | |
 | --- | --- | --- |
 | `contracts/` | 3 | the payload, and the field that pins it |
-| `arena/` | 16 | two or more layers at once, or the repository root |
+| `arena/` | 17 | two or more layers at once, or the repository root |
 | `compose/` | 1 | the Compose layer |
 | `swiftui/` | 1 | the SwiftUI layer |
 

@@ -21,6 +21,7 @@
     "check:collisions": "bun scripts/check/arena/check-collisions.ts",
     "check:literals": "bun scripts/check/arena/check-literals.ts",
     "check:composition": "bun scripts/check/arena/check-composition.ts",
+    "check:fonts": "bun scripts/check/arena/check-fonts.ts",
     "check:doc-comments": "bun scripts/check/arena/check-doc-comments.ts",
     "check:docs": "bun scripts/check/arena/check-docs.ts",
     "check:citations": "bun scripts/check/arena/check-citations.ts",
