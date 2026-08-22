@@ -10,13 +10,18 @@ import { isMainModule } from '../../utils/main-module.ts';
 import { walkFiles } from '../../utils/walk-files.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
+import { CONTRACTS_DIR, type Token } from '../../lib/contracts/payload.ts';
+import { familyHead } from '../../lib/arena/bridge.ts';
+import { tokensOf } from '../../generate/arena/generate-tokens.ts';
 
 export const KOTLIN_ROOT = 'compose/src/main/kotlin';
 export const SWIFT_ROOT = 'swiftui/Sources';
+export const TYPOGRAPHY = `${CONTRACTS_DIR}/contracts/design/typography.json`;
 
 export const node = {
   name: 'check:literals',
   reads: [
+    TYPOGRAPHY,
     `${KOTLIN_ROOT}/**`, `!${KOTLIN_ROOT}/**/*.generated.*`,
     `${SWIFT_ROOT}/**`, `!${SWIFT_ROOT}/**/*.generated.*`,
   ],
@@ -48,6 +53,29 @@ export function literalProblems(files: { file: string; source: string }[]) {
   return sortedByCodeUnit(errs);
 }
 
+export function contractedFamilies(tokens: readonly Pick<Token, 'type' | 'value'>[]) {
+  return sortedByCodeUnit(tokens.filter((token) => token.type === 'fontFamily').map((token) => familyHead(token.value)));
+}
+
+export function familyProblems(files: { file: string; source: string }[], families: readonly string[]) {
+  const errs: string[] = [];
+  for (const { file, source } of files) {
+    if (EXEMPT.has(file)) continue;
+    for (const line of source.split('\n')) {
+      for (const family of families) {
+        if (!line.includes(JSON.stringify(family))) continue;
+        errs.push(`${file} carries the family name ${JSON.stringify(family)} as a literal: ${JSON.stringify(line.trim())}. The family the contract names is a design value, and this file reads it from ArenaTokens`);
+      }
+    }
+  }
+  return sortedByCodeUnit(errs);
+}
+
+export function zeroBannedFamilyProblem(counted: number) {
+  if (counted > 0) return null;
+  return 'read 0 family names out of the pinned contract, so the ban on a hardcoded family covers nothing while reporting a clean pass';
+}
+
 export function staleExemptProblems(present: Set<string>) {
   return [...EXEMPT].flatMap(([file, why]) => (present.has(file)
     ? []
@@ -71,9 +99,13 @@ export function scanned(root_: string) {
 function main() {
   const files = scanned(root).map((file) => ({ file, source: readFileSync(join(root, file), 'utf8') }));
   const zero = zeroScanProblem(files.length);
+  const families = contractedFamilies(tokensOf(root));
+  const noFamily = zeroBannedFamilyProblem(families.length);
   const errs = [
     ...(zero ? [zero] : []),
+    ...(noFamily ? [noFamily] : []),
     ...literalProblems(files),
+    ...familyProblems(files, families),
     ...staleExemptProblems(new Set(files.map((one) => one.file))),
   ];
   if (errs.length) {
@@ -81,7 +113,7 @@ function main() {
     for (const problem of errs) console.error(`  ${problem}`);
     process.exit(1);
   }
-  console.log(`check-literals: ${files.length} hand-authored native source(s), none carrying a design value, and ${EXEMPT.size} allowance(s)`);
+  console.log(`check-literals: ${files.length} hand-authored native source(s), none carrying a design value or one of ${families.length} contracted family name(s), and ${EXEMPT.size} allowance(s)`);
 }
 
 if (isMainModule(import.meta.url)) main();
