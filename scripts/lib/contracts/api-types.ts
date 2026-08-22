@@ -1,8 +1,10 @@
 /* The API contract's vocabulary, which is not the token tier's. A type is an enum or a
  * predefined object, and a field of an object is a primitive, an enum, or an array of one
  * primitive type: R1 upstream refuses the other six forms, so three rows and a refusal are the
- * whole of what arrives here. NOT_YET_READ names the half of contracts/api/ this repository
- * does not read, with the reason, so the absence is a record rather than a hole. */
+ * whole of what arrives here. NOT_YET_READ names the half of contracts/api/ THIS EMIT does not
+ * read, with the reason, so the absence is a record rather than a hole; the behaviour register
+ * reads the component NAMES out of that same half, which is a different reader and not a
+ * contradiction of the entry. */
 
 import { join } from 'node:path';
 import { readJson } from '../../utils/read-json.ts';
@@ -38,10 +40,11 @@ export type ApiType = {
 export const NOT_YET_READ = new Map<string, string>([
   [
     COMPONENTS_PREFIX,
-    'a component contract states the members one component presents, and this repository ships no '
-    + 'component. What a component declares is decided by the behaviour question and that is not '
-    + 'answered yet, so a member surface emitted now is one that would be rewritten rather than '
-    + 'extended. The first component landing here is what retires this entry',
+    'a component contract states the members one component presents, and this repository publishes no '
+    + 'component, so a member surface emitted now is one that would be rewritten rather than extended. '
+    + 'What this emit does not read is that member surface; the component NAME is read, by the behaviour '
+    + 'register, which keys itself by the contract so an unpublished component is a recorded absence '
+    + 'rather than a hole. The first component landing here is what retires this entry',
   ],
 ]);
 

@@ -60,6 +60,28 @@ argument says. That matters more here than upstream, because SwiftPM resolves a 
 a tag directly rather than from a registry: rewriting one moves a dependency under a consumer
 with no version number changing.
 
+## What a behaviour requirement obliges here
+
+**Arena's rule that a requirement met by an element's own native semantics counts as met does
+not travel, and its inverse is what binds both layers here.** A browser's accessibility mapping
+answers a requirement for free; neither toolkit has one, so a requirement met upstream by
+rendering a native element is an explicit obligation on this side, applied by hand, in both
+layers. A binding here that matches its web counterpart is a binding to read again.
+
+**So a binding partitions rather than lists.** Every requirement of the pattern a component
+binds is either met, naming the native symbol that meets it, or excepted with a reason.
+Upstream an exception list is a subset and silence over a requirement means the element met it.
+Silence here would mean nothing at all, which is the ambiguity this tier exists to end.
+
+**The translation is by requirement key and the answers are data.**
+`scripts/lib/arena/behaviour-obligations.ts` states the capability each key names, with no web
+in it, and each layer's answer, which is a native symbol or a refusal carrying its reason. A
+refusal is inherited by every binding rather than retyped into each one, so it goes stale in one
+place. `scripts/lib/arena/behaviour-bindings.ts` is what each component of the contract binds,
+and it is keyed by the contract rather than by what this repository publishes, so a component
+that is not published yet is a recorded absence and never a hole. `bun run check:behaviour`
+holds all of it, and holds none of it by rendering anything.
+
 ## Where a new document goes
 
 **The contributor branch is this file**, and it answers [the convention published for that
