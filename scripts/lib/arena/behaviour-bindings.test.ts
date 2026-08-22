@@ -59,6 +59,13 @@ test('a reason is present exactly when the pattern is none or absent', () => {
   expect(bindingProblems('ArenaGhost', { ...absent, met: {} } as Entry, patterns)[0]).toContain('has no requirement to meet');
 });
 
+test('none is a real inert component and absent is no component, and both are reachable', () => {
+  const inert: Entry = { pattern: 'none', reason: 'a bordered surface with nothing on it a user can act on' };
+  expect(bindingProblems('ArenaCard', inert, patterns)).toEqual([]);
+  expect(bindingProblems('ArenaCard', { pattern: 'none' } as Entry, patterns)[0]).toContain('requires a reason');
+  expect(crossLayerProblems('ArenaCard', { compose: inert, swiftui: absent } as unknown as Entry)).toEqual([]);
+});
+
 test('a pattern nothing declares is named rather than passed over', () => {
   expect(bindingProblems('ArenaGhost', { pattern: 'invented', reason: 'x' } as Entry, patterns)[0])
     .toContain('names no pattern the pinned contract declares');

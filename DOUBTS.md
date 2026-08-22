@@ -31,9 +31,9 @@ paragraph does not. That is the entire argument for this order:
 
 1. **Pay it.** A defect that can be fixed is not debt; it is work.
 2. **A gate, with a reason-carrying map.** `UNMAPPED`, `NOT_A_VALUE`, `SCOPES`, `EXEMPT`,
-   `UNMARKED`, `UNTRACKED`, `SIZE_ALLOWANCE`, `NOT_YET_READ`, `CASE_NAMES`, `REPHRASED`: each
-   entry names a case and says why, as a string value rather than a comment, and **a stale entry
-   fails its own gate**. See
+   `UNMARKED`, `UNTRACKED`, `SIZE_ALLOWANCE`, `NOT_YET_READ`, `CASE_NAMES`, `REPHRASED`,
+   `OBLIGATIONS`, `BINDINGS`: each entry names a case and says why, as a string value rather
+   than a comment, and **a stale entry fails its own gate**. See
    [`scripts/check/AGENTS.md`](./scripts/check/AGENTS.md).
 3. **A suite assertion.** A limit a test can pin is pinned. The cap on user text scale lives in
    `compose/src/test/kotlin/org/dravensoft/arena/ArenaDensityTest.kt` and in
