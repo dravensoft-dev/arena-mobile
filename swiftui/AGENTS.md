@@ -23,12 +23,30 @@ possible.
 
 ## What is emitted and what is written
 
-`Sources/ArenaTokens/` carries three emitted files and three authored ones. The authored three
-are `swiftui/Sources/ArenaTokens/ArenaSupport.swift`, holding the two composite types the emit
-constructs and the shadow modifier; `swiftui/Sources/ArenaTokens/ArenaScale.swift`, holding
-the cap and the two asymmetric conversions; and
-`swiftui/Sources/ArenaTokens/ArenaTheme.swift`, holding both environment keys.
-[`../GENERATED.md`](../GENERATED.md) says how to tell them apart without opening one.
+`Sources/ArenaTokens/` carries the emitted sources beside the authored ones.
+`swiftui/Sources/ArenaTokens/ArenaSupport.swift` holds the composite types the emit constructs
+and the shadow modifier; `swiftui/Sources/ArenaTokens/ArenaScale.swift` holds the cap and the
+two asymmetric conversions; `swiftui/Sources/ArenaTokens/ArenaTheme.swift` holds both
+environment keys. [`../GENERATED.md`](../GENERATED.md) says how to tell an emitted file from an
+authored one without opening it.
+
+**This target carries the API vocabulary beside the values, and its name says only half of what
+it holds.** `swiftui/Sources/ArenaTokens/ArenaApi.generated.swift` is the enums and predefined
+objects a component member takes, emitted from the contract by
+`scripts/generate/arena/generate-api-types.ts`. A second target and a second product were the
+alternative, and what they buy is a boundary nothing needs, since a type there reads no token;
+what they cost is a second product a consumer resolves and a git tag that stops being one
+promise about one package.
+
+## An enum arrives here cheaper than it arrives on Compose
+
+Declaring the raw type is the whole of it: `RawRepresentable`, `CaseIterable` and a failable
+`init?(rawValue:)` are synthesised, so a contract value round-trips with nothing written. The
+Compose layer is handed none of the three and carries an emitted `from(value)` instead, which
+is why [`../compose/AGENTS.md`](../compose/AGENTS.md) has a section about it and this one has a
+sentence. **A struct is the mirror case and costs more here**: Swift synthesises its memberwise
+initialiser at `internal`, so every emitted `public struct` carries an explicit public `init`
+that a Kotlin `data class` never needs.
 
 **An authored source here carries no comment at all.** A fact about one of them belongs on
 this page.
@@ -46,6 +64,23 @@ multiplied by the font size first, which
 
 Reading either of them off the other layer produces a value that compiles and is wrong by a
 factor of the font size.
+
+## `none` is a contract value and `Optional` already has one
+
+Several emitted enums declare a case `none`, because `none` is a value the contract authors and
+this layer carries what the contract says. `Optional` declares its own `none`, so for a member
+typed `ArenaGridGap?` the leading-dot form `.none` resolves to the absent optional and not to the
+enum case, and the two mean different things: one says the consumer stated no rhythm and the
+other says they stated the rhythm that draws nothing. **Write the case in full**, as
+`ArenaGridGap.none`, wherever the type is optional. Derive the set rather than reading it here:
+
+```bash
+bun -e "import {apiTypesOf} from './scripts/generate/arena/generate-api-types.ts'; \
+  for (const t of apiTypesOf()) if ((t.values ?? []).includes('none')) console.log(t.name)"
+```
+
+The Compose layer has no version of this, since nothing there names absence with an entry, which
+is why the rule is on this page and not in [`../AGENTS.md`](../AGENTS.md).
 
 ## The axis, and the cap
 

@@ -11,17 +11,38 @@ number to keep in step.
 
 ## What is emitted and what is written
 
-`src/main/kotlin/org/dravensoft/arena/tokens/` carries three emitted files and three authored
-ones. The emitted three are the token object, the two colour schemes and the three density
-scales; the authored three are `compose/src/main/kotlin/org/dravensoft/arena/tokens/ArenaSupport.kt`,
-which holds the two composite types the emit constructs, and
-`compose/src/main/kotlin/org/dravensoft/arena/tokens/ArenaScale.kt`, which holds the cap.
-`compose/src/main/kotlin/org/dravensoft/arena/theme/ArenaTheme.kt` is authored and provides
-both locals. [`../GENERATED.md`](../GENERATED.md) says how to tell them apart
-without opening one.
+`src/main/kotlin/org/dravensoft/arena/tokens/` carries the emitted values beside the sources a
+person wrote around them: `compose/src/main/kotlin/org/dravensoft/arena/tokens/ArenaSupport.kt`
+holds the composite types the emit constructs and
+`compose/src/main/kotlin/org/dravensoft/arena/tokens/ArenaScale.kt` holds the cap, while
+`compose/src/main/kotlin/org/dravensoft/arena/theme/ArenaTheme.kt` provides both locals.
+
+`src/main/kotlin/org/dravensoft/arena/api/` carries the API vocabulary and nothing authored:
+the enums and predefined objects a component member takes, emitted from the contract by
+`scripts/generate/arena/generate-api-types.ts`. **It is a package of its own and not a module
+of its own**, because a type there reads no token, so there is nothing for a module boundary to
+keep apart, and a second Maven artifact would make a release two acts instead of one.
+
+[`../GENERATED.md`](../GENERATED.md) says how to tell an emitted file from an authored one
+without opening it.
 
 **An authored source here carries no comment at all.** A fact about one of them belongs on
 this page.
+
+## What an enum costs here that it does not cost on SwiftUI
+
+An emitted `enum class` carries a `value` property and a `from(value)` companion, and both are
+written by the emitter. Kotlin gives an enum `name`, `ordinal`, `entries` and a `valueOf` that
+throws, and no notion of a raw value at all, where declaring a raw type on the SwiftUI side
+hands that layer the value, the case list and a failable initialiser for nothing. So the same
+contract is more Kotlin than Swift, and the extra Kotlin is not decoration: without it the two
+layers would offer a consumer different capabilities from one contract.
+
+**A closed set is an `enum class` and not a `@JvmInline value class`**, which is what Compose
+itself reaches for in `TextAlign` and `KeyboardType`. AndroidX buys source compatibility with
+that shape because it ships to a consumer base that cannot be recompiled; here the contract set
+moves only when [`../repo.config.json`](../repo.config.json) raises the pin, and an `enum class`
+buys an exhaustive `when` at every use site instead.
 
 ## What the axis obliges
 

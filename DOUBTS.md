@@ -31,8 +31,9 @@ paragraph does not. That is the entire argument for this order:
 
 1. **Pay it.** A defect that can be fixed is not debt; it is work.
 2. **A gate, with a reason-carrying map.** `UNMAPPED`, `NOT_A_VALUE`, `SCOPES`, `EXEMPT`,
-   `UNMARKED`, `UNTRACKED`, `SIZE_ALLOWANCE`: each entry names a case and says why, as a
-   string value rather than a comment, and **a stale entry fails its own gate**. See
+   `UNMARKED`, `UNTRACKED`, `SIZE_ALLOWANCE`, `NOT_YET_READ`, `CASE_NAMES`, `REPHRASED`: each
+   entry names a case and says why, as a string value rather than a comment, and **a stale entry
+   fails its own gate**. See
    [`scripts/check/AGENTS.md`](./scripts/check/AGENTS.md).
 3. **A suite assertion.** A limit a test can pin is pinned. The cap on user text scale lives in
    `compose/src/test/kotlin/org/dravensoft/arena/ArenaDensityTest.kt` and in
@@ -65,20 +66,6 @@ and a sibling cited by its bare filename.
 
 ## Filed
 
-**The pinned contract version carries no provenance attestation.**
-`@dravensoft/arena-contracts@10.2.0` was published by hand from the Arena repository, so npm
-holds no signed statement about which workflow built it. What it costs: the integrity check in
-`scripts/generate/contracts/fetch-contracts.ts:integrityProblems(expected, tarball)` proves
-the tarball is the one the registry serves and proves nothing about who put it there. Every
-version after it is published over OIDC by a trusted publisher and does carry one, so this
-entry dies the day the pin moves. Re-derive with:
-
-```bash
-bun -e "const v=require('./repo.config.json')['arena-contracts-version']; \
-  const r=await fetch('https://registry.npmjs.org/@dravensoft/arena-contracts/'+v); \
-  console.log((await r.json()).dist.attestations ?? 'no attestations')"
-```
-
 **The font binaries are not carried and no target registers a face.** `font.display`,
 `font.body` and `font.mono` emit the family NAME with the CSS generic tail dropped, which is
 the whole of what a `fontFamily` value can say off the web. Arena ships `.woff2`, which loads
@@ -90,6 +77,22 @@ with:
 ```bash
 bun -e "import {tokensOf} from './scripts/generate/arena/generate-tokens.ts'; \
   for (const t of tokensOf()) if (t.type === 'fontFamily') console.log(t.name, t.value)"
+```
+
+**A contracted `number` crosses as a `Double`, whatever it counts.** The API contract states one
+numeric form and no width, so `ArenaSeries.values`, a continuous measurement, and
+`ArenaTablePage.index`, a page number, are the same form in the contract and the same type in
+both layers. What it costs: a consumer constructs a page from three `Double`s, so a count is
+carried in a type that holds half of one, and no gate can report it, because the contract
+declares no intent for a gate to compare an emit against. The one remedy this repository could
+apply alone is to guess from a field name, which would be inventing a fact the contract declines
+to state, so the remedy is a contract change upstream and this entry dies with it. Re-derive the
+members with:
+
+```bash
+bun -e "import {apiTypesOf} from './scripts/generate/arena/generate-api-types.ts'; \
+  for (const t of apiTypesOf()) for (const [f, s] of Object.entries(t.fields ?? {})) \
+    if (s.type === 'number' || s.of === 'number') console.log(t.name + '.' + f)"
 ```
 
 **A shadow crosses without its spread.** Neither Compose nor SwiftUI draws one, and all three

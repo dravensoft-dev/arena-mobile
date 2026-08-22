@@ -15,8 +15,8 @@ why a suite can assert on a gate's exception map by name without running the gat
 
 **A reason-carrying map is part of the gate, not documentation of it.** `UNMAPPED`,
 `NOT_A_VALUE`, `SCOPES`, `EXEMPT`, `UNMARKED`, `UNTRACKED`, `SIZE_ALLOWANCE`, `DEPARTURES`,
-`NEVER_SUBSCRIBES`: each entry names a case and says why, as a string value rather than a
-comment, and **a stale entry fails the gate itself**. That is what keeps an exception list
+`NEVER_SUBSCRIBES`, `NOT_YET_READ`, `CASE_NAMES`, `REPHRASED`: each entry names a case and says
+why, as a string value rather than a comment, and **a stale entry fails the gate itself**. That is what keeps an exception list
 from outliving the exception, and it is why a debt lives beside its gate rather than in prose.
 
 **A gate declares no `writes`, and `check:graph` fails one that does.** A gate that emits is
@@ -82,7 +82,7 @@ from `GATES` and fails this table when the two disagree.
 | domain | gates | |
 | --- | --- | --- |
 | `contracts/` | 3 | the payload, and the field that pins it |
-| `arena/` | 13 | two or more layers at once, or the repository root |
+| `arena/` | 14 | two or more layers at once, or the repository root |
 | `compose/` | 1 | the Compose layer |
 | `swiftui/` | 1 | the SwiftUI layer |
 

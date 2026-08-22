@@ -24,7 +24,7 @@ symptom does not know yet what they are changing.
 | something is wrong and I do not know which layer owns it | [`DOUBTS.md`](./DOUBTS.md), for what counts as a debt and which record beats a paragraph |
 | a value is wrong, missing, or should be something else | Arena, not here. A value is a contract, and this repository consumes contracts it does not author. Raise `arena-contracts-version` in [`repo.config.json`](./repo.config.json) once the value ships |
 | a token reaches no native symbol, or reaches the wrong unit | [`scripts/AGENTS.md`](./scripts/AGENTS.md), then `scripts/lib/arena/bridge.ts:bridge(token, identifier)`, which is the whole unit bridge |
-| the emitted Kotlin or Swift is shaped wrong | `scripts/generate/arena/generate-tokens.ts`, and never the emitted file |
+| the emitted Kotlin or Swift is shaped wrong | the generator that writes it, `scripts/generate/arena/generate-tokens.ts` for a value and `scripts/generate/arena/generate-api-types.ts` for a type, and never the emitted file |
 | a theme, a density, or what a user's text setting does to a value | [`compose/AGENTS.md`](./compose/AGENTS.md) or [`swiftui/AGENTS.md`](./swiftui/AGENTS.md) |
 | a script, a gate or a generator | [`scripts/AGENTS.md`](./scripts/AGENTS.md), and [`scripts/check/AGENTS.md`](./scripts/check/AGENTS.md) for a gate |
 | whether a step runs at all | [`scripts/graph/AGENTS.md`](./scripts/graph/AGENTS.md) |
@@ -50,7 +50,7 @@ colon narrows a phase. One `bun run check` at a time.
 
 ## What this repository ships
 
-Two libraries from one emit, and neither carries a skin. Arena's own palette and fonts arrive
+Two libraries from one generated source set, and neither carries a skin. Arena's own palette and fonts arrive
 as values because a token is a value; the register a product looks like is a style plugin's
 answer, and the style plugin tier is web in mechanism and has no native counterpart here yet.
 

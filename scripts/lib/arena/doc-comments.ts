@@ -76,3 +76,54 @@ export function docProblems(file: string, found: Map<string, string>, owed: Map<
   }
   return errs;
 }
+
+const KOTLIN_API_TYPE = /^public (?:enum class|data class) ([A-Za-z][A-Za-z0-9]*)/;
+const KOTLIN_API_FIELD = /^\s{4}public val ([A-Za-z][A-Za-z0-9]*)\s*:/;
+const SWIFT_API_TYPE = /^public (?:enum|struct) ([A-Za-z][A-Za-z0-9]*)/;
+const SWIFT_API_FIELD = /^\s{4}public let ([A-Za-z][A-Za-z0-9]*)\s*:/;
+
+function apiDocs(
+  source: string,
+  typeDecl: RegExp,
+  fieldDecl: RegExp,
+  open: (line: string, pending: string[] | null) => string[] | null,
+) {
+  const found = new Map<string, string>();
+  let pending: string[] | null = null;
+  let type = '';
+  for (const raw of source.split('\n')) {
+    const opened = open(raw.trim(), pending);
+    if (opened !== null) { pending = opened; continue; }
+    const declaredType = typeDecl.exec(raw);
+    if (declaredType) {
+      type = declaredType[1];
+      if (pending !== null) found.set(type, flatten(pending.join(' ')));
+      pending = null;
+      continue;
+    }
+    const declaredField = fieldDecl.exec(raw);
+    if (declaredField) {
+      if (pending !== null) found.set(`${type}.${declaredField[1]}`, flatten(pending.join(' ')));
+      pending = null;
+      continue;
+    }
+    if (raw.trim() !== '') pending = null;
+  }
+  return found;
+}
+
+export function apiKotlinDocs(source: string) {
+  return apiDocs(source, KOTLIN_API_TYPE, KOTLIN_API_FIELD, (line, pending) => {
+    if (line.startsWith('/**')) return [line.replace(/^\/\*\*/, '').replace(/\*\/$/, '')];
+    if (pending === null) return null;
+    if (line === '*/') return pending;
+    if (line.startsWith('*')) return [...pending, line.replace(/^\*\s?/, '')];
+    return null;
+  });
+}
+
+export function apiSwiftDocs(source: string) {
+  return apiDocs(source, SWIFT_API_TYPE, SWIFT_API_FIELD, (line, pending) => (line.startsWith('///')
+    ? [...(pending ?? []), line.replace(/^\/\/\/\s?/, '')]
+    : null));
+}

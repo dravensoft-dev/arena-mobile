@@ -8,6 +8,7 @@ test('GATES is asserted by literal value, so the array and this case move in one
     'check:user-scale',
     'check:emit',
     'check:coverage',
+    'check:api-types',
     'check:collisions',
     'check:literals',
     'check:doc-comments',
@@ -27,7 +28,7 @@ test('GATES is asserted by literal value, so the array and this case move in one
 test('the table in scripts/check/AGENTS.md is these numbers', () => {
   const counts = countsByDomain();
   expect(counts.get('contracts')).toBe(3);
-  expect(counts.get('arena')).toBe(13);
+  expect(counts.get('arena')).toBe(14);
   expect(counts.get('compose')).toBe(1);
   expect(counts.get('swiftui')).toBe(1);
   expect([...counts.values()].reduce((a, b) => a + b, 0)).toBe(GATES.length);
