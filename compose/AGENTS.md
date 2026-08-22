@@ -55,6 +55,20 @@ A `number` carrying the `em` hint is a `TextUnit` in `em`, which `letterSpacing`
 directly. That is the row where the two platforms disagree: SwiftUI takes a point value, so
 the same token is applied two different ways and neither layer is evidence about the other.
 
+## A copy overwrites the alpha, so the composition multiplies first
+
+`Color.copy(alpha = x)` replaces whatever alpha the colour was carrying. Every colour in the
+emitted palette arrives opaque, so the difference is invisible over all of them, which is exactly
+why it survives a review; the contracted scrim does not arrive opaque, and a layer that overwrites
+there returns a scrim that is not one.
+`compose/src/main/kotlin/org/dravensoft/arena/tokens/ArenaComposition.kt` multiplies the alpha the
+colour already holds before it copies, so this layer and SwiftUI compose one colour rather than two.
+
+A `Color` in the sRGB space packs as 32-bit ARGB, so a ratio round-trips through eight bits and a
+half comes back as 128 parts in 255. A test comparing one asserts within a step of that ladder, and
+`compose/src/test/kotlin/org/dravensoft/arena/ArenaCompositionTest.kt` carries the reason in the one
+header a test file is allowed.
+
 ## The cap, and what it does not mean
 
 `ArenaScale.CAP` bounds the geometry derived from a control floor and leaves the text alone.

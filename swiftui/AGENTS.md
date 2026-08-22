@@ -65,6 +65,17 @@ multiplied by the font size first, which
 Reading either of them off the other layer produces a value that compiles and is wrong by a
 factor of the font size.
 
+## An opacity multiplies, and the view modifier of that name is a third thing
+
+`Color.opacity(_:)` multiplies the opacity the colour already carries, which is the whole of what
+`swiftui/Sources/ArenaTokens/ArenaComposition.swift:held(_:)` does. Compose spells the same
+operation as a copy over the alpha it reads, because a copy there replaces rather than multiplies,
+so the two layers arrive at one colour by two different sentences.
+
+`View.opacity(_:)` is not a third spelling of it. It composites the whole subtree it wraps, so an
+ink held back that way fades together with everything drawn beside it, which is a different picture.
+A level is a colour that carries an alpha, never a modifier on the view that draws it.
+
 ## `none` is a contract value and `Optional` already has one
 
 Several emitted enums declare a case `none`, because `none` is a value the contract authors and

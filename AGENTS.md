@@ -82,6 +82,37 @@ and it is keyed by the contract rather than by what this repository publishes, s
 that is not published yet is a recorded absence and never a hole. `bun run check:behaviour`
 holds all of it, and holds none of it by rendering anything.
 
+## What a colour composed at runtime is
+
+**Arena composes its held-back inks and its soft washes in a stylesheet the contract set does not
+carry**, as `color-mix(in oklab, C N%, transparent)`. That expression returns C at alpha N and
+nothing else: a mix against transparent is performed on premultiplied components, transparent
+premultiplies to nothing, and the result un-premultiplies back to C's own coordinates. The space
+the expression names therefore decides nothing, which is why no colour-space conversion appears
+anywhere on this side and why neither toolkit being able to mix in oklab is not the obstacle it
+looks like. Arena's own text-contrast gate already reads it that way: it parses the percentage
+out and hands it to a plain sRGB lerp.
+
+**So a composed colour is an alpha the toolkit composites at paint**, and never a value computed
+ahead of time. A precomputed ramp is refused, and the reason is not its cost: a ramp has to name
+the ground it was computed against, and the expression it replaces names none. One ink draws over
+the page, a card, a panel, a field, a wash and the scrim, and defers to the compositor in every
+one of them, so a table of pre-composited values answers one of those and answers the rest with
+the wrong colour. A ramp is also a table of values this repository would be authoring over a skin
+it consumes, which the row above sends to Arena.
+
+**An alias names the job a colour does and never its position in the palette.** A second spelling
+of one job does not cross, and two jobs reading one token both do, because they share a value and
+never a meaning: a skin moving one token moves a field's fill and a border together, and that
+mapping is what is being ported rather than a coincidence. A name identical to an emitted member
+renames nothing and is not an alias at all.
+
+`bun run check:composition` holds it: the two layers compose the same members, every alias resolves
+to a member the emitted scheme declares, and every ink either layer names clears its bar over the
+grounds Arena set those bars against. `ROLES` in `scripts/check/arena/check-composition.ts` carries
+why a member is gated or only reported, and `OWED` beside it names every ratio the contract does not
+hold yet, with the token asked for, failing the moment a raised pin brings one in.
+
 ## Where a new document goes
 
 **The contributor branch is this file**, and it answers [the convention published for that
