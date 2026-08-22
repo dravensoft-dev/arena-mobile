@@ -1,0 +1,106 @@
+import { test, expect } from 'bun:test';
+import {
+  aliasesIn, contrastProblems, measured, OWED, PAIRS, pairProblems, parityProblems,
+  resolutionProblems, ROLES, staleOwedProblems, zeroCompositionProblem, zeroMeasuredProblem,
+} from './check-composition.ts';
+
+const KOTLIN = [
+  'public val ArenaColorScheme.bg: Color get() = base100',
+  'public val ArenaColorScheme.textStrong: Color get() = baseContent',
+].join('\n');
+
+const SWIFT = [
+  '    var bg: Color { base100 }',
+  '    var textStrong: Color { baseContent }',
+].join('\n');
+
+test('both idioms read as the same set of aliases', () => {
+  expect(aliasesIn(KOTLIN)).toEqual(new Map([['bg', 'base100'], ['textStrong', 'baseContent']]));
+  expect(aliasesIn(SWIFT)).toEqual(new Map([['bg', 'base100'], ['textStrong', 'baseContent']]));
+});
+
+test('a member one layer offers and the other does not is the failure nothing else reports', () => {
+  expect(parityProblems(aliasesIn(KOTLIN), aliasesIn(SWIFT))).toEqual([]);
+  const missing = parityProblems(aliasesIn(KOTLIN), new Map([['bg', 'base100']]));
+  expect(missing).toHaveLength(1);
+  expect(missing[0]).toContain('textStrong');
+});
+
+test('an alias pointing at a member the scheme does not declare fails', () => {
+  const members = new Set(['base100', 'baseContent']);
+  expect(resolutionProblems(aliasesIn(KOTLIN), members)).toEqual([]);
+  const wrong = resolutionProblems(new Map([['bg', 'base999']]), members);
+  expect(wrong[0]).toContain('base999');
+});
+
+test('every alias says whether it is ink or ground, and one that does not fails', () => {
+  for (const name of aliasesIn(KOTLIN).keys()) expect(ROLES.has(name)).toBe(true);
+  const orphan = resolutionProblems(new Map([['mystery', 'base100']]), new Set(['base100']));
+  expect(orphan[0]).toContain('mystery');
+});
+
+test('an ink that cannot be read on a ground it is drawn over fails', () => {
+  const colours = {
+    base100: [0.05, 0.05, 0.05] as [number, number, number],
+    baseContent: [0.06, 0.06, 0.06] as [number, number, number],
+  };
+  const aliases = new Map([['bg', 'base100'], ['textStrong', 'baseContent']]);
+  const problems = contrastProblems(aliases, colours, 'dark');
+  expect(problems).toHaveLength(1);
+  expect(problems[0]).toContain('textStrong');
+  expect(problems[0]).toContain('4.5');
+});
+
+test('a content colour illegible on the fill this table maps it onto fails', () => {
+  const colours = {
+    primary: [0.71, 0.16, 0.13] as [number, number, number],
+    primaryContent: [0.72, 0.17, 0.14] as [number, number, number],
+  };
+  const aliases = new Map([['accent', 'primary'], ['onAccent', 'primaryContent']]);
+  expect(PAIRS.length).toBeGreaterThan(0);
+  const problems = pairProblems(aliases, colours, 'dark');
+  expect(problems).toHaveLength(1);
+  expect(problems[0]).toContain('onAccent');
+  expect(problems[0]).toContain('accent');
+});
+
+test('a ground Arena set no bar against is carried with its reason and never swept', () => {
+  const raised = ROLES.get('surfaceRaised');
+  const input = ROLES.get('surfaceInput');
+  const fill = ROLES.get('dangerFill');
+  for (const role of [raised, input, fill]) {
+    expect(role?.kind).toBe('ground');
+    expect(role?.kind === 'ground' && role.swept).toBe(false);
+    expect(role?.why.length).toBeGreaterThan(0);
+  }
+  expect(ROLES.get('bg')?.kind === 'ground' && ROLES.get('bg')?.swept).toBe(true);
+});
+
+test('a separator is reported and not gated, because 1.4.11 measures a control boundary', () => {
+  for (const name of ['border', 'borderStrong', 'accent', 'focusRing']) {
+    const role = ROLES.get(name);
+    expect(role?.kind).toBe('ink');
+    expect(role?.kind === 'ink' && role.gate).toBeNull();
+    expect(role?.why).toContain('NOT GATED');
+  }
+});
+
+test('a table with every member reported and none gated measures nothing and fails', () => {
+  const aliases = new Map([['bg', 'base100'], ['textStrong', 'baseContent']]);
+  expect(measured(aliases)).toBe(1 * 1 + PAIRS.length);
+  expect(zeroMeasuredProblem(measured(new Map([['bg', 'base100']])) - PAIRS.length)).toContain('measured 0 inks');
+  expect(zeroMeasuredProblem(1)).toBeNull();
+});
+
+test('the map of what waits on a pin fails the moment the pin brings it', () => {
+  expect(OWED.size).toBeGreaterThan(0);
+  expect(staleOwedProblems([])).toEqual([]);
+  const arrived = staleOwedProblems([{ name: [...OWED.keys()][0] }]);
+  expect(arrived).toHaveLength(1);
+  expect(arrived[0]).toContain('is now carried by the pinned contract');
+});
+
+test('a run that measured nothing is a failure and not a pass', () => {
+  expect(zeroCompositionProblem(0)).toContain('0 composition');
+  expect(zeroCompositionProblem(1)).toBeNull();
+});

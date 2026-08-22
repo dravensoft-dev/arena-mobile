@@ -46,7 +46,7 @@ export const node = {
   feeds: [
     'generate:tokens', 'generate:api-types',
     'check:pin', 'check:catalogue', 'check:coverage', 'check:api-types', 'check:user-scale',
-    'check:behaviour',
+    'check:behaviour', 'check:composition',
   ],
 };
 
