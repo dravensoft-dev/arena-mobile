@@ -62,11 +62,12 @@ test('a rephrased description is what the emitter writes, and every other one cr
   expect(docTextFor('sp.0', undefined)).toBeUndefined();
 });
 
+const WEB_MECHANISMS = ['var(--', 'contracts/design/', 'prefers-', 'DOM order'];
+
 test('a replacement states no web mechanism, which is the whole reason it exists', () => {
   for (const [, entry] of REPHRASED) {
-    expect(entry.was).toContain('--pad-safe-bottom');
-    expect(entry.text).not.toContain('var(--');
-    expect(entry.text).not.toContain('contracts/design/');
+    expect(WEB_MECHANISMS.some((mechanism) => entry.was.includes(mechanism))).toBe(true);
+    for (const mechanism of WEB_MECHANISMS) expect(entry.text).not.toContain(mechanism);
     expect(entry.why.length).toBeGreaterThan(40);
   }
 });
