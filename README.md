@@ -42,6 +42,33 @@ GeometryReader { proxy in
 }
 ```
 
+**The axes the system sets and the reader does not.** Increased contrast, reduced transparency
+and reduced motion are settings a device reports and no token can hold. `ArenaContrast` moves a
+boundary to the strong step of the ladder Arena already carries, widens the focus ring so it
+still stands out once every border has thickened, and takes the scrim's blur to zero.
+`ArenaMotion` slows a working loop rather than freezing it, because a stopped spinner reads as a
+hung process; stops decorative motion outright; and drops an entrance's travel while keeping its
+fade. The seams compose and the caller reads, so the toolkit reports the setting and the library
+answers it.
+
+```kotlin
+val width = ArenaContrast.border(increased)
+val spin = ArenaMotion.working(ArenaTokens.loopSpin, reduced)
+```
+
+```swift
+let width = ArenaContrast.border(increased)
+let spin = ArenaMotion.working(ArenaTokens.loopSpin, reduced: reduced)
+```
+
+**The scrim reads an axis of its own**, because the web folds transparency into one contrast
+query and either platform here offers two switches a reader turns on independently. On SwiftUI the
+three are `\.colorSchemeContrast`, `\.accessibilityReduceTransparency` and
+`\.accessibilityReduceMotion`. On Compose the first is `UiModeManager.getContrast()`, which arrives
+at API 34 over a `minSdk` of 24, the third is `Settings.Global.ANIMATOR_DURATION_SCALE`, and
+Android publishes nothing for the second, so that one takes what your app decides. Each layer's
+`AGENTS.md` says which and why the reading is yours.
+
 **A build with no JavaScript in it.** The generator is the only thing that reads the contract
 payload; Gradle and SwiftPM compile Kotlin and Swift that are already in the tree. A clone
 with no Bun, no Node and no network builds both libraries.
