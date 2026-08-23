@@ -13,13 +13,21 @@ directory, and a sibling suite named for it, covering it. It exports its logic a
 returning problem strings, and its private `main()` prints them and exits non-zero. That is
 why a suite can assert on a gate's exception map by name without running the gate.
 
-**A reason-carrying map is part of the gate, not documentation of it.** `UNMAPPED`,
-`NOT_A_VALUE`, `SCOPES`, `EXEMPT`, `UNMARKED`, `UNTRACKED`, `SIZE_ALLOWANCE`, `DEPARTURES`,
-`NEVER_SUBSCRIBES`, `NOT_YET_READ`, `CASE_NAMES`, `REPHRASED`, `OBLIGATIONS`, `BINDINGS`,
-`COMPOSED`, `PAIRS`, `OWED`, `FLOORS`, `CASES`, `AXES`, `REFUSED`, `CLASSES`: each entry names a
-case and says why, as a string value rather than a
-comment, and **a stale entry fails the gate itself**. That is what keeps an exception list from outliving the exception, and
-it is why a debt lives beside its gate rather than in prose.
+**A reason-carrying map is part of the gate, not documentation of it.** `NOT_A_VALUE` in
+`scripts/lib/contracts/payload.ts` is the shape and `OWED` in
+`scripts/check/arena/check-composition.ts` is the shape under load: each entry names a case and
+says why, as a string value rather than a comment, and **a stale entry fails the gate itself**.
+That is what keeps an exception list from outliving the exception, and it is why a debt lives
+beside its gate rather than in prose.
+
+**Which maps the tree carries is a question for the tree and never for this page.** A roster here
+would be the exception list this rule refuses, one level up: nothing fails when it goes stale, and
+it named a part of what the tree carries while reading as all of it. Ask instead, and read the
+shape above to tell a reason-carrying map from a plain lookup:
+
+```bash
+grep -rn 'export const [A-Z_]\+ = new Map' scripts/ --include=*.ts | grep -v '\.test\.'
+```
 
 **A gate declares no `writes`, and `check:graph` fails one that does.** A gate that emits is
 an artifact another gate can read, and a reader of a failed writer either runs against a stale
