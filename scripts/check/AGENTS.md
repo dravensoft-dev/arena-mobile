@@ -16,7 +16,8 @@ why a suite can assert on a gate's exception map by name without running the gat
 **A reason-carrying map is part of the gate, not documentation of it.** `UNMAPPED`,
 `NOT_A_VALUE`, `SCOPES`, `EXEMPT`, `UNMARKED`, `UNTRACKED`, `SIZE_ALLOWANCE`, `DEPARTURES`,
 `NEVER_SUBSCRIBES`, `NOT_YET_READ`, `CASE_NAMES`, `REPHRASED`, `OBLIGATIONS`, `BINDINGS`,
-`COMPOSED`, `PAIRS`, `OWED`: each entry names a case and says why, as a string value rather than a
+`COMPOSED`, `PAIRS`, `OWED`, `FLOORS`, `CASES`, `AXES`, `REFUSED`, `CLASSES`: each entry names a
+case and says why, as a string value rather than a
 comment, and **a stale entry fails the gate itself**. That is what keeps an exception list from outliving the exception, and
 it is why a debt lives beside its gate rather than in prose.
 

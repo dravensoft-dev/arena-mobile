@@ -32,7 +32,8 @@ paragraph does not. That is the entire argument for this order:
 1. **Pay it.** A defect that can be fixed is not debt; it is work.
 2. **A gate, with a reason-carrying map.** `UNMAPPED`, `NOT_A_VALUE`, `SCOPES`, `EXEMPT`,
    `UNMARKED`, `UNTRACKED`, `SIZE_ALLOWANCE`, `NOT_YET_READ`, `CASE_NAMES`, `REPHRASED`,
-   `OBLIGATIONS`, `BINDINGS`, `COMPOSED`, `PAIRS`, `OWED`: each entry names a case and says why,
+   `OBLIGATIONS`, `BINDINGS`, `COMPOSED`, `PAIRS`, `OWED`, `FLOORS`, `CASES`, `AXES`, `REFUSED`,
+   `CLASSES`: each entry names a case and says why,
    as a string value rather than a comment, and **a stale entry fails its own gate**. See
    [`scripts/check/AGENTS.md`](./scripts/check/AGENTS.md).
 3. **A suite assertion.** A limit a test can pin is pinned. The cap on user text scale lives in

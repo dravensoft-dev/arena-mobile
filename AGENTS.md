@@ -109,7 +109,7 @@ renames nothing and is not an alias at all.
 
 `bun run check:composition` holds it: the two layers compose the same members, every alias resolves
 to a member the emitted scheme declares, and every ink either layer names clears its bar over the
-grounds Arena set those bars against. `ROLES` in `scripts/check/arena/check-composition.ts` carries
+grounds Arena set those bars against. `COMPOSED` in `scripts/check/arena/check-composition.ts` carries
 why a member is gated or only reported, and `OWED` beside it names every ratio the contract does not
 hold yet, with the token asked for, failing the moment a raised pin brings one in.
 
