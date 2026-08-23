@@ -248,7 +248,7 @@ public enum ArenaTokens {
     public static let loopBrand: TimeInterval = 8
     /// Rotor's reduced step: the brand mark is three times slower again, because it is decoration that happens to also mean 'alive'
     public static let loopBrandReduced: TimeInterval = 24
-    /// What a working loop slows to under prefers-reduced-motion. Motion that reports work slows rather than stopping: a frozen spinner reads as a hung process.
+    /// What a working loop slows to when the reader has asked for less movement. Motion that reports work slows rather than stopping: a frozen spinner reads as a hung process, which is what ArenaMotion.working composes this step for.
     public static let loopReduced: TimeInterval = 2.4
     /// ArenaSkeleton
     public static let loopShimmer: TimeInterval = 1.4

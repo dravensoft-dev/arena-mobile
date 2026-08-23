@@ -61,6 +61,14 @@ export const REPHRASED = new Map<string, { was: string; text: string; why: strin
       why: "DOM order is the web spelling of the thing a stacking slot exists to overrule, and the last clause names a custom property and a file in the Arena repository. Both of the values it points at exist here, as ArenaSafeArea.bottom and as layoutBar, so each name is replaced by the thing it named",
     },
   ],
+  [
+    'loop.reduced',
+    {
+      was: "What a working loop slows to under prefers-reduced-motion. Motion that reports work slows rather than stopping: a frozen spinner reads as a hung process.",
+      text: "What a working loop slows to when the reader has asked for less movement. Motion that reports work slows rather than stopping: a frozen spinner reads as a hung process, which is what ArenaMotion.working composes this step for.",
+      why: "the clause that goes names prefers-reduced-motion, a media query neither toolkit has, and it is the only thing in the sentence that is web rather than policy. What the token IS survives verbatim, because the policy states what each kind of motion does rather than which query reports it, and the replacement names the seam that composes the step instead of the query that asks for it",
+    },
+  ],
 ]);
 
 export function docTextFor(name: string, description: string | undefined, rephrased = REPHRASED) {

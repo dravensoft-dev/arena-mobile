@@ -303,7 +303,7 @@ public object ArenaTokens {
     public val loopBrand: Int = 8000
     /** Rotor's reduced step: the brand mark is three times slower again, because it is decoration that happens to also mean 'alive' */
     public val loopBrandReduced: Int = 24000
-    /** What a working loop slows to under prefers-reduced-motion. Motion that reports work slows rather than stopping: a frozen spinner reads as a hung process. */
+    /** What a working loop slows to when the reader has asked for less movement. Motion that reports work slows rather than stopping: a frozen spinner reads as a hung process, which is what ArenaMotion.working composes this step for. */
     public val loopReduced: Int = 2400
     /** ArenaSkeleton */
     public val loopShimmer: Int = 1400
