@@ -23,6 +23,7 @@
     "check:composition": "bun scripts/check/arena/check-composition.ts",
     "check:fonts": "bun scripts/check/arena/check-fonts.ts",
     "check:environment": "bun scripts/check/arena/check-environment.ts",
+    "check:contrast": "bun scripts/check/arena/check-contrast.ts",
     "check:doc-comments": "bun scripts/check/arena/check-doc-comments.ts",
     "check:docs": "bun scripts/check/arena/check-docs.ts",
     "check:citations": "bun scripts/check/arena/check-citations.ts",
