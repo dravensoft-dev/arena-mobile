@@ -147,10 +147,13 @@ reader goes where the safe area has not been consumed yet.
 already resolved for the reading direction, which is why `ArenaSafeArea.start(_:floor:)` takes
 `safeAreaInsets.leading` with nothing converted between them.
 
-## Increased contrast, and what is refused
+## The three instruments, and none of them is a trait collection
 
-Three cases have an answer and one does not: every `bw` role moves to `bw-strong`, the scrim's
-blur goes to zero under Reduce Transparency, and the focus ring widens because it is drawn at
-an ordinary border's width. The fourth, an accent drawn as ink, is the style plugin's answer
-over a palette this layer does not know, and it is refused rather than faked. Read
-`\.accessibilityContrast` from the environment and answer the three.
+`\.colorSchemeContrast` equal to `.increased` is increased contrast,
+`\.accessibilityReduceTransparency` is the scrim's axis and `\.accessibilityReduceMotion` is the
+motion policy's. All three are environment values a view reads and hands to `ArenaContrast` or to
+`ArenaMotion`, which compose and never read.
+
+**`accessibilityContrast` is UIKit's and not this layer's.** It is a `UITraitCollection` property,
+and reaching for it here finds nothing under that name. What the three cases and the three classes
+ARE is stated once on [`../AGENTS.md`](../AGENTS.md).

@@ -126,6 +126,25 @@ reports none.
 `calculateStartPadding(layoutDirection)`, so the value the seam returns is applied without
 anybody converting a side by hand.
 
+## The contrast axis arrives late and the transparency axis never arrives
+
+`UiModeManager.getContrast()` is how Android reports increased contrast, and it returns a float
+in `[-1, 1]` where zero is the default. **It arrives at API 34 and `minSdk` here is 24**, so which
+reading counts as increased, and what a caller passes below 34, are the caller's decisions:
+`ArenaContrast` takes a boolean because Arena's question is binary and the value it answers with
+is a step of a two-step ladder, and a seam interpolating between contracted steps would author a
+value this library consumes.
+
+**Android publishes no reduce-transparency setting at all**, so `ArenaContrast.scrimBlur(reduced)`
+has no instrument behind it on this layer today. The member exists anyway, because one a layer
+lacks offers a consumer two libraries from one contract, and a caller with no signal passes false.
+
+Reduced motion is `Settings.Global.ANIMATOR_DURATION_SCALE`, which reads zero when the reader has
+turned animations off. It needs a `ContentResolver`, which is another reason the reading is the
+caller's and the composition is the library's.
+
+What the three cases and the three classes ARE is stated once on [`../AGENTS.md`](../AGENTS.md).
+
 ## What this layer does not carry
 
 No component, and no answer to the style plugin tier. `explicitApi()` is on and

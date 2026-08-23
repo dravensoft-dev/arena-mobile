@@ -155,6 +155,67 @@ floor is on the `fixed` axis because a gutter grows with no reader's text settin
 composes rather than replaces. `FLOORS` in `scripts/check/arena/check-environment.ts` carries why
 each edge floors where it does.
 
+## What an accessibility axis the system sets is
+
+**Three settings a reader turns on and this repository cannot see.** Whether they asked for a
+stronger interface, for less translucency, or for less movement is reported by a device and held
+by no token: each has no value until there is one, the same way an inset has none until there is
+a screen. Arena composes the first two in a stylesheet the contract set does not carry and states
+the third as a policy, and both halves cross here.
+
+**The web has one query where this has two settings.** `prefers-contrast` covers the scrim as
+well, and Arena's own stylesheet names the reason in its comment, as what iOS calls Reduce
+Transparency. A browser offers one query; either platform here offers two switches a reader turns
+on independently, so the boundary and the focus ring read increased contrast and the scrim reads
+reduced transparency.
+
+**So the library composes and never reads the device**, for every reason `ArenaSafeArea` carries:
+the axis arrives as a parameter and the seam returns the value composed with it. That is also
+what makes the claim checkable, because nobody can set an accessibility setting from a test and
+anybody can pass a boolean. Which instrument a caller reads is that layer's own, on
+[`compose/AGENTS.md`](./compose/AGENTS.md) and [`swiftui/AGENTS.md`](./swiftui/AGENTS.md).
+
+**Increased contrast has three cases and Arena answers each with a step it already carries.** A
+boundary that carries meaning thickens, from `bw` to `bw-strong`, because WCAG 1.4.11 measures a
+control's boundary and a hairline is the first thing that reader is asking about. The focus ring
+widens onto the first step of the spacing grid, because it is drawn at an ordinary border's width
+and would otherwise stop standing out at the moment every border thickens. And the scrim's
+backdrop blur goes to the zero step, which is the whole of what Reduce Transparency asks for.
+
+**The first case is six questions upstream and one here.** Arena moves six `bw` roles to one
+value, and this repository carries no role tier: the six names are that tier asking a boundary's
+question six times, and what a target without it answers is the question itself, which step a
+boundary takes. Both operands are contracted and emitted, so the collapse is a mapping and never
+a debt.
+
+**The fourth case is refused and the refusal is held rather than written down.** An accent drawn
+as ink is a style plugin's answer over a palette the kernel does not know, so Arena will not
+reassign it and this repository, carrying no plugin tier at all, refuses harder.
+`bun run check:contrast` fails a layer that grows a member for it.
+
+**Reduced motion is a policy and not a stylesheet, which is why it survives a toolkit with no
+media query.** It states what each KIND of motion does rather than listing animations. Motion
+that reports work slows and is never frozen, because a stopped spinner reads as a hung process.
+Purely decorative motion stops outright. An entrance keeps its fade and drops its travel, since
+the movement is the vestibular trigger and the fade is the meaning. **The three classes return
+three kinds of answer and the seam does not pretend otherwise**: a duration of zero over an
+infinite loop is not a flat surface, and the time axis carries no contracted zero the way the
+length axis carries one.
+
+**The slowed step is a default and not a constant**, the way a safe-area floor is: the brand
+mark's own step is three times slower again and reaches the seam as an argument, because the
+rotor is a call site and the policy has three classes. The contrast seam takes no default at all,
+because its pair is the contracted ladder itself and a default there would hand a call site its
+own two widths, which is the role tier arriving by the back door.
+
+`bun run check:contrast` and `bun run check:motion` hold it: both layers carry the same members,
+each over the operand the composition or the policy names, on a length or a duration no reader's
+text setting moves, and the body composes rather than replaces. `CASES` and `AXES` in
+`scripts/check/arena/check-contrast.ts` and `CLASSES` in `scripts/check/arena/check-motion.ts`
+carry why each case and each class answers the way it does. **What no gate here reaches is which
+instrument a consumer reads**, because that lives in the consumer's process, which is the same
+boundary `swiftui/Sources/ArenaTokens/ArenaFonts.swift:unresolved()` already admits.
+
 ## Where a new document goes
 
 **The contributor branch is this file**, and it answers [the convention published for that
