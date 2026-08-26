@@ -466,8 +466,10 @@ own, on [`compose/AGENTS.md`](./compose/AGENTS.md) and [`swiftui/AGENTS.md`](./s
 **A control paints at its rung and activates at the box around it.** Growing the paint with the floor
 draws a control the density did not ask for, so the box is centred on the drawing and the drawing keeps
 the height the scale names. Each suite asserts three things: a control with no floor offers the rung, a
-control asked for a floor offers it, and the pixel inside the box and above the rung is not the
-control's own fill, which is what says the box is not the drawing.
+control asked for a floor offers it, and the extent of what the control draws down its middle column is
+the rung rather than the floor, which is what says the box is not the drawing. Reading one pixel above
+the rung instead is the version of that claim which passes over a control that grew its paint, because
+what sits there is the gutter the focus ring reserves.
 
 **A floor is a constant of a platform, so it is written by hand, and what holds two hand-written copies
 equal is a gate.** `bun run check:target` states each floor once, reads the copy the measuring suite
