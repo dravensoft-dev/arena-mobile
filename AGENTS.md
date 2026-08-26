@@ -205,6 +205,30 @@ routing decision can skip. A workflow declaring two of them is two gates that ca
 cannot require, and each declares a single job. An entry whose workflow leaves the tree, grows
 a second job, or grows a gate job of its own is stale and fails.
 
+## What a document hands a reader to type
+
+**This repository leans on deriving a figure rather than writing one down**, which makes a
+snippet that stops producing an answer its own chosen failure mode: it exits zero, prints
+nothing, and the page around it goes on reading as current. `bun run check:vocabulary` runs
+every fenced `bash` block a document hands a reader and holds it to answering, so an exit code
+of zero is not enough and an empty answer is a failure.
+
+**A block that cannot be run is named rather than skipped.** `ILLUSTRATIVE` in
+`scripts/check/arena/check-vocabulary.ts` carries each with its reason, and there are three
+reasons: it writes, it asks the network, or it carries a placeholder a reader substitutes. An
+entry is addressed by its document and the position of the block in it, and it names the command
+that block opens with, so an excuse that drifts onto a neighbour fails rather than excusing the
+wrong one.
+
+**The other half is the vocabulary itself.** Every `bun run` name a document types is a script
+`package.json` declares, wherever the name sits, because a command copied out of prose is a
+command a reader runs. `check:workflow` asks the same of a job, and the two share
+`scripts/lib/arena/package-scripts.ts` so there is one answer.
+
+**What the gate declares reading is the documents and never what a block reads.** A block
+spawns a child whose reads are that script's own declaration, so widening this node to cover
+them would invent an edge over a tree this gate never opens.
+
 ## What a component's members are
 
 **A component contract is read when the register publishes the component, and excluded when the

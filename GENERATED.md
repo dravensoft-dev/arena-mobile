@@ -44,7 +44,7 @@ answers the question and no list here can go short:
 ```bash
 bun -e "
 import { allNodes } from './scripts/graph/nodes.ts';
-for (const node of await allNodes())
+for (const { node } of await allNodes())
   for (const written of node.writes ?? []) console.log(node.name.padEnd(22), written);
 "
 ```

@@ -34,6 +34,7 @@
     "check:doc-comments": "bun scripts/check/arena/check-doc-comments.ts",
     "check:docs": "bun scripts/check/arena/check-docs.ts",
     "check:citations": "bun scripts/check/arena/check-citations.ts",
+    "check:vocabulary": "bun scripts/check/arena/check-vocabulary.ts",
     "check:generated": "bun scripts/check/arena/check-generated.ts",
     "check:community": "bun scripts/check/arena/check-community.ts",
     "check:workflow": "bun scripts/check/arena/check-workflow.ts",
