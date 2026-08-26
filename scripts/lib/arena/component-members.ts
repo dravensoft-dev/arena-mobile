@@ -6,11 +6,22 @@
  * axis this repository's seams take from a caller because no library here reads a device. */
 
 import { sortedByCodeUnit } from '../../utils/compare.ts';
+import type { ApiType, ComponentMember } from '../contracts/api-types.ts';
+import { enumCases, fieldTypes } from './api-emit.ts';
 import { LAYERS, type Layer } from './behaviour-obligations.ts';
 
 export type Answer = { parameter: string } | { excepted: string };
 
 export type Extra = { why: string; layer?: Layer };
+
+export type Parameter = { type: string; default: string | null };
+
+export const NATIVE_FORMS = new Map<string, Record<Layer, string>>([
+  ['slot', { compose: 'String', swiftui: 'String' }],
+  ['event', { compose: '() -> Unit', swiftui: '@escaping () -> Void' }],
+]);
+
+export const DERIVED_DEFAULT = new Map<string, { compose: string; swiftui: string; why: string }>([]);
 
 const NO_FORM = 'a form submission mechanism: the member names a field of an HTML form and what it '
   + 'answers is what a browser posts. Neither toolkit has a form to belong to, so the member reaches '
@@ -109,6 +120,74 @@ export function staleExtraProblems(component: string, byLayer: ReadonlyMap<Layer
     const carried = layers.some((layer) => byLayer.get(layer)?.has(parameter) === true);
     return carried ? [] : [`BEYOND names ${component}.${parameter}, and no layer that owes it takes one: ${extra.why}`];
   }));
+}
+
+export function expectedType(field: ComponentMember, where: string, layer: Layer) {
+  const native = NATIVE_FORMS.get(field.form);
+  if (native) return native[layer];
+  const { kotlin, swift } = fieldTypes(field, where);
+  return layer === 'compose' ? kotlin : swift;
+}
+
+export function acceptedDefaults(
+  member: string,
+  field: ComponentMember,
+  types: readonly ApiType[],
+  layer: Layer,
+) {
+  const derived = DERIVED_DEFAULT.get(member);
+  if (derived) return [derived[layer]];
+  if (field.default === undefined) return [];
+  if (field.form !== 'enum') return [String(field.default)];
+  const type = types.find((one) => one.name === field.type);
+  const found = type ? enumCases(type).find((one) => one.value === field.default) : undefined;
+  if (!found) return [];
+  return layer === 'compose'
+    ? [`${field.type}.${found.kotlin}`]
+    : [`.${found.swift}`, `${field.type}.${found.swift}`];
+}
+
+export function shapeProblems(
+  component: string,
+  member: string,
+  field: ComponentMember,
+  parameter: Parameter,
+  types: readonly ApiType[],
+  layer: Layer,
+) {
+  const errs: string[] = [];
+  const want = expectedType(field, `${component}.${member}`, layer);
+  if (parameter.type !== want) {
+    errs.push(`${component}.${member} on ${layer} is typed ${JSON.stringify(parameter.type)} and the contract's `
+      + `${field.form} form crosses as ${JSON.stringify(want)}. A member is the same surface on both layers or it is `
+      + 'two libraries from one contract');
+  }
+  const accepted = acceptedDefaults(member, field, types, layer);
+  if (accepted.length === 0) {
+    if (parameter.default !== null) {
+      errs.push(`${component}.${member} on ${layer} defaults to ${JSON.stringify(parameter.default)} and the pinned `
+        + 'contract declares no default for it, so this layer decided what a caller who says nothing gets');
+    }
+    return errs;
+  }
+  if (parameter.default === null) {
+    errs.push(`${component}.${member} on ${layer} takes no default and the pinned contract declares `
+      + `${JSON.stringify(accepted[0] as string)}. A member optional upstream and required here is a call site that `
+      + 'compiles on one layer and not the other');
+    return errs;
+  }
+  if (!accepted.includes(parameter.default)) {
+    errs.push(`${component}.${member} on ${layer} defaults to ${JSON.stringify(parameter.default)} and the contract `
+      + `declares ${JSON.stringify(accepted[0] as string)}. A default changed on one layer alone passes every other `
+      + 'gate and hands two consumers two different controls');
+  }
+  return errs;
+}
+
+export function staleDerivedProblems(declared: ReadonlySet<string>) {
+  return sortedByCodeUnit([...DERIVED_DEFAULT].flatMap(([member, derived]) => (declared.has(member)
+    ? []
+    : [`DERIVED_DEFAULT names ${member} and no component contract declares a member by that name: ${derived.why}`])));
 }
 
 export function staleComponentProblems(carried: readonly string[]) {

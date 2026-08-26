@@ -203,6 +203,18 @@ because no library on this side reads a device.
 requirement is excepted rather than omitted: silence upstream means the browser answered it, and
 silence here would mean nothing at all.
 
+**A member is a name, a type and a default, and all three are held.** A contract states
+`"type": "ArenaButtonVariant"` and `"default": "primary"` beside the member, and a default changed
+on one layer alone otherwise passes every gate in the tree and hands two consumers two different
+controls. The two are DERIVED from the contract rather than written down beside the parameter
+name: `scripts/lib/arena/api-emit.ts:fieldTypes(field, where)` already answers the Kotlin and the
+Swift type of every form the contract types by type, and
+`scripts/lib/arena/api-emit.ts:enumCases(type)` already answers how each layer spells each case, so
+a second copy here would drift the first time a form changes. `NATIVE_FORMS` in
+`scripts/lib/arena/component-members.ts` carries the two forms the contract types by FORM instead,
+a slot and an event, and `DERIVED_DEFAULT` beside it names a default reached through a constant
+rather than a literal. It is empty, and the emptiness is the claim.
+
 `bun run check:members` holds it, over the components it finds by walking the two source trees
 rather than by a list, so a component that lands and registers nothing is a failure. **What a
 green run does not say is that the component draws what the contract describes**: what it says is

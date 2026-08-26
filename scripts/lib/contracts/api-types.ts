@@ -28,6 +28,8 @@ export type ApiField = {
   description?: string;
 };
 
+export type ComponentMember = ApiField & { default?: string | number | boolean };
+
 export type ApiType = {
   name: string;
   kind: string;
