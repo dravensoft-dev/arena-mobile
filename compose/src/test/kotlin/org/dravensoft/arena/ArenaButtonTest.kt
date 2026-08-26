@@ -15,7 +15,7 @@ import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.height
@@ -28,8 +28,8 @@ import org.dravensoft.arena.theme.ArenaTheme
 import org.dravensoft.arena.tokens.ArenaBaseDensity
 import org.dravensoft.arena.tokens.ArenaControl
 import org.dravensoft.arena.tokens.ArenaDarkColors
-import org.dravensoft.arena.tokens.ArenaScale
 import org.dravensoft.arena.tokens.ArenaLightColors
+import org.dravensoft.arena.tokens.ArenaScale
 import org.dravensoft.arena.tokens.accent
 import org.dravensoft.arena.tokens.borderStrong
 import org.dravensoft.arena.tokens.danger
