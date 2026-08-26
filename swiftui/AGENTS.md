@@ -68,8 +68,9 @@ sentence. **A struct is the mirror case and costs more here**: Swift synthesises
 initialiser at `internal`, so every emitted `public struct` carries an explicit public `init`
 that a Kotlin `data class` never needs.
 
-**An authored source here carries no comment at all.** A fact about one of them belongs on
-this page.
+**What a hand-authored source under `swiftui/Sources/` may carry is stated once on
+[`../AGENTS.md`](../AGENTS.md)**, and the answer is no comment at all, so a fact about one of
+them belongs on this page.
 
 ## The two rows that are not symmetric with Compose
 

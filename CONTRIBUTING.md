@@ -55,6 +55,7 @@ than after merge.
 - English only, in code, comments, documents and commit messages.
 - A commit message containing a backtick is written with a quoted here-doc, never with
   `git commit -m "…"`.
-- A document cites code as `path/to/file:member(parameters)` and never by line number.
+- How a document cites code, and why a line number is refused, is stated once on
+  [`AGENTS.md`](./AGENTS.md).
 - History is never rewritten. A published tag is a promise about the tree it resolves to, and
   SwiftPM resolves a package from a tag directly.

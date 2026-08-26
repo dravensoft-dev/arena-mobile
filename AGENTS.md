@@ -229,6 +229,26 @@ command a reader runs. `check:workflow` asks the same of a job, and the two shar
 spawns a child whose reads are that script's own declaration, so widening this node to cover
 them would invent an edge over a tree this gate never opens.
 
+## Where a concept lives
+
+**A concept written in the same words on two pages is edited on one of them, and both go on
+reading as current.** `bun run check:duplication` holds that it has one home. The unit is a
+normalised sentence long enough that a heading cannot collide by accident, compared across every
+pair of documents through an index, with a fenced block and a heading cut before anything is
+compared: a heading names a section, and two pages answering one question for two layers name
+their sections alike on purpose.
+
+**A sentence naming another document is a pointer to a home and passes; one naming none is a
+second home and fails.** That separation is structural rather than a roster: the copy that is
+not the home is the one that says where the home is, which is the sentence a reader is served by
+finding twice. What the gate cannot tell is whether the page a pointer names is where the thing
+is actually stated, which is the admission `check:behaviour` makes about a symbol found in a
+source.
+
+**`SECOND_HOME` in `scripts/check/arena/check-duplication.ts` is empty, and the emptiness is
+the claim.** Every repetition this tree carries is a pointer, so there is nothing to excuse, and
+an entry whose sentence falls back to one page fails as a stale one.
+
 ## What a component's members are
 
 **A component contract is read when the register publishes the component, and excluded when the
@@ -525,8 +545,9 @@ rule is the one no gate holds**, because nothing mechanical can judge it.
   `scripts/lib/arena/deadline.ts:budgetFor(...spent)`. A duration is a statement about the
   machine that measured it, and a Gradle or `xcodebuild` invocation is exactly the shape this
   rule was written for. `bun run check:deadlines` holds both halves.
-- **Two gates cannot run on every host, and the repository declares itself NOT strict.**
-  `check:kotlin` needs a JDK and `check:swift` needs Xcode, which installs on macOS alone.
+- **Two gates cannot run on every host, and the repository declares itself NOT strict.** Which
+  two they are and what each needs is stated once on
+  [`scripts/check/AGENTS.md`](./scripts/check/AGENTS.md).
   Where the dependency is missing the gate exits 2, `check-all` marks it `SKIP`, and the whole
   run reports **INCOMPLETE** rather than passing. `CI=true` turns every skip back into a
   failure, so a workflow is strict with nothing to configure. Arena declares the opposite
@@ -534,10 +555,8 @@ rule is the one no gate holds**, because nothing mechanical can judge it.
 
 ## Debt
 
-**A debt is paid, or made loud, before it is written down.** [`DOUBTS.md`](./DOUBTS.md)
-states what counts as one and where the records that are not prose live: a reason-carrying map
-beside its gate, a suite assertion, a normative `AGENTS.md`. Prefer any of those to a
-paragraph: each of them fails when it stops being true, and a paragraph does not.
+**What counts as a debt, where its record goes, and why any record that fails beats a
+paragraph, is stated once on [`DOUBTS.md`](./DOUBTS.md).**
 
 **A claim about a file you have not READ is how a document goes quietly false**, and "I
 grepped it" is not sufficient evidence, because a query answers where a name appears and never

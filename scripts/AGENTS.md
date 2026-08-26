@@ -85,7 +85,8 @@ may live:
   writes two different files on two machines and the `git diff --exit-code` in every workflow
   calls the second one an emit out of step.
 - **A gate that cannot run says so in one spelling.** `scripts/lib/arena/check-vars.ts:cannotRun`.
-  A rule spelled once per gate is a rule that holds for some of them.
+  Why one spelling rather than each gate's own is stated once on
+  [`scripts/check/AGENTS.md`](./check/AGENTS.md).
 
 **A wait's bound is a `deadline` and never a bare number**, declared in the file that owns the
 wait. `scripts/lib/arena/deadline.ts` carries the argument, and `check:deadlines` holds it.

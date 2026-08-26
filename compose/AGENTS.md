@@ -26,8 +26,9 @@ keep apart, and a second Maven artifact would make a release two acts instead of
 [`../GENERATED.md`](../GENERATED.md) says how to tell an emitted file from an authored one
 without opening it.
 
-**An authored source here carries no comment at all.** A fact about one of them belongs on
-this page.
+**What a hand-authored source under `compose/src/main/` may carry is stated once on
+[`../AGENTS.md`](../AGENTS.md)**, and the answer is no comment at all, so a fact about one of
+them belongs on this page.
 
 ## What an enum costs here that it does not cost on SwiftUI
 
