@@ -33,7 +33,7 @@ export const node = {
   name: 'generate:api-types',
   reads: [`${CONTRACTS_DIR}/${MANIFEST}`, `${CONTRACTS_DIR}/${TYPES_PREFIX}**`],
   writes: [...API_TARGETS],
-  feeds: ['check:collisions', 'check:doc-comments', 'check:emit', 'check:generated', 'check:kotlin', 'check:swift'],
+  feeds: ['check:collisions', 'check:doc-comments', 'check:emit', 'check:generated', 'check:structure', 'check:kotlin', 'check:swift'],
 };
 
 const doc = (type: ApiType, field: string | null, description: string | undefined) => docTextFor(type.name, field, description);

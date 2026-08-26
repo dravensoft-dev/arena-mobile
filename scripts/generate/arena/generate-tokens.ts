@@ -33,7 +33,7 @@ export const node = {
   name: 'generate:tokens',
   reads: [`${CONTRACTS_DIR}/arena.contracts.json`, `${CONTRACTS_DIR}/contracts/design/**`],
   writes: [...TARGETS],
-  feeds: ['check:emit', 'check:coverage', 'check:collisions', 'check:doc-comments', 'check:generated', 'check:kotlin', 'check:swift'],
+  feeds: ['check:emit', 'check:coverage', 'check:collisions', 'check:doc-comments', 'check:generated', 'check:structure', 'check:kotlin', 'check:swift'],
 };
 
 const KOTLIN_IMPORTS = new Map([

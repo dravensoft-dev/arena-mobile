@@ -27,6 +27,7 @@
     "check:contrast": "bun scripts/check/arena/check-contrast.ts",
     "check:control": "bun scripts/check/arena/check-control.ts",
     "check:motion": "bun scripts/check/arena/check-motion.ts",
+    "check:structure": "bun scripts/check/arena/check-structure.ts",
     "check:doc-comments": "bun scripts/check/arena/check-doc-comments.ts",
     "check:docs": "bun scripts/check/arena/check-docs.ts",
     "check:citations": "bun scripts/check/arena/check-citations.ts",

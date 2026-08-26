@@ -92,6 +92,27 @@ spells `contentDescription` where the obligation names the property that holds i
 check:behaviour` holds all of it, and holds none of it by rendering anything: a symbol found in a
 source is one that is WRITTEN, never one applied to the right node.
 
+## Where a native source goes
+
+**Both layers partition their sources the same four ways**, `tokens/`, `api/`, `components/` and
+`theme/`, and the directory is part of what a file says about itself. With one component the
+placement is obvious and the partition costs nothing; with thirty the directory is the only thing
+a reader can consult before opening anything.
+
+**What a file IS decides where it goes, and never where someone put it.** An emitted source sits
+at the path its own generator declares, which is a claim `check:emit` cannot make: that gate
+compares the target and never notices a second copy somewhere else, so a stray emit reads as
+current forever. A stem the pinned contract carries as a component sits in `components/`.
+Everything else authored sits in `tokens/`, so a new value needs no entry anywhere, and the one
+subject that is neither a value nor a component is named in `PLACED` in
+`scripts/check/arena/check-structure.ts` with its reason.
+
+**The two layers are held to the same answer for the same subject**, because a subject placed one
+way on Compose and another on SwiftUI is a tree that answers the placement question twice, and a
+reader who learned it on one layer is wrong on the other. `bun run check:structure` holds all of
+it, and a file loose in a layer's root or under a fifth directory is a named failure rather than
+one the walk skips.
+
 ## What a component's members are
 
 **A component contract is read when the register publishes the component, and excluded when the

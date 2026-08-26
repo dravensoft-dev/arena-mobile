@@ -52,9 +52,11 @@ being one promise about one package.
 
 **Where a file goes is decided by what it IS and never by where someone put it.** An emitted
 source sits at the path its own generator declares, a stem the contract carries as a component
-sits in `components/`, and everything else authored sits in `tokens/`. **A component is told
+sits in `components/`, and everything else authored sits in `tokens/` unless `PLACED` in
+`scripts/check/arena/check-structure.ts` says otherwise with its reason. **A component is told
 apart from a value by its stem being a component name the contract carries**, which is what
-`bun run check:members` walks `components/` for.
+`bun run check:members` walks `components/` for, and `bun run check:structure` is what holds the
+placement itself, on both layers at once.
 
 ## An enum arrives here cheaper than it arrives on Compose
 
