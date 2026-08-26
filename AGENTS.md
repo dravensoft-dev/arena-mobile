@@ -48,7 +48,8 @@ libraries needs none of it: `./gradlew :compose:assemble` and `swift build` read
 committed.
 
 **The commands that run this repository are the scripts whose name carries no colon**, and a
-colon narrows a phase. One `bun run check` at a time.
+colon narrows a phase. `bun run check` runs every gate AND the suites, so one command is the
+whole claim; `bun run test` runs the suites alone. One `bun run check` at a time.
 
 ## What this repository ships
 

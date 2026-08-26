@@ -120,8 +120,15 @@ of the four domains, so a gate landing outside it fails rather than running unno
 
 ## Running them
 
-`bun run check` runs every gate without stopping at the first failure, so one sweep reports
-every problem rather than the first.
+`bun run check` runs every gate and then the suites, without stopping at the first failure, so
+one sweep reports every problem rather than the first and a contributor's one command proves
+what they read it as proving. `bun run test` runs the suites alone.
+
+**A run narrowed by `--domain=` leaves the suites to the job that owns them**, and `--no-tests`
+opts out of a full one. That is why the workflows need no edit: each job already narrows, and
+the tooling job runs `bun run test` itself. An argument outside that set is a failure rather
+than a shrug, because `--no-test` silently ignored is a flag that runs the tests it was typed
+to skip.
 
 **When it is expected: once, when a change is finished, and not before every commit.** The
 individual gates are cheap and stay available per commit.

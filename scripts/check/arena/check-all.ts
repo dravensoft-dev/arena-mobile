@@ -46,6 +46,16 @@ export const GATES: Gate[] = [
   { name: 'check:swift', script: 'scripts/check/swiftui/check-swift.ts' },
 ];
 
+export const TEST_STEP: Gate = { name: 'test', script: 'scripts/ci/arena/run-suite.ts' };
+
+export const FLAGS = ['--no-tests'];
+
+export function unknownArguments(argv: readonly string[]) {
+  return argv
+    .filter((one) => !one.startsWith('--domain=') && !FLAGS.includes(one))
+    .map((one) => `${one} names no argument this runner takes, and it takes --domain=<name> and ${FLAGS.join(', ')}`);
+}
+
 export function domainOf(gate: Gate): Domain | null {
   const found = DOMAINS.find((domain) => gate.script.startsWith(`scripts/check/${domain}/`));
   return found ?? null;
@@ -70,6 +80,11 @@ export function domainArgument(argv: readonly string[]) {
   return found ? found.slice('--domain='.length) : null;
 }
 
+export function wantsTests(argv: readonly string[]) {
+  if (argv.some((one) => FLAGS.includes(one))) return false;
+  return domainArgument(argv) === null;
+}
+
 export type Verdict = 'PASS' | 'FAIL' | 'SKIP';
 
 export function verdictFor(status: number): Verdict {
@@ -91,7 +106,14 @@ export function summaryLine(results: { verdict: Verdict }[]) {
 }
 
 function main() {
-  const domain = domainArgument(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  const unknown = unknownArguments(argv);
+  if (unknown.length) {
+    for (const problem of unknown) console.error(`check-all: ${problem}`);
+    process.exit(1);
+  }
+
+  const domain = domainArgument(argv);
   const bad = domainProblems();
   if (bad.length) {
     console.error(`check-all: ${bad.length} gate(s) outside the domain grid\n`);
@@ -103,13 +125,16 @@ function main() {
     process.exit(1);
   }
 
-  const running = selected(GATES, domain);
-  const results = running.map((gate) => {
-    const child = spawnSync(process.execPath, [join(root, gate.script)], { cwd: root, stdio: 'inherit' });
+  const run = (step: Gate) => {
+    const child = spawnSync(process.execPath, [join(root, step.script)], { cwd: root, stdio: 'inherit' });
     const verdict = verdictFor(child.status ?? 1);
-    console.log(`  ${verdict.padEnd(5)} ${gate.name}`);
-    return { gate, verdict };
-  });
+    console.log(`  ${verdict.padEnd(5)} ${step.name}`);
+    return { gate: step, verdict };
+  };
+
+  const running = selected(GATES, domain);
+  const results = running.map(run);
+  if (wantsTests(argv)) results.push(run(TEST_STEP));
 
   console.log('');
   console.log(summaryLine(results));

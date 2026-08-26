@@ -100,6 +100,11 @@ from `GATES` and fails this table when the two disagree.
 partition `GATES`, and the suite asserts the partition, so a gate cannot join `GATES` and then
 run in no job.
 
+**The suites are a step of the sweep and not a gate**, so `TEST_STEP` names no domain and sits
+outside `GATES`. A full run spends it; a `--domain=` run leaves it to the job that owns it, and
+`--no-tests` opts out. `check-all` takes those two arguments and nothing else, and refuses a
+third rather than ignoring it.
+
 ## Adding a gate
 
 Put it in `check/<domain>/`, add it to `GATES` with its domain in the path, give it an npm

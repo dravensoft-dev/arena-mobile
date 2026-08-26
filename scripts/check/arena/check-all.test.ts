@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test';
-import { GATES, DOMAINS, countsByDomain, domainOf, domainProblems, selected, summaryLine, verdictFor } from './check-all.ts';
+import { GATES, DOMAINS, TEST_STEP, countsByDomain, domainOf, domainProblems, selected, summaryLine, unknownArguments, verdictFor, wantsTests } from './check-all.ts';
 import type { Domain } from './check-all.ts';
 
 test('GATES is asserted by literal value, so the array and this case move in one commit', () => {
@@ -75,4 +75,24 @@ test('a run carrying a skip says INCOMPLETE rather than collapsing the count', (
   expect(line).toContain('2');
   expect(summaryLine([{ verdict: 'PASS' }])).not.toContain('INCOMPLETE');
   expect(summaryLine([{ verdict: 'FAIL' }])).toContain('failed');
+});
+
+test('a full sweep runs the suites, and a narrowed one leaves them to the job that owns them', () => {
+  expect(wantsTests([])).toBe(true);
+  expect(wantsTests(['--domain=arena'])).toBe(false);
+  expect(wantsTests(['--no-tests'])).toBe(false);
+  expect(wantsTests(['--domain=arena', '--no-tests'])).toBe(false);
+});
+
+test('the suite runner is spawned by path and is not a gate, so it names no domain', () => {
+  expect(TEST_STEP.name).toBe('test');
+  expect(TEST_STEP.script).toBe('scripts/ci/arena/run-suite.ts');
+  expect(GATES.some((gate) => gate.script === TEST_STEP.script)).toBe(false);
+  expect(domainOf(TEST_STEP)).toBeNull();
+});
+
+test('an argument nobody recognises fails, because --no-test silently ignored runs the tests', () => {
+  expect(unknownArguments(['--domain=arena', '--no-tests'])).toEqual([]);
+  expect(unknownArguments(['--no-test'])).toHaveLength(1);
+  expect(unknownArguments(['--no-test'])[0]).toContain('--no-test');
 });
