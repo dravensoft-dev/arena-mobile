@@ -101,20 +101,23 @@ shorter, and a layout that clamps it to the floor has read the axis backwards.
 ## The touch target is the activation box and never the painted one
 
 Comfortable is the default density on the argument the README makes, and clearing a floor in
-the token is not clearing it on screen. Compose says the touchable area is larger than the
-drawing through `Modifier.minimumInteractiveComponentSize()` and through a hit area centred on
-a smaller painted shape: a switch's pill stays at its drawn height and answers a thumb through
-that box. Measure the box.
+the token is not clearing it on screen. **The symbol that says it in one call,
+`Modifier.minimumInteractiveComponentSize()`, is Material's**, and this library takes no Material
+dependency, so the box is composed instead: `org.dravensoft.arena.tokens.ArenaControl` returns it
+and a caller passes the floor, because 48dp is a constant of this platform rather than a value
+any contract carries. A hit area centred on a smaller painted shape is the other half, for the
+control whose paint is smaller than its target: a switch's pill stays at its drawn height and
+answers a thumb through that box. Measure the box.
 
 ## The inset arrives from the caller, and `safeDrawing` is which one
 
 `WindowInsets.safeDrawing` is the set to hand to
-`org.dravensoft.arena.tokens.ArenaSafeArea`, and it lives in
-`androidx.compose.foundation.layout`, which this library does not depend on:
-[`compose/build.gradle.kts`](./build.gradle.kts) lists the runtime, the three `ui-` artifacts and the
-animation core, and nothing else. That is why the seam takes the value rather than reading it,
-and it is the reason a consumer writes
-`WindowInsets.safeDrawing.asPaddingValues().calculateBottomPadding()` at the call site.
+`org.dravensoft.arena.tokens.ArenaSafeArea`. Reading it here would put a layout container inside
+a seam of values and would have this library decide, once, which window a consumer's inset comes
+from. That is why the seam takes the value rather than reading it, and it is the reason a
+consumer writes `WindowInsets.safeDrawing.asPaddingValues().calculateBottomPadding()` at the call
+site. What [`compose/build.gradle.kts`](./build.gradle.kts) depends on is derived rather than
+listed here, and the file itself is the list.
 
 **`safeDrawing` reports nothing until the app has gone edge to edge.** An activity that has not
 called `enableEdgeToEdge` has its insets consumed by the decor, so every edge arrives as zero and
@@ -145,8 +148,16 @@ caller's and the composition is the library's.
 
 What the three cases and the three classes ARE is stated once on [`../AGENTS.md`](../AGENTS.md).
 
-## What this layer does not carry
+## What this layer draws, and what it still does not carry
 
-No component, and no answer to the style plugin tier. `explicitApi()` is on and
-`allWarningsAsErrors` is set, so a public symbol without a visibility modifier and a warning
-of any kind both fail the build rather than the review.
+`org.dravensoft.arena.components` is where a drawn component lives, and everything under
+`tokens/` stays a value or a composition over one. The style plugin tier has no answer here and
+the control roles are collapsed onto contracted steps instead, which
+[`../AGENTS.md`](../AGENTS.md) states once for both layers.
+
+**Material3 is refused.** A second design system carrying its own theme, inside one that is not
+it, buys a handful of modifiers and a shape scale this library already has from the contract.
+`androidx.compose.foundation` is where the drawing comes from.
+
+`explicitApi()` is on and `allWarningsAsErrors` is set, so a public symbol without a visibility
+modifier and a warning of any kind both fail the build rather than the review.

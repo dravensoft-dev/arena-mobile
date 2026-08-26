@@ -73,6 +73,27 @@ Android publishes nothing for the second, so that one takes what your app decide
 payload; Gradle and SwiftPM compile Kotlin and Swift that are already in the tree. A clone
 with no Bun, no Node and no network builds both libraries.
 
+**The first component, and the pattern every one after it follows.** `ArenaButton` draws on
+both layers from the same contract, under the same member names. A behaviour pattern is an
+explicit obligation on a platform with no implicit ARIA mapping, so every requirement the
+pattern states is met by a named native symbol and `bun run check:behaviour` holds each one
+against the source that claims it. A member the contract declares that does not cross is
+excepted with the reason it does not, never dropped.
+
+```kotlin
+ArenaButton("Save", click = { save() }, variant = ArenaButtonVariant.Primary)
+```
+
+```swift
+ArenaButton("Save", variant: .primary) { save() }
+```
+
+**A control's geometry, over the contracted step each role is born at.** Arena asks a control's
+questions in a role tier that is a stylesheet, so nothing about it can cross as a value.
+`ArenaControl` answers them with the steps the roles name: the room a control gives its content,
+the gap inside it, its corner and the weight of its label, with the height and the text step off
+the density scale so a control re-densifies without saying so.
+
 ## Install
 
 **Gradle**
@@ -105,10 +126,6 @@ Text("Arena")
 ```
 
 ## What it does not carry
-
-**No component.** This milestone is the token language and the themes. A behaviour pattern is
-an explicit obligation on a platform with no implicit ARIA mapping, and shipping a control
-before that is written is shipping the half a browser used to do for free.
 
 **No skin, and no style plugin.** Arena carries the language and never the appearance. The
 style plugin tier is web in mechanism: the question Arena's role contract states ports and

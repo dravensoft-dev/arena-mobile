@@ -30,13 +30,15 @@ two asymmetric conversions; `swiftui/Sources/ArenaTokens/ArenaTheme.swift` holds
 environment keys. [`../GENERATED.md`](../GENERATED.md) says how to tell an emitted file from an
 authored one without opening it.
 
-**This target carries the API vocabulary beside the values, and its name says only half of what
-it holds.** `swiftui/Sources/ArenaTokens/ArenaApi.generated.swift` is the enums and predefined
-objects a component member takes, emitted from the contract by
-`scripts/generate/arena/generate-api-types.ts`. A second target and a second product were the
-alternative, and what they buy is a boundary nothing needs, since a type there reads no token;
-what they cost is a second product a consumer resolves and a git tag that stops being one
-promise about one package.
+**This target carries the API vocabulary and the drawn components beside the values, and its
+name says a third of what it holds.** `swiftui/Sources/ArenaTokens/ArenaApi.generated.swift` is
+the enums and predefined objects a component member takes, emitted from the contract by
+`scripts/generate/arena/generate-api-types.ts`, and `swiftui/Sources/ArenaTokens/ArenaButton.swift`
+is a component. A second target and a second product were the alternative, and what they buy is a
+boundary nothing needs, since a type there reads no token and a component reads only this target's
+own; what they cost is a second product a consumer resolves and a git tag that stops being one
+promise about one package. **A component is told apart from a value by its stem being a component
+name the contract carries**, which is what `check:members` walks this directory for.
 
 ## An enum arrives here cheaper than it arrives on Compose
 
@@ -130,6 +132,9 @@ for the reason
 `.contentShape()` and a frame larger than the drawing are how this layer says the touchable
 area is not the drawn one. Comfortable is the default density and every rung of it clears the
 44 points Apple asks, which is a claim about the token and not yet about a screen.
+`ArenaControl.target(_:floor:)` composes the box and takes the floor from the caller, because 44
+points is a constant of this platform rather than a value any contract carries, and a default
+here would be the one length in this package written by hand.
 
 ## The safe area is applied before the seam sees it
 
