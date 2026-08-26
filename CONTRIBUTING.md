@@ -30,6 +30,11 @@ checklist, and it is stated there only.
   claims, and both move together or neither does.
 - **No value is expressed twice.** A number in a hand-authored native source is a copy of a
   token that stops moving when the token moves, and `check:literals` refuses it.
+- **The tooling answers to a compiler.** `scripts/tsconfig.check.json` carries no allowance,
+  and `check:script-types` asks both whether the project compiles and whether its globs reach
+  every script on disk. A `?? ''` or a non-null `!` added to quiet it converts the question
+  into a value nobody sees, and `scripts/utils/captured.ts` is what a capture read goes
+  through instead.
 
 ## Before you open one
 

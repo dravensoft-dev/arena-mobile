@@ -14,9 +14,11 @@ scripts/
 ```
 
 **There is no `build/` phase, and the absence is a decision rather than an omission.** Arena
-has one because it compiles JSX, TypeScript and a CSS layer. Here nothing is compiled by a
-script: the two things that compile are Gradle and SwiftPM, and both read committed sources.
-`bun run build` is the verb a contributor types and it runs the graph, not a directory.
+has one because it compiles JSX, TypeScript and a CSS layer into artifacts it ships. Nothing
+here compiles into one: `check:script-types` spawns a compiler and the compiler emits nothing,
+because a typecheck is a judgement rather than a build, and the two things that produce an
+artifact are Gradle and SwiftPM, both reading committed sources. `bun run build` is the verb a
+contributor types and it runs the graph, not a directory.
 
 `utils/` and `graph/` have an `AGENTS.md` and no domain directories.
 [`scripts/utils/AGENTS.md`](./utils/AGENTS.md) says what makes a module a util rather than a library,

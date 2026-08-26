@@ -10,6 +10,7 @@ another util and nothing else, so one reaching for `scripts/lib/arena/repo-root.
 
 | module | answers |
 | --- | --- |
+| `scripts/utils/captured.ts` | `captured(match, index)`, the one read of a regex capture group, which fails at the read where `?? ''` would hand a lost group on as an empty string |
 | `scripts/utils/compare.ts` | `byCodeUnit(a, b)` and `sortedByCodeUnit(values)`, the only ordering that reaches a file |
 | `scripts/utils/main-module.ts` | `isMainModule(url, argv)`, so importing a script does none of its work |
 | `scripts/utils/posix-path.ts` | `toPosix(value)`, `relPosix(from, to, path)`, `isInside(base, candidate, path)` |
