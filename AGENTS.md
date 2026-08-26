@@ -92,6 +92,32 @@ spells `contentDescription` where the obligation names the property that holds i
 check:behaviour` holds all of it, and holds none of it by rendering anything: a symbol found in a
 source is one that is WRITTEN, never one applied to the right node.
 
+## What holds a seam no other gate reads
+
+**The value tier is authored twice, once per layer, and until every file in it is claimed by
+something the two copies can drift in silence.** `bun run check:seams` partitions it: each
+authored source under a layer's `tokens/` and `theme/` is either handed to a gate that already
+holds it, in `HELD_BY` in `scripts/check/arena/check-seams.ts` naming which gate and why, or held
+by that gate itself. A file in neither is a failure, which is what makes the partition a claim
+rather than a roster, and a seam one layer carries alone is one contract offering a consumer two
+libraries.
+
+**A gate named in `HELD_BY` is a gate `GATES` registers**, checked rather than assumed, because a
+seam handed to a gate no sweep runs is a claim made by nobody.
+
+**What is held here is the hand-declared numeric constant, and it is held by name and by value
+rather than by body.** Arena compares two TypeScript copies, one by module-level declaration and
+one by normalised function body, and neither ports: the layers here are Kotlin and Swift and
+there is no shared text. What does cross is the name and the number, so `ArenaScale.CAP` and
+`ArenaScale.cap` are one constant read under each language's own spelling, and a value declared
+on one layer alone, or declared twice with two numbers, is what fails. **That is the cap**, which
+is the one length in either library this repository states rather than reads, and a cap changed on
+one side compiles, passes that layer's own suite, and ships two libraries from one contract.
+
+`bun run check:literals` bans a design value written as a literal in an authored native source and
+allows a cap, a divisor and a ratio as arithmetic; this is what holds those allowed constants equal
+on both sides, so the two gates partition rather than overlap.
+
 ## Where a native source goes
 
 **Both layers partition their sources the same four ways**, `tokens/`, `api/`, `components/` and
