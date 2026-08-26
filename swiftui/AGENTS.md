@@ -148,12 +148,16 @@ for the reason
 
 ## The touch target is the activation box and never the painted one
 
-`.contentShape()` and a frame larger than the drawing are how this layer says the touchable
-area is not the drawn one. Comfortable is the default density and every rung of it clears the
-44 points Apple asks, which is a claim about the token and not yet about a screen.
-`ArenaControl.target(_:floor:)` composes the box and takes the floor from the caller, because 44
-points is a constant of this platform rather than a value any contract carries, and a default
-here would be the one length in this package written by hand.
+**`.contentShape()` and a frame larger than the drawing are how this layer says the touchable area is
+not the drawn one**, applied after the background and the overlay so the paint keeps the height the
+density scale names. What that box IS, what holds it and what stays out is stated once on
+[`../AGENTS.md`](../AGENTS.md).
+
+**A `UIHostingController` is what lays a View out**, so the measurement runs inside the `xcodebuild
+test` this layer's gate already boots a simulator for, and it costs that runner a few cases rather than
+a job. UIKit is on the main actor and so is every case that renders, which
+`swiftui/Tests/ArenaTokensTests/ArenaButtonTests.swift` carries in the one header a test file is
+allowed.
 
 ## The focus ring is drawn here, and `@FocusState` is what reports it
 

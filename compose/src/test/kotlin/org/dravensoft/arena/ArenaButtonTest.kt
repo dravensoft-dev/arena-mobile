@@ -1,10 +1,10 @@
 /* Robolectric lays a composable out on the JVM, so this suite measures a render rather than an
  * expression. @Config pins SDK 34 because the compileSdk this library builds against is ahead of
  * the android-all jar Robolectric resolves, and a targetSdk it cannot boot fails every test here
- * for a reason that has nothing to do with the claim. The pixel assertions read the activation
- * box's own capture: above the painted rung the control draws something other than its fill, and
- * at the centre it draws the fill, which is what says the box is not the drawing. The paint claims
- * below are a function of the scheme and need none of it. */
+ * for a reason that has nothing to do with the claim. The drawing is measured off the activation
+ * box's own capture, as the extent of the control's fill down the middle column, because a single
+ * pixel above the rung reads the gutter the focus ring reserves and passes whatever is drawn. The
+ * paint claims below are a function of the scheme and need none of it. */
 
 package org.dravensoft.arena
 
@@ -18,6 +18,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.height
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.dravensoft.arena.api.ArenaButtonVariant
 import org.dravensoft.arena.api.ArenaControlSize
@@ -26,6 +27,7 @@ import org.dravensoft.arena.components.ArenaButtonPaint
 import org.dravensoft.arena.theme.ArenaTheme
 import org.dravensoft.arena.tokens.ArenaBaseDensity
 import org.dravensoft.arena.tokens.ArenaDarkColors
+import org.dravensoft.arena.tokens.ArenaScale
 import org.dravensoft.arena.tokens.ArenaLightColors
 import org.dravensoft.arena.tokens.accent
 import org.dravensoft.arena.tokens.borderStrong
@@ -39,7 +41,6 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
@@ -87,8 +88,20 @@ class ArenaButtonTest {
         val pixels = compose.onNode(hasClickAction()).captureToImage().toPixelMap()
         val fill = ArenaButtonPaint.fill(ArenaButtonVariant.Primary, ArenaDarkColors)
         val middle = pixels.width / 2
-        assertEquals(fill, pixels[middle, pixels.height / 2])
-        assertNotEquals(fill, pixels[middle, 1])
+        val rows = (0 until pixels.height).filter { pixels[middle, it] == fill }
+        val drawn = rows.last() - rows.first() + 1
+        val rung = with(compose.density) {
+            ArenaScale.control(ArenaControl.height(ArenaControlSize.Sm, ArenaBaseDensity), 1f).roundToPx()
+        }
+        val floor = with(compose.density) { TOUCH_FLOOR.roundToPx() }
+        assertTrue(
+            drawn <= rung + 2,
+            "the control draws $drawn row(s) of its own fill and its rung is $rung, so the floor grew the drawing rather than the box",
+        )
+        assertTrue(
+            drawn < floor,
+            "the control draws $drawn row(s) and the floor is $floor, so what a thumb is offered is what a reader is shown",
+        )
     }
 
     @Test

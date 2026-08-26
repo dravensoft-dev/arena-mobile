@@ -447,7 +447,48 @@ consumes, which is the row the table above sends to Arena.
 from `ArenaSafeArea`. A safe-area floor is a contracted step and this floor is a constant of a
 platform, 48dp on one side and 44pt on the other, so a default would be the one length in either
 library written by hand rather than read from the emit. Which floor a caller passes is that layer's
-own, and comfortable is the density that already stands above both.
+own, and no density clears both floors at every rung: comfortable clears the Apple floor throughout and
+stands level with it at the smallest rung, where it misses the Android floor.
+
+## What a drawn control offers a thumb
+
+**A control that clears a floor in the token has not cleared it on screen.** The activation box is the
+painted rung composed with a floor the caller passes, and every claim made about it so far is a claim
+about a function: what a suite measures is the paint a function returns and what a gate greps is a
+symbol in a source. Whether a DRAWN control offers that box to a thumb is a different question, and the
+only instrument that answers it is a render.
+
+**So each layer measures a render, in the test target its own gate already builds and runs.** No job
+and no runner is added: the Compose suite lays a composable out on the JVM and the SwiftUI suite hosts a
+View on the simulator `check:swift` already boots. Which instrument each reaches for is that layer's
+own, on [`compose/AGENTS.md`](./compose/AGENTS.md) and [`swiftui/AGENTS.md`](./swiftui/AGENTS.md).
+
+**A control paints at its rung and activates at the box around it.** Growing the paint with the floor
+draws a control the density did not ask for, so the box is centred on the drawing and the drawing keeps
+the height the scale names. Each suite asserts three things: a control with no floor offers the rung, a
+control asked for a floor offers it, and the pixel inside the box and above the rung is not the
+control's own fill, which is what says the box is not the drawing.
+
+**A floor is a constant of a platform, so it is written by hand, and what holds two hand-written copies
+equal is a gate.** `bun run check:target` states each floor once, reads the copy the measuring suite
+declares, and fails when the two disagree, which is the technique `check:seams` applies to the cap. It
+ties each floor to the comfortable rung whose own `$description` argues it, so a ladder that drops below
+the floor it argues for fails rather than drifting. And it partitions what is drawn: every component
+either tree carries is measured on both layers or excepted in `UNBOXED` in
+`scripts/check/arena/check-target.ts` with its reason. That map is empty, and the emptiness is the
+claim, because a geometry that cannot take a floor lands with the component that asks it rather than
+being excused before it exists.
+
+**Three things stay out, and each is out for a reason rather than by omission.** What Android's own
+dispatch does with the box is not reached, because the Compose instrument answers the toolkit's
+hit-test surface rather than the view hierarchy's, which the SwiftUI instrument does not share since a
+simulator hit test is UIKit's own. Whether a consumer passes a floor at all is not reached either: it
+is the caller's, so a control drawn without one offers its painted box, and that is the boundary
+`swiftui/Sources/ArenaTokens/tokens/ArenaFonts.swift:unresolved()` already admits about a registered
+family. And what a gate here says about a suite is that it exists and which number it measures against,
+never that it measured the right node, which is the admission `check:behaviour` makes about a symbol
+found in a source; what closes that gap is that the measuring runs inside `check:kotlin` and
+`check:swift`.
 
 `bun run check:control` holds it: every control role the pinned contract declares is either collapsed
 onto a contracted step by both seams or answered elsewhere with its reason, each rung reads the density

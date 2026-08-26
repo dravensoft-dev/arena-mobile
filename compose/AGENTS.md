@@ -101,14 +101,17 @@ shorter, and a layout that clamps it to the floor has read the axis backwards.
 
 ## The touch target is the activation box and never the painted one
 
-Comfortable is the default density on the argument the README makes, and clearing a floor in
-the token is not clearing it on screen. **The symbol that says it in one call,
-`Modifier.minimumInteractiveComponentSize()`, is Material's**, and this library takes no Material
-dependency, so the box is composed instead: `org.dravensoft.arena.tokens.ArenaControl` returns it
-and a caller passes the floor, because 48dp is a constant of this platform rather than a value
-any contract carries. A hit area centred on a smaller painted shape is the other half, for the
-control whose paint is smaller than its target: a switch's pill stays at its drawn height and
-answers a thumb through that box. Measure the box.
+**The symbol that says it in one call, `Modifier.minimumInteractiveComponentSize()`, is Material's**,
+and this library takes no Material dependency, so the box is composed instead: the outer node carries
+the floor, the click action and the semantics, and the painted row inside it keeps the height the
+density scale names. What that box IS, what holds it and what stays out is stated once on
+[`../AGENTS.md`](../AGENTS.md).
+
+**Robolectric is what lays a composable out on the JVM**, so the measurement runs inside
+`:compose:testDebugUnitTest` and needs no emulator and no job of its own. `compileSdk` here is ahead of
+the android-all jar it resolves, so
+`compose/src/test/kotlin/org/dravensoft/arena/ArenaButtonTest.kt` pins the SDK it boots and carries the
+reason in the one header a test file is allowed.
 
 ## The inset arrives from the caller, and `safeDrawing` is which one
 
