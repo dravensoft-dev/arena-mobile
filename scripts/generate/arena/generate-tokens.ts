@@ -26,12 +26,12 @@ export const TARGETS = [
   `${SWIFT_DIR}/ArenaTokens.generated.swift`,
   `${SWIFT_DIR}/ArenaColors.generated.swift`,
   `${SWIFT_DIR}/ArenaDensity.generated.swift`,
-];
+] as const;
 
 export const node = {
   name: 'generate:tokens',
   reads: [`${CONTRACTS_DIR}/arena.contracts.json`, `${CONTRACTS_DIR}/contracts/design/**`],
-  writes: TARGETS,
+  writes: [...TARGETS],
   feeds: ['check:emit', 'check:coverage', 'check:collisions', 'check:doc-comments', 'check:generated', 'check:kotlin', 'check:swift'],
 };
 
@@ -72,10 +72,8 @@ function kotlinObject(fields: Emitted[]) {
 function kotlinRecord(name: string, fields: Emitted[], instances: { name: string; fields: Emitted[] }[]) {
   const members = fields.flatMap((field, index) => [
     ...kdoc(docTextFor(field.token.name, field.token.description), '    '),
-    `    public val ${field.identifier}: ${field.kotlinType},${index === fields.length - 1 ? '' : ''}`,
+    `    public val ${field.identifier}: ${field.kotlinType}${index === fields.length - 1 ? '' : ','}`,
   ]);
-  const last = members.length - 1;
-  members[last] = members[last].replace(/,$/, '');
   const bodies = instances.flatMap((instance) => [
     '',
     `public val ${instance.name}: ${name} = ${name}(`,
@@ -141,19 +139,25 @@ export function emitAll(tokens: Token[]) {
   const scales = scaleTokens(tokens);
   const themes = THEMES.map((theme) => ({ name: theme, fields: themeTokens(tokens, theme) }));
   const densities = DENSITIES.map((density) => ({ name: density, fields: densityTokens(tokens, density) }));
+  const [firstTheme] = themes;
+  const [firstDensity] = densities;
+  if (!firstTheme || !firstDensity) {
+    throw new Error('emitAll: THEMES and DENSITIES each name at least one entry, and the record '
+      + 'the emit builds takes its field list from the first of them');
+  }
   const files = new Map<string, string>();
   files.set(TARGETS[0], kotlinObject(scales));
-  files.set(TARGETS[1], kotlinRecord('ArenaColorScheme', themes[0].fields, themes.map((one) => ({
-    name: `Arena${one.name[0].toUpperCase()}${one.name.slice(1)}Colors`,
+  files.set(TARGETS[1], kotlinRecord('ArenaColorScheme', firstTheme.fields, themes.map((one) => ({
+    name: `Arena${one.name.charAt(0).toUpperCase()}${one.name.slice(1)}Colors`,
     fields: one.fields,
   }))));
-  files.set(TARGETS[2], kotlinRecord('ArenaDensityScale', densities[0].fields, densities.map((one) => ({
-    name: `Arena${one.name[0].toUpperCase()}${one.name.slice(1)}Density`,
+  files.set(TARGETS[2], kotlinRecord('ArenaDensityScale', firstDensity.fields, densities.map((one) => ({
+    name: `Arena${one.name.charAt(0).toUpperCase()}${one.name.slice(1)}Density`,
     fields: one.fields,
   }))));
   files.set(TARGETS[3], swiftEnum(scales));
-  files.set(TARGETS[4], swiftRecord('ArenaColorScheme', themes[0].fields, themes));
-  files.set(TARGETS[5], swiftRecord('ArenaDensityScale', densities[0].fields, densities));
+  files.set(TARGETS[4], swiftRecord('ArenaColorScheme', firstTheme.fields, themes));
+  files.set(TARGETS[5], swiftRecord('ArenaDensityScale', firstDensity.fields, densities));
   return files;
 }
 

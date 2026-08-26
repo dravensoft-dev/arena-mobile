@@ -26,12 +26,12 @@ export const KOTLIN_API_PACKAGE = 'org.dravensoft.arena.api';
 export const API_TARGETS = [
   `${KOTLIN_API_DIR}/ArenaApi.generated.kt`,
   `${SWIFT_DIR}/ArenaApi.generated.swift`,
-];
+] as const;
 
 export const node = {
   name: 'generate:api-types',
   reads: [`${CONTRACTS_DIR}/${MANIFEST}`, `${CONTRACTS_DIR}/${TYPES_PREFIX}**`],
-  writes: API_TARGETS,
+  writes: [...API_TARGETS],
   feeds: ['check:collisions', 'check:doc-comments', 'check:emit', 'check:generated', 'check:kotlin', 'check:swift'],
 };
 
