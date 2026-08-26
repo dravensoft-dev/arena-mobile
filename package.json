@@ -36,6 +36,7 @@
     "check:deadlines": "bun scripts/check/arena/check-deadlines.ts",
     "check:graph": "bun scripts/check/arena/check-graph.ts",
     "check:portability": "bun scripts/check/arena/check-portability.ts",
+    "check:script-types": "bun scripts/check/arena/check-script-types.ts",
     "check:kotlin": "bun scripts/check/compose/check-kotlin.ts",
     "check:swift": "bun scripts/check/swiftui/check-swift.ts"
   },

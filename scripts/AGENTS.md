@@ -88,6 +88,14 @@ may live:
 **A wait's bound is a `deadline` and never a bare number**, declared in the file that owns the
 wait. `scripts/lib/arena/deadline.ts` carries the argument, and `check:deadlines` holds it.
 
+**Every script here answers to a compiler.** `scripts/tsconfig.check.json` is the project, it
+carries no allowance and no relaxation, and `check:script-types` makes two claims about it: that
+it compiles, and that its globs reach every `.ts` on disk under this directory. The second is
+the one that goes wrong quietly, because a project whose globs match nothing compiles nothing
+and reports clean. A capture read after a match goes through
+`scripts/utils/captured.ts:captured(match, index)`, which fails at the read, rather than through
+`?? ''`, which turns a pattern that lost its group into an empty string nobody ever sees.
+
 **A file a script writes is named `<stem>.generated.<ext>`**, so the name says so and no
 reader has to open it. Whether it is tracked is the separate question
 [`../GENERATED.md`](../GENERATED.md) answers, and here the answer is that **everything the

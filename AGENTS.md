@@ -28,6 +28,7 @@ symptom does not know yet what they are changing.
 | a theme, a density, or what a user's text setting does to a value | [`compose/AGENTS.md`](./compose/AGENTS.md) or [`swiftui/AGENTS.md`](./swiftui/AGENTS.md) |
 | a component's members, or what a component binds | the two registers below, `scripts/lib/arena/component-members.ts` and `scripts/lib/arena/behaviour-bindings.ts`, and never the component's own source |
 | a script, a gate or a generator | [`scripts/AGENTS.md`](./scripts/AGENTS.md), and [`scripts/check/AGENTS.md`](./scripts/check/AGENTS.md) for a gate |
+| the tooling does not compile, or a script of mine is not being checked | [`scripts/AGENTS.md`](./scripts/AGENTS.md), for the project every script answers to and what it claims |
 | whether a step runs at all | [`scripts/graph/AGENTS.md`](./scripts/graph/AGENTS.md) |
 | a release | [`versioning_steps.md`](./versioning_steps.md), then [`.github/workflows/AGENTS.md`](./.github/workflows/AGENTS.md) |
 | documentation | the Documentation rules below |
