@@ -25,6 +25,7 @@ export const GATES: Gate[] = [
   { name: 'check:behaviour', script: 'scripts/check/arena/check-behaviour.ts' },
   { name: 'check:collisions', script: 'scripts/check/arena/check-collisions.ts' },
   { name: 'check:literals', script: 'scripts/check/arena/check-literals.ts' },
+  { name: 'check:members', script: 'scripts/check/arena/check-members.ts' },
   { name: 'check:composition', script: 'scripts/check/arena/check-composition.ts' },
   { name: 'check:fonts', script: 'scripts/check/arena/check-fonts.ts' },
   { name: 'check:environment', script: 'scripts/check/arena/check-environment.ts' },

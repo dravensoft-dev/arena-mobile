@@ -28,8 +28,10 @@ test('an exclusion inherits the register reason rather than restating one of its
   expect(publishedComponents(register)).toEqual(['ArenaButton']);
 });
 
-test('a published component whose members nothing opens is the failure that says the reading is owed', () => {
-  expect(surfaceProblems(catalogue, register)[0]).toContain('no reader on this side opens');
+test('a published component whose members MEMBERS does not open is the failure that says the reading is owed', () => {
+  expect(surfaceProblems(catalogue, new Map([['ArenaButton', published], ['ArenaCard', published]]))[0])
+    .toContain('MEMBERS opens no member surface');
+  expect(surfaceProblems(catalogue, register)).toEqual([]);
   expect(surfaceProblems(catalogue, new Map([['ArenaButton', absent], ['ArenaCard', absent]]))).toEqual([]);
 });
 

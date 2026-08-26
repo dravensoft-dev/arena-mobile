@@ -3,13 +3,13 @@
  * and excluded when the register records it absent, inheriting that entry's own reason rather
  * than restating it. A roster of the unpublished ones would be a list nothing fails over; the
  * register already fails when a binding moves, so the exclusion goes stale with it. Nothing
- * here reads a member: what it states is who owes one, and a published component whose members
- * reach nothing is the failure that says the reading is still owed. */
+ * here reads a member: what it states is who owes one, and MEMBERS is the reader that owes it. */
 
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { componentNameOf, componentSources } from '../contracts/api-types.ts';
 import type { ContractManifest } from '../contracts/payload.ts';
 import { BINDINGS, absenceReasonOf, type Entry } from './behaviour-bindings.ts';
+import { MEMBERS } from './component-members.ts';
 
 export function publishedIn(manifest: ContractManifest, register: Map<string, Entry> = BINDINGS) {
   return sortedByCodeUnit(componentSources(manifest)
@@ -30,8 +30,9 @@ export function surfaceProblems(manifest: ContractManifest, register: Map<string
         + 'decides whether its member surface is owed or excused. The register is where that answer lives'];
     }
     if (absenceReasonOf(component, register) !== null) return [];
-    return [`${source} names a component the behaviour register publishes, and no reader on this side opens `
-      + 'its member surface. The members a consumer calls it with would be held by nothing, which is the hole '
-      + 'the exclusion existed to keep out'];
+    if (MEMBERS.has(component)) return [];
+    return [`${source} names a component the behaviour register publishes, and MEMBERS opens no member surface `
+      + 'for it. The members a consumer calls it with would be held by nothing, which is the hole the exclusion '
+      + 'existed to keep out'];
   }));
 }

@@ -20,6 +20,7 @@
     "check:behaviour": "bun scripts/check/arena/check-behaviour.ts",
     "check:collisions": "bun scripts/check/arena/check-collisions.ts",
     "check:literals": "bun scripts/check/arena/check-literals.ts",
+    "check:members": "bun scripts/check/arena/check-members.ts",
     "check:composition": "bun scripts/check/arena/check-composition.ts",
     "check:fonts": "bun scripts/check/arena/check-fonts.ts",
     "check:environment": "bun scripts/check/arena/check-environment.ts",

@@ -82,6 +82,29 @@ and it is keyed by the contract rather than by what this repository publishes, s
 that is not published yet is a recorded absence and never a hole. `bun run check:behaviour`
 holds all of it, and holds none of it by rendering anything.
 
+## What a component's members are
+
+**A component contract is read when the register publishes the component, and excluded when the
+register records it absent**, which is what `scripts/lib/arena/component-surface.ts` states. No
+prefix and no roster decides it, so the exclusion goes stale the moment a binding moves rather
+than being kept in step by hand.
+
+**What a member becomes is data, and the two directions are separate questions.**
+`scripts/lib/arena/component-members.ts` answers both. `MEMBERS` partitions a contract's member
+list into the ones reaching a native parameter, under a name both layers spell the same way, and
+the ones excepted with the reason they do not cross. `BEYOND` names every parameter that answers
+no member, which is either an idiom of one toolkit or an axis a seam here takes from a caller
+because no library on this side reads a device.
+
+**A member that does not cross is excepted and never dropped**, for the reason a behaviour
+requirement is excepted rather than omitted: silence upstream means the browser answered it, and
+silence here would mean nothing at all.
+
+`bun run check:members` holds it, over the components it finds by walking the two source trees
+rather than by a list, so a component that lands and registers nothing is a failure. **What a
+green run does not say is that the component draws what the contract describes**: what it says is
+that the surface a consumer calls matches the surface the contract declares.
+
 ## What a colour composed at runtime is
 
 **Arena composes its held-back inks and its soft washes in a stylesheet the contract set does not
