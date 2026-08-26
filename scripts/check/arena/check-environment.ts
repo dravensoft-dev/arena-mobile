@@ -10,12 +10,13 @@ import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
+import { dirFor } from '../../lib/arena/layer-trees.ts';
 import { CONTRACTS_DIR } from '../../lib/contracts/payload.ts';
 import { identifierFor } from '../../lib/arena/identifier.ts';
 import { tokensOf } from '../../generate/arena/generate-tokens.ts';
 
 export const KOTLIN_SEAM = 'compose/src/main/kotlin/org/dravensoft/arena/tokens/ArenaSafeArea.kt';
-export const SWIFT_SEAM = 'swiftui/Sources/ArenaTokens/ArenaSafeArea.swift';
+export const SWIFT_SEAM = `${dirFor('swiftui', 'tokens')}/ArenaSafeArea.swift`;
 export const SPACING = `${CONTRACTS_DIR}/contracts/design/spacing.json`;
 
 export const node = {

@@ -18,14 +18,15 @@ import {
   enumCases, fieldTypes, rawTypes, staleCaseNameProblems, staleRephrasedProblems, docTextFor,
 } from '../../lib/arena/api-emit.ts';
 import { API_COMMAND, API_SUBJECT, banner, kdoc, tripleSlash } from '../../lib/arena/emit.ts';
-import { SWIFT_DIR } from './generate-tokens.ts';
+import { dirFor } from '../../lib/arena/layer-trees.ts';
 
-export const KOTLIN_API_DIR = 'compose/src/main/kotlin/org/dravensoft/arena/api';
+export const KOTLIN_API_DIR = dirFor('compose', 'api');
+export const SWIFT_API_DIR = dirFor('swiftui', 'api');
 export const KOTLIN_API_PACKAGE = 'org.dravensoft.arena.api';
 
 export const API_TARGETS = [
   `${KOTLIN_API_DIR}/ArenaApi.generated.kt`,
-  `${SWIFT_DIR}/ArenaApi.generated.swift`,
+  `${SWIFT_API_DIR}/ArenaApi.generated.swift`,
 ] as const;
 
 export const node = {

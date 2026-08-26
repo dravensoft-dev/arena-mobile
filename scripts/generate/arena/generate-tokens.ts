@@ -10,13 +10,14 @@ import { isMainModule } from '../../utils/main-module.ts';
 import { repoRoot } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR, DENSITIES, loadTokens, readManifest, resolveAliases, THEMES, type Token } from '../../lib/contracts/payload.ts';
 import { staleUnmappedProblems, type Emitted } from '../../lib/arena/bridge.ts';
+import { dirFor } from '../../lib/arena/layer-trees.ts';
 import {
   banner, densityTokens, docTextFor, kdoc, scaleTokens, shapeProblems, staleRephrasedProblems,
   themeTokens, tripleSlash,
 } from '../../lib/arena/emit.ts';
 
-export const KOTLIN_DIR = 'compose/src/main/kotlin/org/dravensoft/arena/tokens';
-export const SWIFT_DIR = 'swiftui/Sources/ArenaTokens';
+export const KOTLIN_DIR = dirFor('compose', 'tokens');
+export const SWIFT_DIR = dirFor('swiftui', 'tokens');
 export const KOTLIN_PACKAGE = 'org.dravensoft.arena.tokens';
 
 export const TARGETS = [

@@ -24,21 +24,37 @@ possible.
 ## What is emitted and what is written
 
 `Sources/ArenaTokens/` carries the emitted sources beside the authored ones.
-`swiftui/Sources/ArenaTokens/ArenaSupport.swift` holds the composite types the emit constructs
-and the shadow modifier; `swiftui/Sources/ArenaTokens/ArenaScale.swift` holds the cap and the
-two asymmetric conversions; `swiftui/Sources/ArenaTokens/ArenaTheme.swift` holds both
+`swiftui/Sources/ArenaTokens/tokens/ArenaSupport.swift` holds the composite types the emit constructs
+and the shadow modifier; `swiftui/Sources/ArenaTokens/tokens/ArenaScale.swift` holds the cap and the
+two asymmetric conversions; `swiftui/Sources/ArenaTokens/theme/ArenaTheme.swift` holds both
 environment keys. [`../GENERATED.md`](../GENERATED.md) says how to tell an emitted file from an
 authored one without opening it.
 
-**This target carries the API vocabulary and the drawn components beside the values, and its
-name says a third of what it holds.** `swiftui/Sources/ArenaTokens/ArenaApi.generated.swift` is
-the enums and predefined objects a component member takes, emitted from the contract by
-`scripts/generate/arena/generate-api-types.ts`, and `swiftui/Sources/ArenaTokens/ArenaButton.swift`
-is a component. A second target and a second product were the alternative, and what they buy is a
-boundary nothing needs, since a type there reads no token and a component reads only this target's
-own; what they cost is a second product a consumer resolves and a git tag that stops being one
-promise about one package. **A component is told apart from a value by its stem being a component
-name the contract carries**, which is what `check:members` walks this directory for.
+## The target's name says a third of what it holds, and the directory says the rest
+
+**This target carries the API vocabulary and the drawn components beside the values**, and it
+partitions them the four ways the Compose layer already does:
+
+```
+swiftui/Sources/ArenaTokens/tokens/      the emitted values and the seams that compose them
+swiftui/Sources/ArenaTokens/api/         the emitted enums and predefined objects a member takes
+swiftui/Sources/ArenaTokens/components/  what this repository draws
+swiftui/Sources/ArenaTokens/theme/       the environment keys the values reach a view by
+```
+
+**SwiftPM compiles a target from subdirectories with nothing declared**, so
+[`../Package.swift`](../Package.swift) still points at the target root by `path`, the product is
+still `ArenaTokens`, and `import ArenaTokens` is unchanged for anyone resolving a published tag.
+A second target and a second product were the alternative to the partition, and what they buy is
+a boundary nothing needs, since a type in `api/` reads no token and a component reads only this
+target's own; what they cost is a second product a consumer resolves and a git tag that stops
+being one promise about one package.
+
+**Where a file goes is decided by what it IS and never by where someone put it.** An emitted
+source sits at the path its own generator declares, a stem the contract carries as a component
+sits in `components/`, and everything else authored sits in `tokens/`. **A component is told
+apart from a value by its stem being a component name the contract carries**, which is what
+`bun run check:members` walks `components/` for.
 
 ## An enum arrives here cheaper than it arrives on Compose
 
@@ -57,12 +73,12 @@ this page.
 
 **`lineSpacing` is ADDITIONAL space.** Compose takes the whole line height, so a `lh` token
 crosses as `lh × fs` there and as `(lh × fs) − fs` here.
-`swiftui/Sources/ArenaTokens/ArenaScale.swift:lineSpacing` is the one place that subtraction
+`swiftui/Sources/ArenaTokens/tokens/ArenaScale.swift:lineSpacing` is the one place that subtraction
 is written.
 
 **Tracking is a point value.** Compose takes an `em` directly; here the same unitless token is
 multiplied by the font size first, which
-`swiftui/Sources/ArenaTokens/ArenaScale.swift:tracking` does.
+`swiftui/Sources/ArenaTokens/tokens/ArenaScale.swift:tracking` does.
 
 Reading either of them off the other layer produces a value that compiles and is wrong by a
 factor of the font size.
@@ -70,7 +86,7 @@ factor of the font size.
 ## An opacity multiplies, and the view modifier of that name is a third thing
 
 `Color.opacity(_:)` multiplies the opacity the colour already carries, which is the whole of what
-`swiftui/Sources/ArenaTokens/ArenaComposition.swift:held(_:)` does. Compose spells the same
+`swiftui/Sources/ArenaTokens/tokens/ArenaComposition.swift:held(_:)` does. Compose spells the same
 operation as a copy over the alpha it reads, because a copy there replaces rather than multiplies,
 so the two layers arrive at one colour by two different sentences.
 
@@ -82,20 +98,20 @@ A level is a colour that carries an alpha, never a modifier on the view that dra
 
 A family registered through `UIAppFonts` or through the font manager resolves by name, so the
 emitted constant is already the whole mechanism and
-`swiftui/Sources/ArenaTokens/ArenaFonts.swift` takes a face that is a system generic or a name.
+`swiftui/Sources/ArenaTokens/tokens/ArenaFonts.swift` takes a face that is a system generic or a name.
 The Compose layer resolves no bundled face from a name and takes a `FontFamily` instead, which
 [`../compose/AGENTS.md`](../compose/AGENTS.md) states.
 
 **`Font.custom(_:size:)` scales with Dynamic Type on its own and `Font.system(size:)` does not.**
 A size reaching this seam has already been through
-`swiftui/Sources/ArenaTokens/ArenaScale.swift:text(_:)`, so it is resolved with
+`swiftui/Sources/ArenaTokens/tokens/ArenaScale.swift:text(_:)`, so it is resolved with
 `Font.custom(_:fixedSize:)` and the type scale scales once. The obvious spelling scales it
 twice here and once on Compose, from a call site that reads correctly on both, which is why
 `check:fonts` refuses a `.custom(` that carries no `fixedSize:`.
 
 **A name nobody registered falls back to the system face in silence**, which no gate on this
 side can reach, because what is registered is a property of the consumer's process.
-`swiftui/Sources/ArenaTokens/ArenaFonts.swift:unresolved()` names the families the process does
+`swiftui/Sources/ArenaTokens/tokens/ArenaFonts.swift:unresolved()` names the families the process does
 not resolve, so a consumer's own test asserts the registration rather than a reviewer noticing
 the wrong face.
 
@@ -119,7 +135,7 @@ is why the rule is on this page and not in [`../AGENTS.md`](../AGENTS.md).
 ## The axis, and the cap
 
 A `dimension` on the `scales` axis emits as a bare `CGFloat` and is passed through
-`swiftui/Sources/ArenaTokens/ArenaScale.swift:text` at the point of use, which is `UIFontMetrics` scaling. A `fixed` one is
+`swiftui/Sources/ArenaTokens/tokens/ArenaScale.swift:text` at the point of use, which is `UIFontMetrics` scaling. A `fixed` one is
 points and is used as it arrives: a point and a dp are both defined as one CSS pixel at 1x, so
 that row of the bridge crosses at 1:1 and a test holds it.
 

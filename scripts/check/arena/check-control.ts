@@ -12,13 +12,14 @@ import { isMainModule } from '../../utils/main-module.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { captured } from '../../utils/captured.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
+import { dirFor } from '../../lib/arena/layer-trees.ts';
 import { CONTRACTS_DIR } from '../../lib/contracts/payload.ts';
 import { readJson } from '../../utils/read-json.ts';
 import { densityTokens, scaleTokens } from '../../lib/arena/emit.ts';
 import { tokensOf } from '../../generate/arena/generate-tokens.ts';
 
 export const KOTLIN_SEAM = 'compose/src/main/kotlin/org/dravensoft/arena/tokens/ArenaControl.kt';
-export const SWIFT_SEAM = 'swiftui/Sources/ArenaTokens/ArenaControl.swift';
+export const SWIFT_SEAM = `${dirFor('swiftui', 'tokens')}/ArenaControl.swift`;
 export const ROLES = `${CONTRACTS_DIR}/contracts/design/roles.json`;
 export const CONTROL_MARK = 'control';
 

@@ -10,12 +10,13 @@ import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { byCodeUnit, sortedByCodeUnit } from '../../utils/compare.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
+import { dirFor } from '../../lib/arena/layer-trees.ts';
 import { CONTRACTS_DIR, type Token } from '../../lib/contracts/payload.ts';
 import { CSS_GENERIC_FAMILIES } from '../../lib/arena/bridge.ts';
 import { tokensOf } from '../../generate/arena/generate-tokens.ts';
 
 export const KOTLIN_SEAM = 'compose/src/main/kotlin/org/dravensoft/arena/tokens/ArenaFonts.kt';
-export const SWIFT_SEAM = 'swiftui/Sources/ArenaTokens/ArenaFonts.swift';
+export const SWIFT_SEAM = `${dirFor('swiftui', 'tokens')}/ArenaFonts.swift`;
 export const TYPOGRAPHY = `${CONTRACTS_DIR}/contracts/design/typography.json`;
 
 export const node = {

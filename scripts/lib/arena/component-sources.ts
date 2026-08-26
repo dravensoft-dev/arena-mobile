@@ -8,13 +8,14 @@ import { join } from 'node:path';
 import { walkFiles } from '../../utils/walk-files.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { LAYERS, type Layer } from './behaviour-obligations.ts';
+import { EXTENSIONS, dirFor } from './layer-trees.ts';
 
-export const KOTLIN_COMPONENTS = 'compose/src/main/kotlin/org/dravensoft/arena/components';
-export const SWIFT_COMPONENTS = 'swiftui/Sources/ArenaTokens';
+export const KOTLIN_COMPONENTS = dirFor('compose', 'components');
+export const SWIFT_COMPONENTS = dirFor('swiftui', 'components');
 
 export const TREES: Record<Layer, { dir: string; extension: string }> = {
-  compose: { dir: KOTLIN_COMPONENTS, extension: '.kt' },
-  swiftui: { dir: SWIFT_COMPONENTS, extension: '.swift' },
+  compose: { dir: KOTLIN_COMPONENTS, extension: EXTENSIONS.compose },
+  swiftui: { dir: SWIFT_COMPONENTS, extension: EXTENSIONS.swiftui },
 };
 
 export function sourcesIn(root: string, layer: Layer, components: readonly string[]) {

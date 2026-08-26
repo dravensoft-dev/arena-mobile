@@ -253,7 +253,7 @@ text setting moves, and the body composes rather than replaces. `CASES` and `AXE
 `scripts/check/arena/check-contrast.ts` and `CLASSES` in `scripts/check/arena/check-motion.ts`
 carry why each case and each class answers the way it does. **What no gate here reaches is which
 instrument a consumer reads**, because that lives in the consumer's process, which is the same
-boundary `swiftui/Sources/ArenaTokens/ArenaFonts.swift:unresolved()` already admits.
+boundary `swiftui/Sources/ArenaTokens/tokens/ArenaFonts.swift:unresolved()` already admits.
 
 ## What a control's geometry is
 
