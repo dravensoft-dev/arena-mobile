@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -85,39 +86,47 @@ public fun ArenaButton(
     val density = ArenaTheme.density
     val inactive = disabled || loading
     val painted = ArenaScale.control(ArenaControl.height(size, density), LocalDensity.current.fontScale)
+    val box = if (targetFloor == null) painted else ArenaControl.target(painted, targetFloor)
     val shape = RoundedCornerShape(ArenaControl.radius)
     val ring = ArenaContrast.focusWidth(increasedContrast)
     val gutter = ArenaTokens.focusOffset + ring
     var focused by remember { mutableStateOf(false) }
-    Row(
+    Box(
         modifier = modifier
             .then(if (full) Modifier.fillMaxWidth() else Modifier)
             .onFocusChanged { focused = it.isFocused }
-            .border(ring, if (focused) colors.focusRing else Color.Transparent, RoundedCornerShape(ArenaControl.radius + gutter))
-            .padding(gutter)
-            .sizeIn(minHeight = if (targetFloor == null) painted else ArenaControl.target(painted, targetFloor))
-            .clip(shape)
-            .background(ArenaButtonPaint.fill(variant, colors))
-            .border(ArenaContrast.border(increasedContrast), ArenaButtonPaint.edge(variant, colors), shape)
+            .sizeIn(minHeight = box)
             .clickable(enabled = !inactive, onClick = click)
-            .padding(horizontal = ArenaControl.padding)
             .semantics {
                 role = Role.Button
                 contentDescription = content
                 if (inactive) disabled()
                 onClick { click(); true }
             },
-        horizontalArrangement = Arrangement.spacedBy(ArenaControl.gap, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
+        contentAlignment = Alignment.Center,
     ) {
-        BasicText(
-            text = content,
-            style = TextStyle(
-                color = ArenaButtonPaint.ink(variant, colors),
-                fontSize = ArenaControl.text(size, density),
-                fontWeight = ArenaControl.weight,
-                fontFamily = ArenaTheme.fonts.body,
-            ),
-        )
+        Row(
+            modifier = Modifier
+                .then(if (full) Modifier.fillMaxWidth() else Modifier)
+                .border(ring, if (focused) colors.focusRing else Color.Transparent, RoundedCornerShape(ArenaControl.radius + gutter))
+                .padding(gutter)
+                .sizeIn(minHeight = painted)
+                .clip(shape)
+                .background(ArenaButtonPaint.fill(variant, colors))
+                .border(ArenaContrast.border(increasedContrast), ArenaButtonPaint.edge(variant, colors), shape)
+                .padding(horizontal = ArenaControl.padding),
+            horizontalArrangement = Arrangement.spacedBy(ArenaControl.gap, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BasicText(
+                text = content,
+                style = TextStyle(
+                    color = ArenaButtonPaint.ink(variant, colors),
+                    fontSize = ArenaControl.text(size, density),
+                    fontWeight = ArenaControl.weight,
+                    fontFamily = ArenaTheme.fonts.body,
+                ),
+            )
+        }
     }
 }
