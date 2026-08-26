@@ -42,8 +42,8 @@ export const COMPOSED = new Map<string, Role>([
   ['surfaceRaised', { kind: 'ground', swept: false, why: 'base-300 is a panel rather than a reading surface, and Arena states no bar against it. One invented here would fail a palette this repository consumes rather than a mapping it wrote' }],
   ['surfaceInput', { kind: 'ground', swept: false, why: "a field's own fill, base-300 again, for the reason surfaceRaised carries" }],
   ['dangerFill', { kind: 'ground', swept: false, why: 'a fill with a content colour of its own, paired against error-content upstream, and never a ground body text is read on' }],
-  ['border', { kind: 'ink', gate: null, why: 'REPORTED AND NOT GATED: a separator is not a control boundary. WCAG 1.4.11 measures the boundary of a control, this layer draws none yet, and Arena measures no border against a surface' }],
-  ['borderStrong', { kind: 'ink', gate: null, why: 'REPORTED AND NOT GATED: the boundary that carries meaning, for the reason border carries' }],
+  ['border', { kind: 'ink', gate: null, why: 'REPORTED AND NOT GATED: a separator is not a control boundary, so WCAG 1.4.11 does not reach it, and Arena measures no border against a surface' }],
+  ['borderStrong', { kind: 'ink', gate: null, why: 'REPORTED AND NOT GATED: the boundary that carries meaning, which a control now draws, so 1.4.11 does reach it. UNMET is where that bar and the ratio the palette answers it with are recorded' }],
   ['textStrong', { kind: 'ink', gate: 4.5, why: 'body text at full strength' }],
   ['accent', { kind: 'ink', gate: null, why: 'REPORTED AND NOT GATED: the brand, and a gate here would repaint Dravensoft rather than tighten a token' }],
   ['onAccent', { kind: 'ink', gate: null, why: 'measured against the accent it stands on rather than against a ground' }],
@@ -54,6 +54,22 @@ export const COMPOSED = new Map<string, Role>([
 export const PAIRS = [
   { ink: 'onAccent', fill: 'accent', gate: 4.5, why: "a button's label on the accent it stands on: the one pair this table creates rather than inherits" },
 ];
+
+export const UNMET = new Map<string, { gate: number; why: string }>([
+  ['borderStrong', {
+    gate: 3,
+    why: 'the boundary of a control, which WCAG 1.4.11 measures at 3:1 against what sits behind it. neutral answers '
+      + 'it below that bar over both grounds in both themes. The bar is not raised here, because raising it means '
+      + 'repainting a palette this repository consumes rather than tightening a mapping it wrote, which is the reason '
+      + 'surfaceRaised already carries. The remedy is a contract change upstream and this entry dies with it',
+  }],
+  ['accent', {
+    gate: 3,
+    why: "the primary control's own boundary, which is the fill it stands on. The light palette clears the bar and the "
+      + 'dark one does not, so the entry stays until both do. Same remedy as borderStrong, and the same refusal to '
+      + 'invent a hue here',
+  }],
+]);
 
 export const OWED = new Map<string, string>([
   ['level.ink-body', 'textBody, replacing --text-body and --bone-dim. Ask Arena for a number carrying cssUnit "%" beside tint in contracts/design/effects.json'],
@@ -160,6 +176,27 @@ export function staleComposedProblems(aliases: Map<string, string>) {
       + `a bar over nothing and a reason nobody can act on: ${role.why}`])));
 }
 
+export function unmetProblems(aliases: Map<string, string>, byTheme: Record<string, Record<string, Rgb>>) {
+  return sortedByCodeUnit([...UNMET].flatMap(([name, unmet]) => {
+    const target = aliases.get(name);
+    if (target === undefined) {
+      return [`UNMET names ${name}, which neither layer composes, so a bar is recorded over nothing: ${unmet.why}`];
+    }
+    const grounds = [...aliases].filter(([other]) => {
+      const role = COMPOSED.get(other);
+      return role?.kind === 'ground' && role.swept;
+    });
+    const measured = Object.entries(byTheme).flatMap(([, colours]) => grounds.flatMap(([, groundTarget]) => {
+      const ink = colours[target];
+      const under = colours[groundTarget];
+      return ink && under ? [contrast(ink, under)] : [];
+    }));
+    if (measured.length === 0 || measured.some((ratio) => ratio < unmet.gate)) return [];
+    return [`UNMET records ${name} below a bar of ${unmet.gate}:1, and the pinned palette now clears it over every `
+      + `swept ground in every theme. Gate it in COMPOSED and delete the entry: ${unmet.why}`];
+  }));
+}
+
 export function staleOwedProblems(tokens: readonly { name: string }[]) {
   const carried = new Set(tokens.map((token) => token.name));
   return sortedByCodeUnit([...OWED].flatMap(([token, owed]) => (carried.has(token)
@@ -204,6 +241,7 @@ function main() {
       ...contrastProblems(kotlin, colourTable(tokens, theme), theme),
       ...pairProblems(kotlin, colourTable(tokens, theme), theme),
     ]),
+    ...unmetProblems(kotlin, Object.fromEntries(THEMES.map((theme) => [theme, colourTable(tokens, theme)]))),
     ...staleOwedProblems(tokens),
   ];
   if (errs.length) {
@@ -214,6 +252,7 @@ function main() {
   console.log(
     `check-composition: ${kotlin.size} member(s) composed in both layers, `
     + `${measured(kotlin) * THEMES.length} ink(s) measured against a bar across ${THEMES.length} theme(s), `
+    + `${UNMET.size} bar(s) the pinned palette does not clear, each with the reason it is not raised here, `
     + `and ${OWED.size} ratio(s) waiting on a raised pin`,
   );
 }

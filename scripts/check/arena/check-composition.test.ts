@@ -1,7 +1,8 @@
 import { test, expect } from 'bun:test';
 import {
   aliasesIn, contrastProblems, measured, OWED, PAIRS, pairProblems, parityProblems,
-  resolutionProblems, COMPOSED, staleComposedProblems, staleOwedProblems, zeroCompositionProblem, zeroMeasuredProblem,
+  resolutionProblems, COMPOSED, UNMET, staleComposedProblems, staleOwedProblems, unmetProblems,
+  zeroCompositionProblem, zeroMeasuredProblem,
 } from './check-composition.ts';
 
 const KOTLIN = [
@@ -114,4 +115,22 @@ test('the map of what waits on a pin fails the moment the pin brings it', () => 
 test('a run that measured nothing is a failure and not a pass', () => {
   expect(zeroCompositionProblem(0)).toContain('0 composition');
   expect(zeroCompositionProblem(1)).toBeNull();
+});
+
+test('a bar the palette does not clear is recorded, and the record dies when the palette clears it', () => {
+  const aliases = new Map([['bg', 'base100'], ['borderStrong', 'neutral'], ['accent', 'primary']]);
+  const dim = { dark: { base100: [0, 0, 0] as const, neutral: [0.05, 0.05, 0.05] as const, primary: [0.05, 0.05, 0.05] as const } };
+  expect(unmetProblems(aliases, dim as never)).toEqual([]);
+  const bright = { dark: { base100: [0, 0, 0] as const, neutral: [1, 1, 1] as const, primary: [1, 1, 1] as const } };
+  expect(unmetProblems(aliases, bright as never)).toHaveLength(UNMET.size);
+  expect(unmetProblems(aliases, bright as never)[0]).toContain('Gate it in COMPOSED and delete the entry');
+  expect(unmetProblems(new Map([['bg', 'base100']]), dim as never)[0]).toContain('a bar is recorded over nothing');
+});
+
+test('every bar the palette does not clear says why it is not raised here', () => {
+  for (const [name, unmet] of UNMET) {
+    expect(COMPOSED.has(name)).toBe(true);
+    expect(unmet.gate).toBeGreaterThan(0);
+    expect(unmet.why.length).toBeGreaterThan(120);
+  }
 });

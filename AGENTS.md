@@ -141,6 +141,12 @@ grounds Arena set those bars against. `COMPOSED` in `scripts/check/arena/check-c
 why a member is gated or only reported, and `OWED` beside it names every ratio the contract does not
 hold yet, with the token asked for, failing the moment a raised pin brings one in.
 
+**A bar this repository cannot raise is recorded rather than lowered.** A control draws a boundary
+here now, so WCAG 1.4.11 reaches the members it is drawn in, and the pinned palette answers two of
+them below that bar. Raising it means repainting a palette this repository consumes rather than
+tightening a mapping it wrote, so `UNMET` beside `COMPOSED` names each one with its bar and its
+reason, and an entry whose member starts clearing the bar is stale and fails.
+
 ## What the device's own geometry is
 
 **Arena composes the device's own geometry in the same stylesheet the contract set does not
