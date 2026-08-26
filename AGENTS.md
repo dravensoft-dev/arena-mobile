@@ -216,6 +216,38 @@ carry why each case and each class answers the way it does. **What no gate here 
 instrument a consumer reads**, because that lives in the consumer's process, which is the same
 boundary `swiftui/Sources/ArenaTokens/ArenaFonts.swift:unresolved()` already admits.
 
+## What a control's geometry is
+
+**Arena asks a control's questions in a tier this repository does not carry.** `pad-control-x`,
+`gap-control`, `r-control` and `fw-control` are keys in `.contracts/contracts/design/roles.json`, and every
+entry in that file is a `$type` and a `$description` with no `$value` at all: a question a style
+plugin answers rather than a value. `NOT_A_VALUE` in `scripts/lib/contracts/payload.ts` excludes it
+from the emit for exactly that reason, so nothing about the tier can cross as a value.
+
+**So a control's geometry collapses onto the contracted step each role states it is born at.** That
+is the move the boundary ladder already forced: a target with no role tier answers the question the
+name asks rather than the name, and both operands are contracted, so the collapse is a mapping and
+never a debt. `ArenaControl` on each layer carries it. The height and the text step are not part of
+it: they come off the density scale, so a control re-densifies without the seam saying so.
+
+**The room a control gives its content is one value and not one per rung.** Arena spends the
+contracted step at its smallest control and a literal at the other two, and a literal is a stylesheet
+the payload does not carry; two steps invented here would be this repository authoring over a tier it
+consumes, which is the row the table above sends to Arena.
+
+**The activation box takes its floor as an argument and carries no default**, which is where it parts
+from `ArenaSafeArea`. A safe-area floor is a contracted step and this floor is a constant of a
+platform, 48dp on one side and 44pt on the other, so a default would be the one length in either
+library written by hand rather than read from the emit. Which floor a caller passes is that layer's
+own, and comfortable is the density that already stands above both.
+
+`bun run check:control` holds it: every control role the pinned contract declares is either collapsed
+onto a contracted step by both seams or answered elsewhere with its reason, each rung reads the density
+member the scale names, a length sits on the fixed axis and a label on the scales axis, and the body
+composes rather than replaces. `COLLAPSED` in `scripts/check/arena/check-control.ts` carries why each
+role answers the way it does, and a role the payload adds lands in that partition rather than in a
+silence.
+
 ## Where a new document goes
 
 **The contributor branch is this file**, and it answers [the convention published for that
