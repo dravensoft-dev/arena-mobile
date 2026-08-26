@@ -167,7 +167,17 @@ export const BINDINGS = new Map<string, Entry>([
   ['ArenaBottomNavItem', { pattern: 'absent', reason: ABSENT_REASON }],
   ['ArenaBreadcrumbs', { pattern: 'absent', reason: ABSENT_REASON }],
   ['ArenaBulkActionBar', { pattern: 'absent', reason: ABSENT_REASON }],
-  ['ArenaButton', { pattern: 'absent', reason: ABSENT_REASON }],
+  ['ArenaButton', {
+    pattern: 'button',
+    met: {
+      'roles.element': { compose: 'Role.Button', swiftui: '.accessibilityAddTraits(.isButton)' },
+      'roles.label': { compose: 'SemanticsProperties.ContentDescription', swiftui: '.accessibilityLabel' },
+      'keyboard.Space': { compose: 'SemanticsActions.OnClick', swiftui: '.accessibilityAction' },
+      'keyboard.Enter': { compose: 'SemanticsActions.OnClick', swiftui: '.accessibilityAction' },
+      'states.disabled': { compose: 'SemanticsProperties.Disabled', swiftui: '.accessibilityRemoveTraits' },
+    },
+    exceptions: {},
+  }],
   ['ArenaCalendar', { pattern: 'absent', reason: ABSENT_REASON }],
   ['ArenaCalendarEvent', { pattern: 'absent', reason: ABSENT_REASON }],
   ['ArenaCard', { pattern: 'absent', reason: ABSENT_REASON }],

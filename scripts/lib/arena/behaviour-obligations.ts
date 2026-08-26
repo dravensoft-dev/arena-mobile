@@ -3,9 +3,9 @@
  * implicit mapping owes the capability underneath instead. So each entry restates the
  * capability with no web in it and each layer answers with a symbol or refuses with a reason,
  * and a refusal is inherited by every binding rather than retyped into each one.
- * A symbol here is NAMED and not verified: no toolchain compiles a reference to one until a
- * component exists, so the register is one spelling per symbol and a suite holds that, which
- * is what a grep over a component's source will need when there is one to grep. */
+ * A symbol here is one spelling per capability, and for a component this repository draws,
+ * check:behaviour holds the binding that names it against that layer's own source. What no
+ * grep reaches is whether the symbol was applied to the right node. */
 
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { elementRoles, requirementKeys, type Pattern } from '../contracts/behaviour.ts';

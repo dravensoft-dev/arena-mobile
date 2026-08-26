@@ -1,8 +1,8 @@
 import { test, expect } from 'bun:test';
 import {
-  SIGNATURES, drawnComponents, layerCoverageProblems, memberNamesOf, node, parametersIn,
-  zeroDrawnProblem, zeroMemberProblem,
+  SIGNATURES, memberNamesOf, node, parametersIn, zeroDrawnProblem, zeroMemberProblem,
 } from './check-members.ts';
+import { drawnComponents, layerCoverageProblems } from '../../lib/arena/component-sources.ts';
 import {
   BEYOND, MEMBERS, isAnswered, parameterProblems, partitionProblems, staleComponentProblems,
   staleExtraProblems,

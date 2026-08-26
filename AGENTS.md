@@ -79,8 +79,13 @@ in it, and each layer's answer, which is a native symbol or a refusal carrying i
 refusal is inherited by every binding rather than retyped into each one, so it goes stale in one
 place. `scripts/lib/arena/behaviour-bindings.ts` is what each component of the contract binds,
 and it is keyed by the contract rather than by what this repository publishes, so a component
-that is not published yet is a recorded absence and never a hole. `bun run check:behaviour`
-holds all of it, and holds none of it by rendering anything.
+that is not published yet is a recorded absence and never a hole.
+
+**For a component this repository draws, a symbol a binding names is a symbol that layer's source
+carries.** The check is the last member of the symbol at a word boundary, because a use site
+spells `contentDescription` where the obligation names the property that holds it. `bun run
+check:behaviour` holds all of it, and holds none of it by rendering anything: a symbol found in a
+source is one that is WRITTEN, never one applied to the right node.
 
 ## What a component's members are
 

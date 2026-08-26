@@ -1,10 +1,14 @@
 /* Every requirement the pinned contract declares reaches a native obligation on both layers,
- * every component it carries declares what it binds, and every binding closes over its
- * pattern. Nothing here renders: what it holds is that the declarations partition the
- * contract, never that a component behaves. Zero patterns, zero keys and zero components are
- * each a failure, since a gate that walked nothing reports no gaps behind a plausible line. */
+ * every component it carries declares what it binds, and every binding closes over its pattern.
+ * For a component this repository draws, a symbol a binding names as met is also a symbol that
+ * layer's source carries: the last member of the symbol, at a word boundary, because a use site
+ * spells `contentDescription` where the obligation names the property that holds it. Nothing
+ * here renders, so what a present symbol says is that it is written and never that it is applied
+ * to the right node. Zero patterns, keys or components are each a failure. */
 
+import { readFileSync } from 'node:fs';
 import { isMainModule } from '../../utils/main-module.ts';
+import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR, MANIFEST, readManifest } from '../../lib/contracts/payload.ts';
 import { COMPONENTS_PREFIX, componentNames } from '../../lib/contracts/api-types.ts';
@@ -16,7 +20,12 @@ import {
 } from '../../lib/arena/behaviour-obligations.ts';
 import {
   BINDINGS, REASONLESS_PATTERNS, bindingLayers, bindingProblems, componentProblems, crossLayerProblems,
+  isPublished, type Entry,
 } from '../../lib/arena/behaviour-bindings.ts';
+import { LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
+import {
+  KOTLIN_COMPONENTS, SWIFT_COMPONENTS, sourcesByLayer,
+} from '../../lib/arena/component-sources.ts';
 
 export const node = {
   name: 'check:behaviour',
@@ -24,6 +33,8 @@ export const node = {
     `${CONTRACTS_DIR}/${MANIFEST}`,
     `${CONTRACTS_DIR}/${BEHAVIOUR_PREFIX}**`,
     `${CONTRACTS_DIR}/${COMPONENTS_PREFIX}**`,
+    `${KOTLIN_COMPONENTS}/**`,
+    `${SWIFT_COMPONENTS}/**`, `!${SWIFT_COMPONENTS}/**/*.generated.*`,
   ],
   writes: [],
   feeds: [],
@@ -37,15 +48,48 @@ export function zeroProblems({ patterns, keys, components }: { patterns: number;
   return errs;
 }
 
+export function spellingOf(symbol: string) {
+  const head = symbol.replace(/^\./, '').split('(')[0] as string;
+  return head.slice(head.lastIndexOf('.') + 1);
+}
+
+export function carries(source: string, symbol: string) {
+  if (source.includes(symbol)) return true;
+  const spelling = spellingOf(symbol);
+  return spelling.length > 0 && new RegExp(`\\b${spelling}\\b`, 'i').test(source);
+}
+
+export function symbolProblems(component: string, entry: Entry, layer: Layer, source: string | null) {
+  if (source === null) {
+    return [`${component} is published by the register and ${layer} carries no source for it, so every symbol its `
+      + 'binding names would be held against a file this gate never opened'];
+  }
+  const binding = bindingLayers(entry).find((one) => one.layer === layer);
+  const met = { ...binding?.met, ...Object.assign({}, ...(binding?.also ?? []).map((added) => added.met ?? {})) };
+  return sortedByCodeUnit(Object.entries(met as Record<string, Partial<Record<Layer, string>>>)
+    .flatMap(([key, answers]) => {
+      const symbol = answers[layer];
+      if (symbol === undefined || carries(source, symbol)) return [];
+      return [`${component}:${layer} claims ${key} met by ${symbol}, and that source carries no such symbol. `
+        + 'A requirement a browser met by rendering an element is applied by hand here, so a binding naming one '
+        + 'nothing wrote is the silent hole this register exists to stop'];
+    }));
+}
+
+export function publishedCount() {
+  return [...BINDINGS.values()].filter(isPublished).length;
+}
+
 export function passLine(
-  { patterns, keys, roles, components, published, absences }:
-  { patterns: number; keys: number; roles: number; components: number; published: number; absences: number },
+  { patterns, keys, roles, components, published, absences, symbols }:
+  { patterns: number; keys: number; roles: number; components: number; published: number; absences: number; symbols: number },
 ) {
   return `check-behaviour: ${patterns} pattern(s) from the pinned contract, ${keys} requirement key(s) and ${roles} role(s), `
     + `every one reaching a native obligation on both layers; ${components} component(s) declared, `
-    + `${published} published and ${absences} recorded absence(s), every binding partitioning its pattern.\n`
+    + `${published} published and ${absences} recorded absence(s), every binding partitioning its pattern, `
+    + `and ${symbols} symbol(s) found in the source of the layer that names them.\n`
     + '  (A green run says the declarations partition the contract, never that any component behaves,\n'
-    + '   and a symbol a binding NAMES is not a symbol anything here compiled.)';
+    + '   and a symbol found in a source is a symbol WRITTEN, never one applied to the right node.)';
 }
 
 function main() {
@@ -63,9 +107,18 @@ function main() {
     ...staleRoleProblems(patterns),
     ...componentProblems(components),
   ];
+  const byLayer = sourcesByLayer(root, components);
+  let symbols = 0;
   for (const [component, entry] of BINDINGS) {
     errs.push(...bindingProblems(component, entry, patterns));
     errs.push(...crossLayerProblems(component, entry));
+    if (!isPublished(entry)) continue;
+    for (const layer of LAYERS) {
+      const path = byLayer.get(layer)?.get(component) ?? null;
+      errs.push(...symbolProblems(component, entry, layer, path === null ? null : readFileSync(path, 'utf8')));
+      const binding = bindingLayers(entry).find((one) => one.layer === layer);
+      symbols += Object.keys(binding?.met ?? {}).length;
+    }
   }
 
   if (errs.length) {
@@ -83,6 +136,7 @@ function main() {
     components: components.length,
     published: BINDINGS.size - absences,
     absences,
+    symbols,
   }));
 }
 

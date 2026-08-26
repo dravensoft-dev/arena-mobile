@@ -9,23 +9,17 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
-import { walkFiles } from '../../utils/walk-files.ts';
 import { readJson } from '../../utils/read-json.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR, MANIFEST, readManifest } from '../../lib/contracts/payload.ts';
 import { COMPONENTS_PREFIX, componentNames } from '../../lib/contracts/api-types.ts';
 import { LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
 import {
+  KOTLIN_COMPONENTS, SWIFT_COMPONENTS, drawnComponents, layerCoverageProblems, sourcesByLayer,
+} from '../../lib/arena/component-sources.ts';
+import {
   MEMBERS, parameterProblems, partitionProblems, staleComponentProblems, staleExtraProblems,
 } from '../../lib/arena/component-members.ts';
-
-export const KOTLIN_COMPONENTS = 'compose/src/main/kotlin/org/dravensoft/arena/components';
-export const SWIFT_COMPONENTS = 'swiftui/Sources/ArenaTokens';
-
-export const TREES: Record<Layer, { dir: string; extension: string }> = {
-  compose: { dir: KOTLIN_COMPONENTS, extension: '.kt' },
-  swiftui: { dir: SWIFT_COMPONENTS, extension: '.swift' },
-};
 
 export const node = {
   name: 'check:members',
@@ -62,25 +56,6 @@ export function parametersIn(source: string, opens: RegExp, parameter: RegExp) {
   return found;
 }
 
-export function sourcesIn(root_: string, layer: Layer, components: readonly string[]) {
-  const { dir, extension } = TREES[layer];
-  const named = new Set(components);
-  return new Map(walkFiles(join(root_, dir), (rel) => rel.endsWith(extension) && !rel.includes('.generated.'))
-    .map((rel) => [rel.slice(rel.lastIndexOf('/') + 1, -extension.length), rel] as const)
-    .filter(([stem]) => named.has(stem))
-    .map(([stem, rel]) => [stem, join(root_, dir, rel)] as const));
-}
-
-export function drawnComponents(byLayer: ReadonlyMap<Layer, ReadonlyMap<string, string>>) {
-  return sortedByCodeUnit([...new Set([...byLayer.values()].flatMap((found) => [...found.keys()]))]);
-}
-
-export function layerCoverageProblems(component: string, byLayer: ReadonlyMap<Layer, ReadonlyMap<string, string>>) {
-  return LAYERS.filter((layer) => !byLayer.get(layer)?.has(component))
-    .map((layer) => `${component} is drawn on ${LAYERS.filter((other) => other !== layer).join(' and ')} and not on `
-      + `${layer}, so one contract offers a consumer two libraries`);
-}
-
 export function memberNamesOf(contract: { api?: Record<string, unknown> }) {
   return sortedByCodeUnit(Object.keys(contract.api ?? {}));
 }
@@ -99,9 +74,7 @@ export function zeroMemberProblem(component: string, counted: number) {
 function main() {
   const manifest = readManifest(root);
   const carried = componentNames(manifest);
-  const byLayer = new Map<Layer, ReadonlyMap<string, string>>(
-    LAYERS.map((layer) => [layer, sourcesIn(root, layer, carried)] as const),
-  );
+  const byLayer = sourcesByLayer(root, carried);
   const drawn = drawnComponents(byLayer);
   const zero = zeroDrawnProblem(drawn.length + MEMBERS.size);
 
