@@ -36,6 +36,7 @@
     "check:citations": "bun scripts/check/arena/check-citations.ts",
     "check:generated": "bun scripts/check/arena/check-generated.ts",
     "check:community": "bun scripts/check/arena/check-community.ts",
+    "check:workflow": "bun scripts/check/arena/check-workflow.ts",
     "check:agents": "bun scripts/check/arena/check-agents.ts",
     "check:deadlines": "bun scripts/check/arena/check-deadlines.ts",
     "check:graph": "bun scripts/check/arena/check-graph.ts",

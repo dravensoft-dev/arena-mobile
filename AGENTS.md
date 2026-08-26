@@ -185,6 +185,26 @@ reader who learned it on one layer is wrong on the other. `bun run check:structu
 it, and a file loose in a layer's root or under a fifth directory is a named failure rather than
 one the walk skips.
 
+## What a workflow tells a runner
+
+**A workflow is the one file in this tree GitHub reads and nothing here compiles**, so a name
+that goes wrong in it goes wrong on a runner rather than on a laptop. `bun run check:workflow`
+reads the `.yml` and asks four things of every job: a `bun run` name is a script
+`package.json` declares, a script run by path is in the tree, a `--domain=` argument names a
+member of `DOMAINS`, and every job a workflow declares sits in the `needs` of that workflow's
+gate job.
+
+**The gate job is the one carrying `if: always()`**, and never the one whose name ends in
+`-gate`. That condition is what makes its result stand for the run: a job a routing decision
+skips reports success to branch protection, so the only job worth requiring is the one no
+routing decision can skip. A workflow declaring two of them is two gates that can disagree.
+
+**A workflow that guards nothing carries no gate job**, and `NO_GATE` in
+`scripts/check/arena/check-workflow.ts` names each with its reason. Both entries run on
+`workflow_run` after another workflow reports success, which is an event branch protection
+cannot require, and each declares a single job. An entry whose workflow leaves the tree, grows
+a second job, or grows a gate job of its own is stale and fails.
+
 ## What a component's members are
 
 **A component contract is read when the register publishes the component, and excluded when the
