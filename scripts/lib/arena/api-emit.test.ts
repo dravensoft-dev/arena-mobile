@@ -82,7 +82,9 @@ test('a rephrased description is what is owed, and every other one crosses verba
 
 test('a rephrasing fails when the text it was written against moves, which is what buys the carve-out', () => {
   const asDeclared = (key: string, was: string): ApiType[] => {
-    const [type, field] = key.split('.', 2);
+    const dot = key.indexOf('.');
+    const type = dot === -1 ? key : key.slice(0, dot);
+    const field = dot === -1 ? '' : key.slice(dot + 1);
     return field
       ? [{ name: type, kind: 'object', fields: { [field]: { form: 'primitive', type: 'string', description: was } } }]
       : [{ name: type, kind: 'enum', values: ['a'], description: was }];

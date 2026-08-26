@@ -5,6 +5,7 @@
  * adopting an ordinary comment with a longer syntax. */
 
 import { flatten } from './emit.ts';
+import { captured } from '../../utils/captured.ts';
 
 const KOTLIN_DECL = /^\s{4}public val ([A-Za-z][A-Za-z0-9]*)\s*:/;
 const SWIFT_DECL = /^\s{4}public (?:static )?let ([A-Za-z][A-Za-z0-9]*)\s*:/;
@@ -24,7 +25,7 @@ export function kotlinDocs(source: string) {
     }
     const declared = KOTLIN_DECL.exec(raw);
     if (declared) {
-      if (pending !== null) found.set(declared[1], flatten(pending.join(' ')));
+      if (pending !== null) found.set(captured(declared), flatten(pending.join(' ')));
       pending = null;
       continue;
     }
@@ -44,7 +45,7 @@ export function swiftDocs(source: string) {
     }
     const declared = SWIFT_DECL.exec(raw);
     if (declared) {
-      if (pending.length) found.set(declared[1], flatten(pending.join(' ')));
+      if (pending.length) found.set(captured(declared), flatten(pending.join(' ')));
       pending = [];
       continue;
     }
@@ -96,7 +97,7 @@ function apiDocs(
     if (opened !== null) { pending = opened; continue; }
     const declaredType = typeDecl.exec(raw);
     if (declaredType) {
-      type = declaredType[1];
+      type = captured(declaredType);
       if (pending !== null) found.set(type, flatten(pending.join(' ')));
       pending = null;
       continue;

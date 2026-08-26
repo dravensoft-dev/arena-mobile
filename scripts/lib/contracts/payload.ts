@@ -8,6 +8,7 @@
 import { join } from 'node:path';
 import { readJson } from '../../utils/read-json.ts';
 import { byCodeUnit } from '../../utils/compare.ts';
+import { captured } from '../../utils/captured.ts';
 
 export const PACKAGE_NAME = '@dravensoft/arena-contracts';
 export const CONTRACTS_DIR = '.contracts';
@@ -140,7 +141,7 @@ const ALIAS = /^\{([^}]+)\}$/;
 export function aliasTarget(value: unknown) {
   if (typeof value !== 'string') return null;
   const match = ALIAS.exec(value.trim());
-  return match ? match[1] : null;
+  return match ? captured(match) : null;
 }
 
 export function resolveAliases(tokens: Token[]) {

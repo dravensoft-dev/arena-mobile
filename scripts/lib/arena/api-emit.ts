@@ -234,8 +234,10 @@ export function describedEntries(types: ApiType[]) {
 export function owedDocs(types: ApiType[]) {
   const owed = new Map<string, string>();
   for (const [key, description] of describedEntries(types)) {
-    const [type, field] = key.split('.', 2);
-    owed.set(key, docTextFor(type, field ?? null, description) as string);
+    const dot = key.indexOf('.');
+    const type = dot === -1 ? key : key.slice(0, dot);
+    const field = dot === -1 ? null : key.slice(dot + 1);
+    owed.set(key, docTextFor(type, field, description) as string);
   }
   return owed;
 }

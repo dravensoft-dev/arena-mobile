@@ -37,8 +37,9 @@ test('userScale inherits group to leaf, which DTCG admits and does not define', 
 test('the script flag and the cssUnit hint are read off the leaf', () => {
   const tree = { tint: { $type: 'number', soft: { $value: 12, $extensions: { 'com.dravensoft.arena': { cssUnit: '%', script: true } } } } };
   const [one] = collect(tree, [], 'contracts/design/effects.json', {}, []);
-  expect(one.cssUnit).toBe('%');
-  expect(one.script).toBe(true);
+  expect(one).toBeDefined();
+  expect(one?.cssUnit).toBe('%');
+  expect(one?.script).toBe(true);
 });
 
 test('an alias resolves against the merged tree, because chart.json references what spacing.json holds', () => {
