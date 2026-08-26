@@ -1,5 +1,6 @@
 import { test, expect } from 'bun:test';
 import { GATES, DOMAINS, countsByDomain, domainOf, domainProblems, selected, summaryLine, verdictFor } from './check-all.ts';
+import type { Domain } from './check-all.ts';
 
 test('GATES is asserted by literal value, so the array and this case move in one commit', () => {
   expect(GATES.map((gate) => gate.name)).toEqual([
@@ -44,7 +45,11 @@ test('the table in scripts/check/AGENTS.md is these numbers', () => {
 
 test('every gate names a domain, so the job partition reaches all of them', () => {
   expect(domainProblems()).toEqual([]);
-  for (const gate of GATES) expect(DOMAINS).toContain(domainOf(gate));
+  for (const gate of GATES) {
+    const domain = domainOf(gate);
+    expect(domain).not.toBeNull();
+    expect(DOMAINS).toContain(domain as Domain);
+  }
 });
 
 test('the last two gates are the native ones, so a new gate is inserted rather than appended', () => {

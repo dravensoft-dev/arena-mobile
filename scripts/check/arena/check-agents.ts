@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { walkFiles } from '../../utils/walk-files.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
+import { captured } from '../../utils/captured.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { resolveFrom } from './check-citations.ts';
 
@@ -43,7 +44,7 @@ export function levels(root_: string) {
 
 export function linksFrom(rel: string, markdown: string) {
   return [...markdown.matchAll(LINK)]
-    .map((match) => match[1])
+    .map((match) => captured(match))
     .filter((target) => !/^[a-z]+:/.test(target) && !target.startsWith('//'))
     .map((target) => resolveFrom(rel, target));
 }

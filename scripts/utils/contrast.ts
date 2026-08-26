@@ -16,5 +16,8 @@ export function luminance([r, g, b]: Rgb) {
 
 export function contrast(a: Rgb, b: Rgb) {
   const [high, low] = [luminance(a), luminance(b)].sort((one, other) => other - one);
+  if (high === undefined || low === undefined) {
+    throw new Error('contrast: a ratio is measured over two luminances, and the sort returned fewer');
+  }
   return (high + 0.05) / (low + 0.05);
 }

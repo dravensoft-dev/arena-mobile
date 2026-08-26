@@ -54,11 +54,11 @@ function em(value: number) {
 
 export function familyHead(value: unknown) {
   const list = Array.isArray(value) ? value.map(String) : [String(value)];
-  const named = list.filter((one) => !CSS_GENERIC_FAMILIES.has(one));
-  if (named.length === 0) {
+  const [head] = list.filter((one) => !CSS_GENERIC_FAMILIES.has(one));
+  if (head === undefined) {
     throw new Error(`a fontFamily of ${JSON.stringify(list)} names only CSS generic families, and none of them names anything on either platform`);
   }
-  return named[0];
+  return head;
 }
 
 type ColorValue = { colorSpace: string; components: number[]; alpha?: number };

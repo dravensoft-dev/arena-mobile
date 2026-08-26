@@ -10,6 +10,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
+import { captured } from '../../utils/captured.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR } from '../../lib/contracts/payload.ts';
 import { readJson } from '../../utils/read-json.ts';
@@ -141,7 +142,7 @@ export function rungsIn(source: string, head: RegExp, rung: RegExp) {
 export function targetIn(source: string, pattern: RegExp) {
   for (const line of source.split('\n')) {
     const match = pattern.exec(line);
-    if (match) return { defaulted: match[1].trim().length > 0, body: match[2].trim() };
+    if (match) return { defaulted: captured(match).trim().length > 0, body: captured(match, 2).trim() };
   }
   return null;
 }

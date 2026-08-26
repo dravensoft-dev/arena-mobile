@@ -62,7 +62,9 @@ export function namingProblems(targets: readonly string[]) {
 
 export function bannerProblems(commands: ReadonlyMap<string, string>, read: (target: string) => string) {
   return [...commands].flatMap(([target, command]) => {
-    const first = read(target).split('\n', 1)[0];
+    const source = read(target);
+    const end = source.indexOf('\n');
+    const first = end === -1 ? source : source.slice(0, end);
     return first.includes(command)
       ? []
       : [`${target} does not name the command that writes it on its first line, so a reader has to guess`];
@@ -92,8 +94,8 @@ export function crlfPatterns(gitattributes: string) {
   return gitattributes
     .split('\n')
     .filter((line) => !line.trimStart().startsWith('#') && /\beol=crlf\b/.test(line))
-    .map((line) => line.trim().split(/\s+/)[0])
-    .filter(Boolean);
+    .map((line) => line.trim().split(/\s+/)[0] ?? '')
+    .filter((pattern) => pattern !== '');
 }
 
 export function matchesAttribute(pattern: string, path: string) {

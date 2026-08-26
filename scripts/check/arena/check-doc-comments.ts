@@ -44,7 +44,7 @@ export function owedByFile(tokens: ReturnType<typeof tokensOf>, types: ReturnTyp
 }
 
 export function readerFor(target: string) {
-  const api = API_TARGETS.includes(target);
+  const api = API_TARGETS.some((one) => one === target);
   if (target.endsWith('.kt')) return api ? apiKotlinDocs : kotlinDocs;
   return api ? apiSwiftDocs : swiftDocs;
 }

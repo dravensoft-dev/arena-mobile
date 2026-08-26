@@ -46,7 +46,9 @@ test('the members come off the contract, and the register partitions them', () =
 });
 
 test('an answered member is a parameter on both layers, and a parameter answering none is authored', () => {
-  const answered = new Set([...(MEMBERS.get('ArenaButton') as Map<string, { parameter?: string }>).values()]
+  const answers = MEMBERS.get('ArenaButton');
+  expect(answers).toBeDefined();
+  const answered = new Set([...(answers ?? new Map()).values()]
     .filter(isAnswered).map((answer) => answer.parameter));
   expect(parameterProblems('ArenaButton', new Set([...answered, 'increasedContrast', 'targetFloor']), 'swiftui')).toEqual([]);
   expect(parameterProblems('ArenaButton', new Set([...answered, 'modifier']), 'compose')).toEqual([]);

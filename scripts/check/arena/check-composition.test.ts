@@ -74,7 +74,9 @@ test('a ground Arena set no bar against is carried with its reason and never swe
     expect(role?.kind === 'ground' && role.swept).toBe(false);
     expect(role?.why.length).toBeGreaterThan(0);
   }
-  expect(COMPOSED.get('bg')?.kind === 'ground' && COMPOSED.get('bg')?.swept).toBe(true);
+  const bg = COMPOSED.get('bg');
+  expect(bg?.kind).toBe('ground');
+  expect(bg?.kind === 'ground' && bg.swept).toBe(true);
 });
 
 test('a separator is reported and not gated, because 1.4.11 measures a control boundary', () => {
@@ -107,7 +109,9 @@ test('an entry outliving the member it describes fails, and the map holds itself
 test('the map of what waits on a pin fails the moment the pin brings it', () => {
   expect(OWED.size).toBeGreaterThan(0);
   expect(staleOwedProblems([])).toEqual([]);
-  const arrived = staleOwedProblems([{ name: [...OWED.keys()][0] }]);
+  const [firstOwed] = [...OWED.keys()];
+  expect(firstOwed).toBeDefined();
+  const arrived = staleOwedProblems([{ name: firstOwed ?? '' }]);
   expect(arrived).toHaveLength(1);
   expect(arrived[0]).toContain('is now carried by the pinned contract');
 });

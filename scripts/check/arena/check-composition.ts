@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
+import { captured } from '../../utils/captured.ts';
 import { walkFiles } from '../../utils/walk-files.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { contrast, type Rgb } from '../../utils/contrast.ts';
@@ -88,7 +89,7 @@ export function aliasesIn(source: string) {
   const found = new Map<string, string>();
   for (const line of source.split('\n')) {
     const match = KOTLIN_ALIAS.exec(line) ?? SWIFT_ALIAS.exec(line);
-    if (match) found.set(match[1], match[2]);
+    if (match) found.set(captured(match), captured(match, 2));
   }
   return found;
 }
@@ -219,7 +220,11 @@ function colourTable(tokens: ReturnType<typeof tokensOf>, theme: Theme) {
   const table: Record<string, Rgb> = {};
   for (const field of themeTokens(tokens, theme)) {
     const value = field.token.value as { components: number[] };
-    table[field.identifier] = [value.components[0], value.components[1], value.components[2]];
+    const [r, g, b] = value.components;
+    if (r === undefined || g === undefined || b === undefined) {
+      throw new Error(`${field.token.name} declares ${value.components.length} colour component(s), and a ratio is measured over three`);
+    }
+    table[field.identifier] = [r, g, b];
   }
   return table;
 }
