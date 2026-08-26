@@ -30,6 +30,7 @@
     "check:structure": "bun scripts/check/arena/check-structure.ts",
     "check:seams": "bun scripts/check/arena/check-seams.ts",
     "check:suites": "bun scripts/check/arena/check-suites.ts",
+    "check:affordances": "bun scripts/check/arena/check-affordances.ts",
     "check:doc-comments": "bun scripts/check/arena/check-doc-comments.ts",
     "check:docs": "bun scripts/check/arena/check-docs.ts",
     "check:citations": "bun scripts/check/arena/check-citations.ts",

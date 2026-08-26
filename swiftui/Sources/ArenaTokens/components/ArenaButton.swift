@@ -33,6 +33,7 @@ public struct ArenaButton: View {
     @Environment(\.arenaColors) private var colors
     @Environment(\.arenaDensity) private var density
     @Environment(\.arenaFonts) private var fonts
+    @FocusState private var focused: Bool
 
     private let content: String
     private let click: () -> Void
@@ -77,6 +78,12 @@ public struct ArenaButton: View {
 
     private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: ArenaControl.radius) }
 
+    private var ring: CGFloat { ArenaContrast.focusWidth(increasedContrast) }
+
+    private var gutter: CGFloat { ArenaTokens.focusOffset + ring }
+
+    private var ringShape: RoundedRectangle { RoundedRectangle(cornerRadius: ArenaControl.radius + gutter) }
+
     public var body: some View {
         Button(action: click) {
             HStack(spacing: ArenaControl.gap) {
@@ -92,6 +99,9 @@ public struct ArenaButton: View {
             .contentShape(shape)
         }
         .buttonStyle(.plain)
+        .focused($focused)
+        .padding(gutter)
+        .overlay(ringShape.strokeBorder(focused ? colors.focusRing : Color.clear, lineWidth: ring))
         .disabled(inactive)
         .accessibilityLabel(content)
         .accessibilityAddTraits(.isButton)

@@ -139,6 +139,31 @@ no counterpart on the other is reported too, which is the half that hides: both 
 either way. An entry that outlives its asymmetry, because the subject grew a suite of its own,
 fails rather than lingering.
 
+## What a contracted affordance obliges
+
+**Every component contract declares an `affordances` array, and every one of the three is drawn by
+a browser for free.** Neither toolkit draws any of them, so the inverse rule this page already
+states applies whole: what a browser answers by rendering an element is an explicit obligation
+here, applied by hand, on both layers. `DRAWN` in `scripts/lib/arena/affordance-bindings.ts`
+partitions each contract's own array into what is drawn, naming the native symbol that draws it,
+and what is excepted with its reason.
+
+**`focus` is drawn, because every operand it needs is already contracted and already gated.** The
+ring's colour is the `focusRing` alias `ArenaComposition` composes on both layers, its width is
+what `ArenaContrast.focusWidth` returns and `check:contrast` holds against the spacing grid, and
+its separation is an emitted token. The gutter it needs is reserved whether or not the control has
+focus, so taking focus moves nothing on screen.
+
+**`hover` and `press` are excepted, and the reason is the same absence read twice.** What a control
+lightens with is a level or a soft, and `OWED` in `scripts/check/arena/check-composition.ts` names
+every one of them as a ratio Arena has not contracted yet. Drawing either here means inventing a
+value over a palette this repository consumes, which is the row the table above sends to Arena, so
+both exceptions die with the raised pin that brings the token in.
+
+`bun run check:affordances` holds it, and holds none of it by rendering anything: a symbol found in
+a source is one that is WRITTEN, never one applied to the right node, which is the same admission
+`check:behaviour` makes about a binding.
+
 ## Where a native source goes
 
 **Both layers partition their sources the same four ways**, `tokens/`, `api/`, `components/` and

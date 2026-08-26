@@ -154,6 +154,13 @@ area is not the drawn one. Comfortable is the default density and every rung of 
 points is a constant of this platform rather than a value any contract carries, and a default
 here would be the one length in this package written by hand.
 
+## The focus ring is drawn here, and `@FocusState` is what reports it
+
+`.focused($state)` bound to a `@FocusState` is how this layer learns a control is the keyboard's
+target, and `.buttonStyle(.plain)` does not take that away: what it removes is the toolkit's own
+press register, which this repository excepts rather than replaces. The ring is an overlay over a
+gutter the control pays whether it has focus or not, so taking focus moves nothing.
+
 ## The safe area is applied before the seam sees it
 
 SwiftUI insets a view by the safe area on its own, so `ArenaSafeArea` is for a view that has

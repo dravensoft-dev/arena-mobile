@@ -148,6 +148,14 @@ caller's and the composition is the library's.
 
 What the three cases and the three classes ARE is stated once on [`../AGENTS.md`](../AGENTS.md).
 
+## The focus ring is drawn here, and `onFocusChanged` is what reports it
+
+`Modifier.clickable` already makes a control focusable and already refuses focus when it is
+disabled, so nothing here adds a `focusable()` of its own; what is added is a
+`Modifier.onFocusChanged` above it in the chain, since a focus observer has to sit before the
+focus target it observes. The ring is a second `border` over a gutter the control pays whether it
+has focus or not, so taking focus moves nothing.
+
 ## What this layer draws, and what it still does not carry
 
 `org.dravensoft.arena.components` is where a drawn component lives, and everything under

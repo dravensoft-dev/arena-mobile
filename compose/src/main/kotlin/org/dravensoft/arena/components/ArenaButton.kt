@@ -11,9 +11,14 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -31,9 +36,11 @@ import org.dravensoft.arena.tokens.ArenaColorScheme
 import org.dravensoft.arena.tokens.ArenaContrast
 import org.dravensoft.arena.tokens.ArenaControl
 import org.dravensoft.arena.tokens.ArenaScale
+import org.dravensoft.arena.tokens.ArenaTokens
 import org.dravensoft.arena.tokens.accent
 import org.dravensoft.arena.tokens.borderStrong
 import org.dravensoft.arena.tokens.danger
+import org.dravensoft.arena.tokens.focusRing
 import org.dravensoft.arena.tokens.onAccent
 import org.dravensoft.arena.tokens.surfaceCard
 import org.dravensoft.arena.tokens.textStrong
@@ -79,9 +86,15 @@ public fun ArenaButton(
     val inactive = disabled || loading
     val painted = ArenaScale.control(ArenaControl.height(size, density), LocalDensity.current.fontScale)
     val shape = RoundedCornerShape(ArenaControl.radius)
+    val ring = ArenaContrast.focusWidth(increasedContrast)
+    val gutter = ArenaTokens.focusOffset + ring
+    var focused by remember { mutableStateOf(false) }
     Row(
         modifier = modifier
             .then(if (full) Modifier.fillMaxWidth() else Modifier)
+            .onFocusChanged { focused = it.isFocused }
+            .border(ring, if (focused) colors.focusRing else Color.Transparent, RoundedCornerShape(ArenaControl.radius + gutter))
+            .padding(gutter)
             .sizeIn(minHeight = if (targetFloor == null) painted else ArenaControl.target(painted, targetFloor))
             .clip(shape)
             .background(ArenaButtonPaint.fill(variant, colors))

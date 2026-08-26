@@ -26,6 +26,7 @@ import { LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
 import {
   KOTLIN_COMPONENTS, SWIFT_COMPONENTS, sourcesByLayer,
 } from '../../lib/arena/component-sources.ts';
+import { carries } from '../../lib/arena/native-symbol.ts';
 
 export const node = {
   name: 'check:behaviour',
@@ -46,17 +47,6 @@ export function zeroProblems({ patterns, keys, components }: { patterns: number;
   if (keys === 0) errs.push('found 0 requirement keys, so every binding partitions an empty set and closes by meeting nothing');
   if (components === 0) errs.push(`found 0 components under ${COMPONENTS_PREFIX}, so the register is complete by naming nothing`);
   return errs;
-}
-
-export function spellingOf(symbol: string) {
-  const head = symbol.replace(/^\./, '').split('(')[0] as string;
-  return head.slice(head.lastIndexOf('.') + 1);
-}
-
-export function carries(source: string, symbol: string) {
-  if (source.includes(symbol)) return true;
-  const spelling = spellingOf(symbol);
-  return spelling.length > 0 && new RegExp(`\\b${spelling}\\b`, 'i').test(source);
 }
 
 export function symbolProblems(component: string, entry: Entry, layer: Layer, source: string | null) {
