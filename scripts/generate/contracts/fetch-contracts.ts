@@ -48,7 +48,7 @@ export const node = {
     'check:pin', 'check:catalogue', 'check:coverage', 'check:api-types', 'check:user-scale',
     'check:literals', 'check:members', 'check:structure',
     'check:affordances', 'check:behaviour', 'check:composition', 'check:fonts', 'check:environment',
-    'check:contrast', 'check:control', 'check:motion',
+    'check:contrast', 'check:control', 'check:target', 'check:motion',
   ],
 };
 
