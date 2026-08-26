@@ -37,7 +37,7 @@ paragraph does not. That is the entire argument for this order:
    command that answers it.
 3. **A suite assertion.** A limit a test can pin is pinned. The cap on user text scale lives in
    `compose/src/test/kotlin/org/dravensoft/arena/ArenaDensityTest.kt` and in
-   `swiftui/Tests/ArenaTokensTests/ArenaTokensTests.swift` for exactly that reason.
+   `swiftui/Tests/ArenaTokensTests/ArenaDensityTests.swift` for exactly that reason.
 4. **The normative document for that layer.** [`AGENTS.md`](./AGENTS.md),
    [`compose/AGENTS.md`](./compose/AGENTS.md), [`swiftui/AGENTS.md`](./swiftui/AGENTS.md), or
    [`scripts/AGENTS.md`](./scripts/AGENTS.md).

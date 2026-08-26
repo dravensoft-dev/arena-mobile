@@ -118,6 +118,27 @@ one side compiles, passes that layer's own suite, and ships two libraries from o
 allows a cap, a divisor and a ratio as arithmetic; this is what holds those allowed constants equal
 on both sides, so the two gates partition rather than overlap.
 
+## What a subject owes a suite
+
+**One contract, two layers, and a suite on one of them is a claim half the consumers cannot act
+on.** `bun run check:suites` keys a coverage record `<subject>:<layer>` and decides absence by
+walking both sides: the subjects come out of each layer's `tokens/` and `components/`, the suites
+out of each layer's test root, so "this layer does not cover it" and "this gate could not find it"
+stop being one value.
+
+**An emitted source is not a subject.** `check:emit` holds it against a fresh emit, so a suite for
+it would assert the emitter twice and fail for the emitter's reasons. Which partitions carry no
+subject at all is stated rather than assumed: `OUTSIDE` in
+`scripts/check/arena/check-suites.ts` names each with its reason, and its keys have to complement
+the ones that do carry subjects, so a fifth partition cannot arrive without somebody deciding
+whether what sits in it owes a suite.
+
+**Both directions are asked.** A subject with no suite beside it is reported unless
+`COVERED_ELSEWHERE` names the file whose assertions cover it, and a suite present on one layer with
+no counterpart on the other is reported too, which is the half that hides: both layers are green
+either way. An entry that outlives its asymmetry, because the subject grew a suite of its own,
+fails rather than lingering.
+
 ## Where a native source goes
 
 **Both layers partition their sources the same four ways**, `tokens/`, `api/`, `components/` and

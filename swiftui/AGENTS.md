@@ -143,7 +143,7 @@ that row of the bridge crosses at 1:1 and a test holds it.
 
 `ArenaScale.cap` in that file bounds the geometry derived from a control floor and leaves the text alone,
 for the reason
-`swiftui/Tests/ArenaTokensTests/ArenaTokensTests.swift` carries in its header.
+`swiftui/Tests/ArenaTokensTests/ArenaDensityTests.swift` carries in its header.
 
 ## The touch target is the activation box and never the painted one
 
