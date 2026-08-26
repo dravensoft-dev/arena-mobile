@@ -1,7 +1,7 @@
 import { test, expect } from 'bun:test';
 import {
-  COMPONENTS_PREFIX, NOT_YET_READ, TYPES_PREFIX, apiSources, isPrimitive, requiredFirst,
-  staleNotYetReadProblems, structureProblems, typeSources, type ApiType,
+  COMPONENTS_PREFIX, TYPES_PREFIX, apiSources, componentNameOf, componentNames, componentSources,
+  isPrimitive, requiredFirst, structureProblems, typeSources, type ApiType,
 } from './api-types.ts';
 
 const manifest = (contracts: string[]) => ({ name: '@dravensoft/arena-contracts', version: '10.2.2', contracts });
@@ -19,12 +19,12 @@ test('the catalogue decides what is read, and the two prefixes are not the same 
   expect(apiSources(all)).toEqual([`${COMPONENTS_PREFIX}ArenaButton.json`, `${TYPES_PREFIX}arena-tone.json`]);
 });
 
-test('NOT_YET_READ names the component contracts with a reason, and an absence covering nothing fails', () => {
-  expect([...NOT_YET_READ.keys()]).toEqual([COMPONENTS_PREFIX]);
-  for (const [, why] of NOT_YET_READ) expect(why.length).toBeGreaterThan(80);
-  expect(staleNotYetReadProblems(manifest([`${COMPONENTS_PREFIX}ArenaButton.json`]))).toEqual([]);
-  expect(staleNotYetReadProblems(manifest([`${TYPES_PREFIX}arena-tone.json`]))[0])
-    .toContain('An absence covering nothing records nothing');
+test('the component half of the catalogue reads out as names, and an entry naming no file throws', () => {
+  const all = manifest([`${COMPONENTS_PREFIX}ArenaButton.json`, `${TYPES_PREFIX}arena-tone.json`]);
+  expect(componentSources(all)).toEqual([`${COMPONENTS_PREFIX}ArenaButton.json`]);
+  expect(componentNames(all)).toEqual(['ArenaButton']);
+  expect(componentNameOf(`${COMPONENTS_PREFIX}ArenaButton.json`)).toBe('ArenaButton');
+  expect(() => componentNameOf(`${COMPONENTS_PREFIX}ArenaButton`)).toThrow('naming no .json file');
 });
 
 test('a type is named, prefixed and declared once', () => {

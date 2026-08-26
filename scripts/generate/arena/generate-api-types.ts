@@ -11,8 +11,9 @@ import { isMainModule } from '../../utils/main-module.ts';
 import { repoRoot } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR, MANIFEST, readManifest } from '../../lib/contracts/payload.ts';
 import {
-  TYPES_PREFIX, loadApiTypes, requiredFirst, staleNotYetReadProblems, structureProblems, type ApiType,
+  TYPES_PREFIX, loadApiTypes, requiredFirst, structureProblems, type ApiType,
 } from '../../lib/contracts/api-types.ts';
+import { surfaceProblems } from '../../lib/arena/component-surface.ts';
 import {
   enumCases, fieldTypes, rawTypes, staleCaseNameProblems, staleRephrasedProblems, docTextFor,
 } from '../../lib/arena/api-emit.ts';
@@ -128,7 +129,7 @@ export function apiTypesOf(root = repoRoot) {
 export function payloadProblems(types: ApiType[], root = repoRoot) {
   return [
     ...structureProblems(types),
-    ...staleNotYetReadProblems(readManifest(root)),
+    ...surfaceProblems(readManifest(root)),
     ...staleCaseNameProblems(types),
     ...staleRephrasedProblems(types),
   ];

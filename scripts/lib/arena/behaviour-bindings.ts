@@ -103,6 +103,20 @@ export function bindingProblems(component: string, entry: Entry, patterns: Map<s
   return sortedByCodeUnit(errs);
 }
 
+export function isPublished(entry: Entry) {
+  return bindingLayers(entry).some((binding) => !REASONLESS_PATTERNS.includes(binding.pattern ?? ''));
+}
+
+export function publishedComponents(register: Map<string, Entry> = BINDINGS) {
+  return sortedByCodeUnit([...register].filter(([, entry]) => isPublished(entry)).map(([component]) => component));
+}
+
+export function absenceReasonOf(component: string, register: Map<string, Entry> = BINDINGS) {
+  const entry = register.get(component);
+  if (!entry || isPublished(entry)) return null;
+  return bindingLayers(entry).map((binding) => binding.reason).find((reason) => reason !== undefined) ?? null;
+}
+
 function addedSet(binding: LayerBinding) {
   return sortedByCodeUnit((binding.also ?? []).map((added) => added.pattern)).join(', ');
 }
@@ -135,7 +149,7 @@ export function componentProblems(components: string[]) {
   return sortedByCodeUnit(errs);
 }
 
-const ABSENT_REASON = 'this layer publishes no component yet, so there is no surface for a requirement to '
+export const ABSENT_REASON = 'this layer publishes no component yet, so there is no surface for a requirement to '
   + 'hold or fail against. The entry is the recorded absence rather than a silent hole, and it dies when '
   + 'the component lands';
 

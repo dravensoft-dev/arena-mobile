@@ -1,10 +1,9 @@
 /* The API contract's vocabulary, which is not the token tier's. A type is an enum or a
  * predefined object, and a field of an object is a primitive, an enum, or an array of one
  * primitive type: R1 upstream refuses the other six forms, so three rows and a refusal are the
- * whole of what arrives here. NOT_YET_READ names the half of contracts/api/ THIS EMIT does not
- * read, with the reason, so the absence is a record rather than a hole; the behaviour register
- * reads the component NAMES out of that same half, which is a different reader and not a
- * contradiction of the entry. */
+ * whole of what arrives here. This module reads the catalogue and never decides which half of
+ * contracts/api/ a reader owes: the component half is decided by the behaviour register, in
+ * scripts/lib/arena/component-surface.ts, which is where the rule and its reason live. */
 
 import { join } from 'node:path';
 import { readJson } from '../../utils/read-json.ts';
@@ -37,17 +36,6 @@ export type ApiType = {
   fields?: Record<string, ApiField>;
 };
 
-export const NOT_YET_READ = new Map<string, string>([
-  [
-    COMPONENTS_PREFIX,
-    'a component contract states the members one component presents, and this repository publishes no '
-    + 'component, so a member surface emitted now is one that would be rewritten rather than extended. '
-    + 'What this emit does not read is that member surface; the component NAME is read, by the behaviour '
-    + 'register, which keys itself by the contract so an unpublished component is a recorded absence '
-    + 'rather than a hole. The first component landing here is what retires this entry',
-  ],
-]);
-
 export function apiSources(manifest: ContractManifest) {
   return sortedByCodeUnit(manifest.contracts.filter((path) => path.startsWith(API_PREFIX)));
 }
@@ -56,12 +44,18 @@ export function typeSources(manifest: ContractManifest) {
   return sortedByCodeUnit(manifest.contracts.filter((path) => path.startsWith(TYPES_PREFIX)));
 }
 
-export function staleNotYetReadProblems(manifest: ContractManifest) {
-  const carried = apiSources(manifest);
-  return [...NOT_YET_READ].flatMap(([prefix, why]) => (carried.some((path) => path.startsWith(prefix))
-    ? []
-    : [`NOT_YET_READ names ${prefix}, and the payload carries nothing under it. An absence covering `
-      + `nothing records nothing: ${why}`]));
+export function componentSources(manifest: ContractManifest) {
+  return sortedByCodeUnit(manifest.contracts.filter((path) => path.startsWith(COMPONENTS_PREFIX)));
+}
+
+export function componentNameOf(entry: string) {
+  const found = /([^/]+)\.json$/.exec(entry);
+  if (!found) throw new Error(`${entry} is a catalogue entry naming no .json file, so no component name reads out of it`);
+  return found[1] as string;
+}
+
+export function componentNames(manifest: ContractManifest) {
+  return componentSources(manifest).map(componentNameOf);
 }
 
 export function loadApiTypes(root: string, manifest = readManifest(root)) {

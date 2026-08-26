@@ -10,9 +10,9 @@ import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR, MANIFEST, readManifest, type ContractManifest } from '../../lib/contracts/payload.ts';
 import {
-  API_PREFIX, NOT_YET_READ, apiSources, fieldEntries, staleNotYetReadProblems, structureProblems,
-  typeSources, type ApiType,
+  API_PREFIX, COMPONENTS_PREFIX, apiSources, fieldEntries, structureProblems, typeSources, type ApiType,
 } from '../../lib/contracts/api-types.ts';
+import { excludedIn, publishedIn, surfaceProblems } from '../../lib/arena/component-surface.ts';
 import {
   CASE_NAMES, REPHRASED, caseStemFor, fieldTypes, kotlinCase, rawTypes, staleCaseNameProblems,
   staleRephrasedProblems, swiftCase,
@@ -33,10 +33,9 @@ export function zeroTypeProblem(counted: number) {
 
 export function sourceProblems(manifest: ContractManifest) {
   const read = new Set(typeSources(manifest));
-  const excluded = [...NOT_YET_READ.keys()];
   return sortedByCodeUnit(apiSources(manifest)
     .filter((source) => !read.has(source))
-    .filter((source) => !excluded.some((prefix) => source.startsWith(prefix)))
+    .filter((source) => !source.startsWith(COMPONENTS_PREFIX))
     .map((source) => `${source} is an API contract this emit neither reads nor excludes with a reason`));
 }
 
@@ -80,7 +79,7 @@ function main() {
     ...structureProblems(types),
     ...sourceProblems(manifest),
     ...coverageProblems(types),
-    ...staleNotYetReadProblems(manifest),
+    ...surfaceProblems(manifest),
     ...staleCaseNameProblems(types),
     ...staleRephrasedProblems(types),
   ];
@@ -93,7 +92,8 @@ function main() {
   console.log(
     `check-api-types: ${size.types} type(s) from the pinned contract, ${size.values} enum value(s) and `
     + `${size.fields} field(s), every one reaching a native name in both layers, with `
-    + `${NOT_YET_READ.size} contract directory(ies) excluded with a reason, ${CASE_NAMES.size} case name(s) `
+    + `${publishedIn(manifest).length} component contract(s) published by the register and `
+    + `${excludedIn(manifest).length} excluded by it, ${CASE_NAMES.size} case name(s) `
     + `and ${REPHRASED.size} description(s) named with theirs`,
   );
 }

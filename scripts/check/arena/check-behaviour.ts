@@ -5,10 +5,9 @@
  * each a failure, since a gate that walked nothing reports no gaps behind a plausible line. */
 
 import { isMainModule } from '../../utils/main-module.ts';
-import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
-import { CONTRACTS_DIR, MANIFEST, readManifest, type ContractManifest } from '../../lib/contracts/payload.ts';
-import { COMPONENTS_PREFIX } from '../../lib/contracts/api-types.ts';
+import { CONTRACTS_DIR, MANIFEST, readManifest } from '../../lib/contracts/payload.ts';
+import { COMPONENTS_PREFIX, componentNames } from '../../lib/contracts/api-types.ts';
 import {
   BEHAVIOUR_PREFIX, elementRoles, loadPatterns, requirementKeys, structureProblems,
 } from '../../lib/contracts/behaviour.ts';
@@ -36,18 +35,6 @@ export function zeroProblems({ patterns, keys, components }: { patterns: number;
   if (keys === 0) errs.push('found 0 requirement keys, so every binding partitions an empty set and closes by meeting nothing');
   if (components === 0) errs.push(`found 0 components under ${COMPONENTS_PREFIX}, so the register is complete by naming nothing`);
   return errs;
-}
-
-export function componentNameOf(entry: string) {
-  const found = /([^/]+)\.json$/.exec(entry);
-  if (!found) throw new Error(`${entry} is a catalogue entry naming no .json file, so no component name reads out of it`);
-  return found[1] as string;
-}
-
-export function componentNames(manifest: ContractManifest) {
-  return sortedByCodeUnit(manifest.contracts
-    .filter((path) => path.startsWith(COMPONENTS_PREFIX))
-    .map(componentNameOf));
 }
 
 export function passLine(
