@@ -11,7 +11,9 @@ junit = "4.13.2"
 [libraries]
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 compose-animation-core = { group = "androidx.compose.animation", name = "animation-core" }
+compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 compose-ui-text = { group = "androidx.compose.ui", name = "ui-text" }
 compose-ui-unit = { group = "androidx.compose.ui", name = "ui-unit" }
