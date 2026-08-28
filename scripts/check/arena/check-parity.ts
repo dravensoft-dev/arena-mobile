@@ -124,9 +124,9 @@ export const UNITS: Record<Layer, { pattern: RegExp; why: string }> = {
       + 'suite that stops declaring it goes on passing while measuring in a unit the seam does not speak',
   },
   swiftui: {
-    pattern: /\brenderer\.scale = 1\b/,
-    why: 'the SwiftUI suite renders at a scale of one, so a point is a pixel and a run counted in pixels answers a '
-      + 'contracted length',
+    pattern: /\brenderer\.scale = renderScale\b/,
+    why: 'the SwiftUI suite rasterises at the scale it declares and multiplies every contracted length by it, '
+      + 'because a boundary one point wide is a run a one-pixel tolerance cannot tell from an absent one',
   },
 };
 

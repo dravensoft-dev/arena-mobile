@@ -73,8 +73,8 @@ test('a claim and the authority it measures against are both read out of the sui
 
 test('the unit a suite counts in is declared in the suite and read here', () => {
   expect(unitProblems('compose', 'ArenaButton', 'with(compose.density) { }')).toEqual([]);
-  expect(unitProblems('swiftui', 'ArenaButton', 'renderer.scale = 1')).toEqual([]);
-  expect(unitProblems('swiftui', 'ArenaButton', 'renderer.scale = 2')[0]).toContain('declares no unit');
+  expect(unitProblems('swiftui', 'ArenaButton', 'renderer.scale = renderScale')).toEqual([]);
+  expect(unitProblems('swiftui', 'ArenaButton', 'renderer.scale = 1')[0]).toContain('declares no unit');
 });
 
 test('AXES and UNREACHED partition the declared set of axes, disjointly', () => {
