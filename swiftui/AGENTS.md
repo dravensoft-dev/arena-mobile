@@ -159,6 +159,10 @@ a job. UIKit is on the main actor and so is every case that renders, which
 `swiftui/Tests/ArenaTokensTests/ArenaButtonTests.swift` carries in the one header a test file is
 allowed.
 
+**`ImageRenderer` is what rasterises the drawing for the probes**, at the scale that file declares
+rather than at one, redrawn into an sRGB context so a pixel is compared against the palette in the
+space the emit spells it in.
+
 ## The focus ring is drawn here, and `@FocusState` is what reports it
 
 `.focused($state)` bound to a `@FocusState` is how this layer learns a control is the keyboard's

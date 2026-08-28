@@ -113,6 +113,11 @@ the android-all jar it resolves, so
 `compose/src/test/kotlin/org/dravensoft/arena/ArenaButtonTest.kt` pins the SDK it boots and carries the
 reason in the one header a test file is allowed.
 
+**What that suite probes the drawing with is `captureToImage()` under `GraphicsMode.NATIVE`**, read
+back as a `PixelMap` and converted through the rule's own `Density`, and the same `@Config` asks for a
+window tall enough to hold the matrix in one composition, because `setContent` is callable once per
+test and a node the window does not reach cannot be captured.
+
 ## The inset arrives from the caller, and `safeDrawing` is which one
 
 `WindowInsets.safeDrawing` is the set to hand to

@@ -499,6 +499,62 @@ composes rather than replaces. `COLLAPSED` in `scripts/check/arena/check-control
 role answers the way it does, and a role the payload adds lands in that partition rather than in a
 silence.
 
+## Whether the two layers agree about what they draw
+
+**Arena proves its two framework layers render the same pixels, and its instrument works because the
+two share a rendering engine, a face and a rounding.** Neither of those is true here and neither
+toolkit is the other's authority, so agreement on this side is not a comparison between two renders.
+Each layer renders one shared enumeration and is held to what its OWN seam computes, and the
+agreement composes through the contract: `check:members` holds that a consumer calls one surface,
+`check:control`, `check:composition` and `check:contrast` hold that the surface computes one value,
+and `bun run check:parity` holds that each layer DRAWS the value its own seam computed. None of the
+three makes either layer the other's reference, which is the peerage the question is built on.
+
+**No measurement crosses a layer, so no tolerance crosses one either.** Every tolerance that remains
+is a rasteriser's, inside one layer, declared per axis with the mechanism that forces it: a colour
+probe takes the centre of a region and admits none, and a length probe counts a run and admits the
+pixel antialiasing puts at each end, because a rectangle centred in a render of the other parity
+lands on a half coordinate. A single number applied to every axis would be the blanket threshold this
+arrangement exists to refuse.
+
+**The case matrix is the component's own contracted axes and nothing else.** It is derived through
+`scripts/lib/arena/api-emit.ts:enumCases(type)` over the members `MEMBERS` in
+`scripts/lib/arena/component-members.ts` says cross, so a variant the payload adds enters the matrix
+rather than landing in a silence, and both suites carry it as a literal the gate reads back. The
+density and the colour scheme stay out at their defaults, because each is the theme's axis rather
+than the component's; the activation box is the one axis that also renders at the base ladder, since
+no comfortable rung sits below the floor one of the two platforms states and a floor that never binds
+asserts an identity.
+
+**One predicate, because two instruments with two of them are not one instrument.** A painted pixel
+is one equal to the fill or to the edge the paint names for that case, and where both are transparent
+nothing the control draws is painted. That is a claim rather than a gap, and it is why the control is
+drawn over the contracted ground: without one, "the control painted nothing here" and "the capture
+never reached here" are one reading, and a ghost is the case where the difference is the claim.
+
+**What a face decides is out, and it is out structurally rather than for want of a better fixture.**
+`ArenaFonts` takes the family from the consumer, so a suite here falls back to whatever the platform
+registers, and the label's ink, its advance width and its baseline follow from that. `UNREACHED` in
+`scripts/check/arena/check-parity.ts` names each one with its reason beside the axes a render cannot
+ask for at all, and the two maps partition one declared set. `UNDECIDABLE` is the other map and it
+carries a case crossed with an axis rather than an axis, for the drawing that has no bound to measure:
+its entries are declared rather than derived, because the paint table lives in Kotlin and in Swift and
+a copy of it in TypeScript would be a third spelling of a decision that has two.
+
+**Nothing crosses between jobs.** A suite that dumped its geometry and a gate that compared the two
+dumps was weighed and refused, and the reason worth recording is not that a gate declares no `writes`
+nor that a third job would bill a macOS runner twice: it is that comparing two dumps makes one layer's
+number the other's expectation. Comparing each against the contract is what keeps the two peers.
+
+`bun run check:parity` holds it: both suites declare the derived matrix and carry a claim per axis
+under one name, `AXES` names the authority each claim measures against and is matched on the last
+member of the symbol at a word boundary, the unit each suite counts in is read out of its source, and
+every component either tree draws is enumerated on both layers or excepted with its reason.
+**What a green run does not say is that a suite measured the right node**, which is the admission
+`check:behaviour` makes about a symbol found in a source; what closes the gap is that the measuring
+runs inside `check:kotlin` and `check:swift`. Which instrument each layer reaches for is that layer's
+own, on [`compose/AGENTS.md`](./compose/AGENTS.md) and [`swiftui/AGENTS.md`](./swiftui/AGENTS.md).
+
 ## Where a new document goes
 
 **The contributor branch is this file**, and it answers [the convention published for that
