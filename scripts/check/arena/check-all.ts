@@ -50,6 +50,7 @@ export const GATES: Gate[] = [
   { name: 'check:portability', script: 'scripts/check/arena/check-portability.ts' },
   { name: 'check:script-types', script: 'scripts/check/arena/check-script-types.ts' },
   { name: 'check:target', script: 'scripts/check/arena/check-target.ts' },
+  { name: 'check:parity', script: 'scripts/check/arena/check-parity.ts' },
   { name: 'check:kotlin', script: 'scripts/check/compose/check-kotlin.ts' },
   { name: 'check:swift', script: 'scripts/check/swiftui/check-swift.ts' },
 ];
