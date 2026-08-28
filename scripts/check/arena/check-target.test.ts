@@ -4,6 +4,7 @@ import {
   floorIn, floorProblems, partitionProblems, staleUnboxedProblems, zeroComponentProblem,
   zeroMeasuredProblem, node,
 } from './check-target.ts';
+import { suiteFor } from '../../lib/arena/layer-trees.ts';
 
 const rungs = [
   { name: 'dz.ctl-h-sm', density: 'base' as const, points: 32 },
@@ -19,9 +20,16 @@ test('the floor is read out of the suite that measures with it, in each idiom', 
 });
 
 test('one number written twice in two languages is held equal to what this gate says it is', () => {
-  expect(floorProblems('compose', 48)).toEqual([]);
-  expect(floorProblems('compose', 40)[0]).toContain('measures against 40');
-  expect(floorProblems('compose', null)[0]).toContain('names no floor at all');
+  const suite = suiteFor('compose', 'ArenaButton');
+  expect(floorProblems('compose', 48, suite)).toEqual([]);
+  expect(floorProblems('compose', 40, suite)[0]).toContain('measures against 40');
+  expect(floorProblems('compose', 40, suite)[0]).toContain(suite);
+});
+
+test('a suite is resolved from the component name rather than named by hand', () => {
+  expect(suiteFor('compose', 'ArenaButton')).toBe('compose/src/test/kotlin/org/dravensoft/arena/ArenaButtonTest.kt');
+  expect(suiteFor('swiftui', 'ArenaButton')).toBe('swiftui/Tests/ArenaTokensTests/ArenaButtonTests.swift');
+  expect(node.reads).toContain(suiteFor('swiftui', 'ArenaButton'));
 });
 
 test('each floor is tied to the contracted rung whose own description argues it', () => {
@@ -40,7 +48,9 @@ test('a layer whose every rung already clears its floor makes the activation box
 test('every component either tree draws is measured on both layers or excepted with a reason', () => {
   const measured = new Map([['compose', new Set(['ArenaButton'])], ['swiftui', new Set(['ArenaButton'])]]);
   expect(partitionProblems(['ArenaButton'], measured)).toEqual([]);
-  expect(partitionProblems(['ArenaButton', 'ArenaSwitch'], measured)[0]).toContain('ArenaSwitch');
+  const missing = partitionProblems(['ArenaButton', 'ArenaSwitch'], measured);
+  expect(missing[0]).toContain('ArenaSwitch');
+  expect(missing[0]).toContain(suiteFor('compose', 'ArenaSwitch'));
   expect(staleUnboxedProblems(['ArenaButton'])).toEqual([]);
 });
 

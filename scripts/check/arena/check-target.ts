@@ -5,7 +5,8 @@
  * walk finds is measured on both layers or excepted in UNBOXED with its reason. A suite named here
  * is a suite that exists, never one that measured the right node, which is the admission
  * check:behaviour makes about a symbol found in a source; what closes the gap is that the
- * measuring runs inside check:kotlin and check:swift. */
+ * measuring runs inside check:kotlin and check:swift. A suite is resolved from the component's own
+ * name rather than named here, so a component that lands owes one without this gate being edited. */
 
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -15,7 +16,7 @@ import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { captured } from '../../utils/captured.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
-import { EXTENSIONS, SUITE_ROOTS, dirFor } from '../../lib/arena/layer-trees.ts';
+import { EXTENSIONS, dirFor, suiteFor } from '../../lib/arena/layer-trees.ts';
 import { CONTRACTS_DIR, DENSITIES, type Density } from '../../lib/contracts/payload.ts';
 import { densityTokens } from '../../lib/arena/emit.ts';
 import { tokensOf } from '../../generate/arena/generate-tokens.ts';
@@ -37,11 +38,6 @@ export const FLOORS: Record<Layer, { points: number; why: string }> = {
 export const FLOOR_PATTERNS: Record<Layer, RegExp> = {
   compose: /^\s*private val TOUCH_FLOOR: Dp = (\d+)\.dp$/,
   swiftui: /^\s*private let touchFloor: CGFloat = (\d+)$/,
-};
-
-export const SUITES: Record<Layer, string> = {
-  compose: `${SUITE_ROOTS.compose}/ArenaButtonTest.kt`,
-  swiftui: `${SUITE_ROOTS.swiftui}/ArenaButtonTests.swift`,
 };
 
 export const HEIGHT_MARK = 'height.';
@@ -70,7 +66,10 @@ export const node = {
     `${CONTRACTS_DIR}/contracts/design/spacing.json`,
     `${CONTRACTS_DIR}/contracts/design/density.compact.json`,
     `${CONTRACTS_DIR}/contracts/design/density.comfortable.json`,
-    ...LAYERS.flatMap((layer) => [`${dirFor(layer, 'components')}/**`, SUITES[layer]]),
+    ...LAYERS.flatMap((layer) => [
+      `${dirFor(layer, 'components')}/**`,
+      ...componentsIn(layer).map((component) => suiteFor(layer, component)),
+    ]),
   ],
   writes: [],
   feeds: [],
@@ -86,15 +85,11 @@ export function floorIn(source: string, pattern: RegExp) {
   return null;
 }
 
-export function floorProblems(layer: Layer, read: number | null, floors = FLOORS, suites = SUITES) {
+export function floorProblems(layer: Layer, read: number, suite: string, floors = FLOORS) {
   const floor = floors[layer];
-  if (read === null) {
-    return [`${suites[layer]} names no floor at all, so the suite that measures the activation box measures it `
-      + `against nothing this gate can read: ${floor.why}`];
-  }
   if (read !== floor.points) {
-    return [`${suites[layer]} measures against ${read} and this gate states ${floor.points}, so one number is `
-      + `written twice in two places and the two disagree: ${floor.why}`];
+    return [`${suite} measures against ${read} and this gate states ${floor.points}, so one number is written `
+      + `twice in two places and the two disagree: ${floor.why}`];
   }
   return [];
 }
@@ -134,13 +129,13 @@ export function partitionProblems(
   components: readonly string[],
   measured: ReadonlyMap<string, ReadonlySet<string>>,
   unboxed = UNBOXED,
-  suites = SUITES,
 ) {
   return sortedByCodeUnit(components.flatMap((component) => {
     if (unboxed.has(component)) return [];
     return LAYERS.filter((layer) => !(measured.get(layer) ?? new Set<string>()).has(component))
-      .map((layer) => `${component} is drawn and ${suites[layer]} measures no activation box for it, and UNBOXED `
-        + 'excuses none. A control whose target is held on one layer and not the other offers a thumb two libraries');
+      .map((layer) => `${component} is drawn and ${suiteFor(layer, component)} names no floor, so nothing measures `
+        + 'an activation box for it and UNBOXED excuses none. A control whose target is held on one layer and not '
+        + 'the other offers a thumb two libraries');
   }));
 }
 
@@ -198,12 +193,18 @@ function main() {
   let floorsRead = 0;
 
   for (const layer of LAYERS) {
-    const path = join(root, SUITES[layer]);
-    const source = existsSync(path) ? readFileSync(path, 'utf8') : '';
-    const floor = floorIn(source, FLOOR_PATTERNS[layer]);
-    if (floor !== null) floorsRead += 1;
-    errs.push(...floorProblems(layer, floor));
-    measured.set(layer, new Set(components.filter((component) => source.includes(component))));
+    const found = new Set<string>();
+    for (const component of components) {
+      const suite = suiteFor(layer, component);
+      const path = join(root, suite);
+      const source = existsSync(path) ? readFileSync(path, 'utf8') : '';
+      const floor = floorIn(source, FLOOR_PATTERNS[layer]);
+      if (floor === null) continue;
+      floorsRead += 1;
+      found.add(component);
+      errs.push(...floorProblems(layer, floor, suite));
+    }
+    measured.set(layer, found);
   }
 
   const noComponent = zeroComponentProblem(components.length);

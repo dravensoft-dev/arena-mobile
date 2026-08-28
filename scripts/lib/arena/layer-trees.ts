@@ -24,3 +24,7 @@ export const SUITE_SUFFIXES: Record<Layer, string> = { compose: 'Test', swiftui:
 export function dirFor(layer: Layer, partition: Partition) {
   return `${ROOTS[layer]}/${partition}`;
 }
+
+export function suiteFor(layer: Layer, component: string) {
+  return `${SUITE_ROOTS[layer]}/${component}${SUITE_SUFFIXES[layer]}${EXTENSIONS[layer]}`;
+}
