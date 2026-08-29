@@ -76,7 +76,7 @@ public struct ArenaButton: View {
         return ArenaControl.target(painted, floor: floor)
     }
 
-    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: ArenaControl.radius) }
+    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: ArenaControl.radius + ArenaTokens.focusOffset) }
 
     private var ring: CGFloat { ArenaContrast.focusWidth(increasedContrast) }
 
