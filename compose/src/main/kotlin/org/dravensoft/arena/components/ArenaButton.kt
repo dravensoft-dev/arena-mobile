@@ -87,7 +87,7 @@ public fun ArenaButton(
     val inactive = disabled || loading
     val painted = ArenaScale.control(ArenaControl.height(size, density), LocalDensity.current.fontScale)
     val box = if (targetFloor == null) painted else ArenaControl.target(painted, targetFloor)
-    val shape = RoundedCornerShape(ArenaControl.radius + ArenaTokens.focusOffset)
+    val shape = RoundedCornerShape(ArenaControl.radius)
     val ring = ArenaContrast.focusWidth(increasedContrast)
     val gutter = ArenaTokens.focusOffset + ring
     var focused by remember { mutableStateOf(false) }
