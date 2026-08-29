@@ -182,14 +182,16 @@ private func gutter(_ contrast: Bool) -> CGFloat {
     for (variant, size) in cases where variant != .ghost {
         let scheme = ArenaColorScheme.dark
         let pixels = try captured(control(variant, size))
+        let outlined = ArenaButtonPaint.fill(variant, scheme) == Color.clear
         let fill = inked(ArenaButtonPaint.fill(variant, scheme))
         let edge = inked(ArenaButtonPaint.edge(variant, scheme))
         let from = px(gutter(false))
         let top = try #require((0..<pixels.height).first { isPainted(pixels.at(pixels.width / 2, $0), fill, edge) })
         let cornerRadius = (from..<pixels.width).prefix { !isPainted(pixels.at($0, top), fill, edge) }.count
         let step = px(ArenaControl.radius)
-        #expect(abs(cornerRadius - step) <= 1,
-                "\(variant) \(size) leaves \(cornerRadius) column(s) unpainted at the top row of its rectangle and ArenaControl.radius names \(step)")
+        let slack = 1 + (outlined ? px(ArenaContrast.border(false)) : 0)
+        #expect(abs(cornerRadius - step) <= slack,
+                "\(variant) \(size) leaves \(cornerRadius) column(s) unpainted at the top row of its rectangle and ArenaControl.radius names \(step); a variant drawing no ground offers only its stroke there, and this rasteriser reaches full coverage a stroke further in")
     }
 }
 
