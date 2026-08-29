@@ -86,7 +86,7 @@ public fun ArenaButton(
     val density = ArenaTheme.density
     val inactive = disabled || loading
     val painted = ArenaScale.control(ArenaControl.height(size, density), LocalDensity.current.fontScale)
-    val box = if (targetFloor == null) painted else ArenaControl.target(painted, targetFloor)
+    val box = if (targetFloor == null) painted else ArenaControl.target(painted, painted)
     val shape = RoundedCornerShape(ArenaControl.radius)
     val ring = ArenaContrast.focusWidth(increasedContrast)
     val gutter = ArenaTokens.focusOffset + ring
@@ -95,7 +95,7 @@ public fun ArenaButton(
         modifier = modifier
             .then(if (full) Modifier.fillMaxWidth() else Modifier)
             .onFocusChanged { focused = it.isFocused }
-            .sizeIn(minHeight = painted)
+            .sizeIn(minHeight = box)
             .clickable(enabled = !inactive, onClick = click)
             .semantics {
                 role = Role.Button
