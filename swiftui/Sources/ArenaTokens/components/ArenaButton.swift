@@ -72,8 +72,8 @@ public struct ArenaButton: View {
     private var painted: CGFloat { ArenaScale.control(ArenaControl.height(size, density)) }
 
     private var box: CGFloat {
-        guard targetFloor != nil else { return painted }
-        return ArenaControl.target(painted, floor: painted)
+        guard let floor = targetFloor else { return painted }
+        return ArenaControl.target(painted, floor: floor)
     }
 
     private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: ArenaControl.radius) }
@@ -92,7 +92,7 @@ public struct ArenaButton: View {
                     .fontWeight(ArenaControl.weight)
                     .foregroundStyle(ArenaButtonPaint.ink(variant, colors))
             }
-            .frame(maxWidth: full ? .infinity : nil, minHeight: painted)
+            .frame(maxWidth: full ? .infinity : nil, minHeight: box)
             .padding(.horizontal, ArenaControl.padding)
             .background(shape.fill(ArenaButtonPaint.fill(variant, colors)))
             .overlay(shape.strokeBorder(ArenaButtonPaint.edge(variant, colors), lineWidth: ArenaContrast.border(increasedContrast)))
