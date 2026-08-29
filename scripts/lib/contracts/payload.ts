@@ -8,6 +8,7 @@
 import { join } from 'node:path';
 import { readJson } from '../../utils/read-json.ts';
 import { byCodeUnit } from '../../utils/compare.ts';
+import { captured } from '../../utils/captured.ts';
 
 export const PACKAGE_NAME = '@dravensoft/arena-contracts';
 export const CONTRACTS_DIR = '.contracts';
@@ -58,6 +59,7 @@ export type Token = {
   script?: boolean;
   cssUnit?: string;
   values?: string[];
+  weights?: [number, number];
 };
 
 type Node = Record<string, unknown>;
@@ -112,6 +114,7 @@ export function collect(node: Node, trail: string[], file: string, inherited: Pa
       script: own.script === true ? true : undefined,
       cssUnit: own.cssUnit as string | undefined,
       values: own.values as string[] | undefined,
+      weights: own.weights as [number, number] | undefined,
     });
     return into;
   }
@@ -138,7 +141,7 @@ const ALIAS = /^\{([^}]+)\}$/;
 export function aliasTarget(value: unknown) {
   if (typeof value !== 'string') return null;
   const match = ALIAS.exec(value.trim());
-  return match ? match[1] : null;
+  return match ? captured(match) : null;
 }
 
 export function resolveAliases(tokens: Token[]) {

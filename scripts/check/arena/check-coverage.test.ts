@@ -21,10 +21,12 @@ test('UNMAPPED names a composite member that exists, and each entry carries its 
   }
 });
 
+const nameOf = (key: string) => (key.includes('#') ? key.slice(0, key.indexOf('#')) : key);
+
 test('an UNMAPPED entry outliving the member it excuses fails the gate that reads it', () => {
-  const carried = [...UNMAPPED.keys()].map((key) => shadow(key.split('#')[0], { spread: { value: -2, unit: 'px' } }));
+  const carried = [...UNMAPPED.keys()].map((key) => shadow(nameOf(key), { spread: { value: -2, unit: 'px' } }));
   expect(staleUnmappedProblems(carried)).toEqual([]);
-  const without = [...UNMAPPED.keys()].map((key) => shadow(key.split('#')[0], {}));
+  const without = [...UNMAPPED.keys()].map((key) => shadow(nameOf(key), {}));
   expect(staleUnmappedProblems(without)[0]).toContain('carries no spread member');
   expect(staleUnmappedProblems([])[0]).toContain('the payload carries no token');
 });

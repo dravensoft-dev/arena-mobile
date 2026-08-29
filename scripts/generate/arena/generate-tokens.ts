@@ -10,10 +10,14 @@ import { isMainModule } from '../../utils/main-module.ts';
 import { repoRoot } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR, DENSITIES, loadTokens, readManifest, resolveAliases, THEMES, type Token } from '../../lib/contracts/payload.ts';
 import { staleUnmappedProblems, type Emitted } from '../../lib/arena/bridge.ts';
-import { banner, densityTokens, kdoc, scaleTokens, shapeProblems, themeTokens, tripleSlash } from '../../lib/arena/emit.ts';
+import { dirFor } from '../../lib/arena/layer-trees.ts';
+import {
+  banner, densityTokens, docTextFor, kdoc, scaleTokens, shapeProblems, staleRephrasedProblems,
+  themeTokens, tripleSlash,
+} from '../../lib/arena/emit.ts';
 
-export const KOTLIN_DIR = 'compose/src/main/kotlin/org/dravensoft/arena/tokens';
-export const SWIFT_DIR = 'swiftui/Sources/ArenaTokens';
+export const KOTLIN_DIR = dirFor('compose', 'tokens');
+export const SWIFT_DIR = dirFor('swiftui', 'tokens');
 export const KOTLIN_PACKAGE = 'org.dravensoft.arena.tokens';
 
 export const TARGETS = [
@@ -23,13 +27,13 @@ export const TARGETS = [
   `${SWIFT_DIR}/ArenaTokens.generated.swift`,
   `${SWIFT_DIR}/ArenaColors.generated.swift`,
   `${SWIFT_DIR}/ArenaDensity.generated.swift`,
-];
+] as const;
 
 export const node = {
   name: 'generate:tokens',
   reads: [`${CONTRACTS_DIR}/arena.contracts.json`, `${CONTRACTS_DIR}/contracts/design/**`],
-  writes: TARGETS,
-  feeds: ['check:emit', 'check:coverage', 'check:collisions', 'check:doc-comments', 'check:generated', 'check:kotlin', 'check:swift'],
+  writes: [...TARGETS],
+  feeds: ['check:emit', 'check:coverage', 'check:collisions', 'check:doc-comments', 'check:generated', 'check:structure', 'check:kotlin', 'check:swift'],
 };
 
 const KOTLIN_IMPORTS = new Map([
@@ -60,7 +64,7 @@ function kotlinHeader(fields: Emitted[], extra: string[] = []) {
 
 function kotlinObject(fields: Emitted[]) {
   const body = fields.flatMap((field) => [
-    ...kdoc(field.token.description, '    '),
+    ...kdoc(docTextFor(field.token.name, field.token.description), '    '),
     `    public val ${field.identifier}: ${field.kotlinType} = ${field.kotlinLiteral}`,
   ]);
   return [kotlinHeader(fields), 'public object ArenaTokens {', ...body, '}', ''].join('\n');
@@ -68,11 +72,9 @@ function kotlinObject(fields: Emitted[]) {
 
 function kotlinRecord(name: string, fields: Emitted[], instances: { name: string; fields: Emitted[] }[]) {
   const members = fields.flatMap((field, index) => [
-    ...kdoc(field.token.description, '    '),
-    `    public val ${field.identifier}: ${field.kotlinType},${index === fields.length - 1 ? '' : ''}`,
+    ...kdoc(docTextFor(field.token.name, field.token.description), '    '),
+    `    public val ${field.identifier}: ${field.kotlinType}${index === fields.length - 1 ? '' : ','}`,
   ]);
-  const last = members.length - 1;
-  members[last] = members[last].replace(/,$/, '');
   const bodies = instances.flatMap((instance) => [
     '',
     `public val ${instance.name}: ${name} = ${name}(`,
@@ -96,7 +98,7 @@ function swiftHeader() {
 
 function swiftEnum(fields: Emitted[]) {
   const body = fields.flatMap((field) => [
-    ...tripleSlash(field.token.description, '    '),
+    ...tripleSlash(docTextFor(field.token.name, field.token.description), '    '),
     `    public static let ${field.identifier}: ${field.swiftType} = ${field.swiftLiteral}`,
   ]);
   return [swiftHeader(), 'public enum ArenaTokens {', ...body, '}', ''].join('\n');
@@ -104,7 +106,7 @@ function swiftEnum(fields: Emitted[]) {
 
 function swiftRecord(name: string, fields: Emitted[], instances: { name: string; fields: Emitted[] }[]) {
   const members = fields.flatMap((field) => [
-    ...tripleSlash(field.token.description, '    '),
+    ...tripleSlash(docTextFor(field.token.name, field.token.description), '    '),
     `    public let ${field.identifier}: ${field.swiftType}`,
   ]);
   const parameters = fields.map((field, index) => `        ${field.identifier}: ${field.swiftType}${index === fields.length - 1 ? '' : ','}`);
@@ -138,19 +140,25 @@ export function emitAll(tokens: Token[]) {
   const scales = scaleTokens(tokens);
   const themes = THEMES.map((theme) => ({ name: theme, fields: themeTokens(tokens, theme) }));
   const densities = DENSITIES.map((density) => ({ name: density, fields: densityTokens(tokens, density) }));
+  const [firstTheme] = themes;
+  const [firstDensity] = densities;
+  if (!firstTheme || !firstDensity) {
+    throw new Error('emitAll: THEMES and DENSITIES each name at least one entry, and the record '
+      + 'the emit builds takes its field list from the first of them');
+  }
   const files = new Map<string, string>();
   files.set(TARGETS[0], kotlinObject(scales));
-  files.set(TARGETS[1], kotlinRecord('ArenaColorScheme', themes[0].fields, themes.map((one) => ({
-    name: `Arena${one.name[0].toUpperCase()}${one.name.slice(1)}Colors`,
+  files.set(TARGETS[1], kotlinRecord('ArenaColorScheme', firstTheme.fields, themes.map((one) => ({
+    name: `Arena${one.name.charAt(0).toUpperCase()}${one.name.slice(1)}Colors`,
     fields: one.fields,
   }))));
-  files.set(TARGETS[2], kotlinRecord('ArenaDensityScale', densities[0].fields, densities.map((one) => ({
-    name: `Arena${one.name[0].toUpperCase()}${one.name.slice(1)}Density`,
+  files.set(TARGETS[2], kotlinRecord('ArenaDensityScale', firstDensity.fields, densities.map((one) => ({
+    name: `Arena${one.name.charAt(0).toUpperCase()}${one.name.slice(1)}Density`,
     fields: one.fields,
   }))));
   files.set(TARGETS[3], swiftEnum(scales));
-  files.set(TARGETS[4], swiftRecord('ArenaColorScheme', themes[0].fields, themes));
-  files.set(TARGETS[5], swiftRecord('ArenaDensityScale', densities[0].fields, densities));
+  files.set(TARGETS[4], swiftRecord('ArenaColorScheme', firstTheme.fields, themes));
+  files.set(TARGETS[5], swiftRecord('ArenaDensityScale', firstDensity.fields, densities));
   return files;
 }
 
@@ -165,7 +173,7 @@ export function tokensOf(root = repoRoot) {
 
 function main() {
   const tokens = tokensOf();
-  const problems = [...shapeProblems(tokens), ...staleUnmappedProblems(tokens)];
+  const problems = [...shapeProblems(tokens), ...staleUnmappedProblems(tokens), ...staleRephrasedProblems(tokens)];
   if (problems.length) {
     console.error(`generate-tokens: ${problems.length} problem(s) in the pinned payload\n`);
     for (const problem of problems) console.error(`  ${problem}`);

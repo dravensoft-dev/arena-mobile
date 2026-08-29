@@ -94,5 +94,7 @@ repository secrets.
 ## What reads this directory
 
 `check:docs` reads every `.md` here and holds it to the size limit and the punctuation rule,
-the same as anywhere else in the tree. It does not read `.yml`: nothing does, so the workflows
-themselves are held only by GitHub.
+the same as anywhere else in the tree. `check:workflow` reads the `.yml`: every `bun run` name
+a job types is a script `package.json` declares, every script it runs by path is in the tree,
+every `--domain=` names a domain, and every job declared here sits in the `needs` of this
+workflow's gate job, which is the sentence above held rather than written down.

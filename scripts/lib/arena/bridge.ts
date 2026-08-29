@@ -54,11 +54,11 @@ function em(value: number) {
 
 export function familyHead(value: unknown) {
   const list = Array.isArray(value) ? value.map(String) : [String(value)];
-  const named = list.filter((one) => !CSS_GENERIC_FAMILIES.has(one));
-  if (named.length === 0) {
+  const [head] = list.filter((one) => !CSS_GENERIC_FAMILIES.has(one));
+  if (head === undefined) {
     throw new Error(`a fontFamily of ${JSON.stringify(list)} names only CSS generic families, and none of them names anything on either platform`);
   }
-  return named[0];
+  return head;
 }
 
 type ColorValue = { colorSpace: string; components: number[]; alpha?: number };
@@ -75,6 +75,9 @@ export function kotlinColor(value: unknown, where: string) {
   const color = value as ColorValue;
   if (color?.colorSpace !== 'srgb') throw new Error(`${where} declares colorSpace ${color?.colorSpace}, and the bridge is stated for srgb`);
   const [r, g, b] = color.components;
+  if (r === undefined || g === undefined || b === undefined) {
+    throw new Error(`${where} declares ${color.components.length} colour component(s), and the bridge is stated for three`);
+  }
   const a = color.alpha ?? 1;
   return `Color(red = ${kotlinFloat(r)}, green = ${kotlinFloat(g)}, blue = ${kotlinFloat(b)}, alpha = ${kotlinFloat(a)})`;
 }
@@ -83,6 +86,9 @@ export function swiftColor(value: unknown, where: string) {
   const color = value as ColorValue;
   if (color?.colorSpace !== 'srgb') throw new Error(`${where} declares colorSpace ${color?.colorSpace}, and the bridge is stated for srgb`);
   const [r, g, b] = color.components;
+  if (r === undefined || g === undefined || b === undefined) {
+    throw new Error(`${where} declares ${color.components.length} colour component(s), and the bridge is stated for three`);
+  }
   const a = color.alpha ?? 1;
   return `Color(.sRGB, red: ${num(r)}, green: ${num(g)}, blue: ${num(b)}, opacity: ${num(a)})`;
 }
@@ -108,13 +114,16 @@ export function bridge(token: Token, identifier: string): Emitted {
     }
     case 'cubicBezier': {
       const curve = token.value as number[];
-      if (curve.length !== 4) throw new Error(`${where} is a cubicBezier of ${curve.length} numbers`);
+      const [x1, y1, x2, y2] = curve;
+      if (curve.length !== 4 || x1 === undefined || y1 === undefined || x2 === undefined || y2 === undefined) {
+        throw new Error(`${where} is a cubicBezier of ${curve.length} numbers`);
+      }
       return {
         ...base,
         kotlinType: 'ArenaEasing',
         kotlinLiteral: `ArenaEasing(${curve.map(kotlinFloat).join(', ')})`,
         swiftType: 'ArenaEasing',
-        swiftLiteral: `ArenaEasing(x1: ${num(curve[0])}, y1: ${num(curve[1])}, x2: ${num(curve[2])}, y2: ${num(curve[3])})`,
+        swiftLiteral: `ArenaEasing(x1: ${num(x1)}, y1: ${num(y1)}, x2: ${num(x2)}, y2: ${num(y2)})`,
       };
     }
     case 'fontFamily': {
@@ -159,7 +168,9 @@ export function bridge(token: Token, identifier: string): Emitted {
 export function staleUnmappedProblems(tokens: Token[]) {
   const byName = new Map(tokens.map((token) => [token.name, token]));
   return [...UNMAPPED].flatMap(([key, why]) => {
-    const [name, member] = key.split('#', 2);
+    const hash = key.indexOf('#');
+    const name = hash === -1 ? key : key.slice(0, hash);
+    const member = hash === -1 ? '' : key.slice(hash + 1);
     const token = byName.get(name);
     if (!token) return [`UNMAPPED names ${key}, and the payload carries no token ${name}: ${why}`];
     if (member && !(member in (token.value as Record<string, unknown>))) {

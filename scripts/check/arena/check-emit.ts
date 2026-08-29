@@ -8,10 +8,11 @@ import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { TARGETS, emitAll, tokensOf } from '../../generate/arena/generate-tokens.ts';
+import { API_TARGETS, apiTypesOf, emitApi } from '../../generate/arena/generate-api-types.ts';
 
 export const node = {
   name: 'check:emit',
-  reads: TARGETS,
+  reads: [...TARGETS, ...API_TARGETS],
   writes: [],
   feeds: [],
 };
@@ -38,7 +39,7 @@ export function emitProblems(expected: Map<string, string>, onDisk: (target: str
 }
 
 function main() {
-  const expected = emitAll(tokensOf(root));
+  const expected = new Map([...emitAll(tokensOf(root)), ...emitApi(apiTypesOf(root))]);
   const errs = emitProblems(expected, (target) => {
     const full = join(root, target);
     return existsSync(full) ? readFileSync(full, 'utf8') : null;

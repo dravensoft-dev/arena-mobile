@@ -21,20 +21,49 @@ export const GATES: Gate[] = [
   { name: 'check:user-scale', script: 'scripts/check/contracts/check-user-scale.ts' },
   { name: 'check:emit', script: 'scripts/check/arena/check-emit.ts' },
   { name: 'check:coverage', script: 'scripts/check/arena/check-coverage.ts' },
+  { name: 'check:api-types', script: 'scripts/check/arena/check-api-types.ts' },
+  { name: 'check:behaviour', script: 'scripts/check/arena/check-behaviour.ts' },
   { name: 'check:collisions', script: 'scripts/check/arena/check-collisions.ts' },
   { name: 'check:literals', script: 'scripts/check/arena/check-literals.ts' },
+  { name: 'check:members', script: 'scripts/check/arena/check-members.ts' },
+  { name: 'check:composition', script: 'scripts/check/arena/check-composition.ts' },
+  { name: 'check:fonts', script: 'scripts/check/arena/check-fonts.ts' },
+  { name: 'check:environment', script: 'scripts/check/arena/check-environment.ts' },
+  { name: 'check:contrast', script: 'scripts/check/arena/check-contrast.ts' },
+  { name: 'check:control', script: 'scripts/check/arena/check-control.ts' },
+  { name: 'check:motion', script: 'scripts/check/arena/check-motion.ts' },
+  { name: 'check:structure', script: 'scripts/check/arena/check-structure.ts' },
+  { name: 'check:seams', script: 'scripts/check/arena/check-seams.ts' },
+  { name: 'check:suites', script: 'scripts/check/arena/check-suites.ts' },
+  { name: 'check:affordances', script: 'scripts/check/arena/check-affordances.ts' },
   { name: 'check:doc-comments', script: 'scripts/check/arena/check-doc-comments.ts' },
   { name: 'check:docs', script: 'scripts/check/arena/check-docs.ts' },
   { name: 'check:citations', script: 'scripts/check/arena/check-citations.ts' },
+  { name: 'check:duplication', script: 'scripts/check/arena/check-duplication.ts' },
+  { name: 'check:vocabulary', script: 'scripts/check/arena/check-vocabulary.ts' },
   { name: 'check:generated', script: 'scripts/check/arena/check-generated.ts' },
   { name: 'check:community', script: 'scripts/check/arena/check-community.ts' },
+  { name: 'check:workflow', script: 'scripts/check/arena/check-workflow.ts' },
   { name: 'check:agents', script: 'scripts/check/arena/check-agents.ts' },
   { name: 'check:deadlines', script: 'scripts/check/arena/check-deadlines.ts' },
   { name: 'check:graph', script: 'scripts/check/arena/check-graph.ts' },
   { name: 'check:portability', script: 'scripts/check/arena/check-portability.ts' },
+  { name: 'check:script-types', script: 'scripts/check/arena/check-script-types.ts' },
+  { name: 'check:target', script: 'scripts/check/arena/check-target.ts' },
+  { name: 'check:parity', script: 'scripts/check/arena/check-parity.ts' },
   { name: 'check:kotlin', script: 'scripts/check/compose/check-kotlin.ts' },
   { name: 'check:swift', script: 'scripts/check/swiftui/check-swift.ts' },
 ];
+
+export const TEST_STEP: Gate = { name: 'test', script: 'scripts/ci/arena/run-suite.ts' };
+
+export const FLAGS = ['--no-tests'];
+
+export function unknownArguments(argv: readonly string[]) {
+  return argv
+    .filter((one) => !one.startsWith('--domain=') && !FLAGS.includes(one))
+    .map((one) => `${one} names no argument this runner takes, and it takes --domain=<name> and ${FLAGS.join(', ')}`);
+}
 
 export function domainOf(gate: Gate): Domain | null {
   const found = DOMAINS.find((domain) => gate.script.startsWith(`scripts/check/${domain}/`));
@@ -60,6 +89,11 @@ export function domainArgument(argv: readonly string[]) {
   return found ? found.slice('--domain='.length) : null;
 }
 
+export function wantsTests(argv: readonly string[]) {
+  if (argv.some((one) => FLAGS.includes(one))) return false;
+  return domainArgument(argv) === null;
+}
+
 export type Verdict = 'PASS' | 'FAIL' | 'SKIP';
 
 export function verdictFor(status: number): Verdict {
@@ -81,7 +115,14 @@ export function summaryLine(results: { verdict: Verdict }[]) {
 }
 
 function main() {
-  const domain = domainArgument(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  const unknown = unknownArguments(argv);
+  if (unknown.length) {
+    for (const problem of unknown) console.error(`check-all: ${problem}`);
+    process.exit(1);
+  }
+
+  const domain = domainArgument(argv);
   const bad = domainProblems();
   if (bad.length) {
     console.error(`check-all: ${bad.length} gate(s) outside the domain grid\n`);
@@ -93,13 +134,16 @@ function main() {
     process.exit(1);
   }
 
-  const running = selected(GATES, domain);
-  const results = running.map((gate) => {
-    const child = spawnSync(process.execPath, [join(root, gate.script)], { cwd: root, stdio: 'inherit' });
+  const run = (step: Gate) => {
+    const child = spawnSync(process.execPath, [join(root, step.script)], { cwd: root, stdio: 'inherit' });
     const verdict = verdictFor(child.status ?? 1);
-    console.log(`  ${verdict.padEnd(5)} ${gate.name}`);
-    return { gate, verdict };
-  });
+    console.log(`  ${verdict.padEnd(5)} ${step.name}`);
+    return { gate: step, verdict };
+  };
+
+  const running = selected(GATES, domain);
+  const results = running.map(run);
+  if (wantsTests(argv)) results.push(run(TEST_STEP));
 
   console.log('');
   console.log(summaryLine(results));

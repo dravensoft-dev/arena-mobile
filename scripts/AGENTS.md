@@ -14,9 +14,11 @@ scripts/
 ```
 
 **There is no `build/` phase, and the absence is a decision rather than an omission.** Arena
-has one because it compiles JSX, TypeScript and a CSS layer. Here nothing is compiled by a
-script: the two things that compile are Gradle and SwiftPM, and both read committed sources.
-`bun run build` is the verb a contributor types and it runs the graph, not a directory.
+has one because it compiles JSX, TypeScript and a CSS layer into artifacts it ships. Nothing
+here compiles into one: `check:script-types` spawns a compiler and the compiler emits nothing,
+because a typecheck is a judgement rather than a build, and the two things that produce an
+artifact are Gradle and SwiftPM, both reading committed sources. `bun run build` is the verb a
+contributor types and it runs the graph, not a directory.
 
 `utils/` and `graph/` have an `AGENTS.md` and no domain directories.
 [`scripts/utils/AGENTS.md`](./utils/AGENTS.md) says what makes a module a util rather than a library,
@@ -83,10 +85,19 @@ may live:
   writes two different files on two machines and the `git diff --exit-code` in every workflow
   calls the second one an emit out of step.
 - **A gate that cannot run says so in one spelling.** `scripts/lib/arena/check-vars.ts:cannotRun`.
-  A rule spelled once per gate is a rule that holds for some of them.
+  Why one spelling rather than each gate's own is stated once on
+  [`scripts/check/AGENTS.md`](./check/AGENTS.md).
 
 **A wait's bound is a `deadline` and never a bare number**, declared in the file that owns the
 wait. `scripts/lib/arena/deadline.ts` carries the argument, and `check:deadlines` holds it.
+
+**Every script here answers to a compiler.** `scripts/tsconfig.check.json` is the project, it
+carries no allowance and no relaxation, and `check:script-types` makes two claims about it: that
+it compiles, and that its globs reach every `.ts` on disk under this directory. The second is
+the one that goes wrong quietly, because a project whose globs match nothing compiles nothing
+and reports clean. A capture read after a match goes through
+`scripts/utils/captured.ts:captured(match, index)`, which fails at the read, rather than through
+`?? ''`, which turns a pattern that lost its group into an empty string nobody ever sees.
 
 **A file a script writes is named `<stem>.generated.<ext>`**, so the name says so and no
 reader has to open it. Whether it is tracked is the separate question
@@ -112,8 +123,15 @@ of the four domains, so a gate landing outside it fails rather than running unno
 
 ## Running them
 
-`bun run check` runs every gate without stopping at the first failure, so one sweep reports
-every problem rather than the first.
+`bun run check` runs every gate and then the suites, without stopping at the first failure, so
+one sweep reports every problem rather than the first and a contributor's one command proves
+what they read it as proving. `bun run test` runs the suites alone.
+
+**A run narrowed by `--domain=` leaves the suites to the job that owns them**, and `--no-tests`
+opts out of a full one. That is why the workflows need no edit: each job already narrows, and
+the tooling job runs `bun run test` itself. An argument outside that set is a failure rather
+than a shrug, because `--no-test` silently ignored is a flag that runs the tests it was typed
+to skip.
 
 **When it is expected: once, when a change is finished, and not before every commit.** The
 individual gates are cheap and stay available per commit.

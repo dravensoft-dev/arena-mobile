@@ -8,6 +8,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
+import { captured } from '../../utils/captured.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { documents } from './check-docs.ts';
 
@@ -37,10 +38,10 @@ export const node = {
 export function citationsIn(rel: string, markdown: string) {
   const found: { rel: string; path: string; member?: string; kind: 'span' | 'link' }[] = [];
   for (const match of markdown.matchAll(SPAN)) {
-    found.push({ rel, path: match[1], member: match[2], kind: 'span' });
+    found.push({ rel, path: captured(match), member: match[2], kind: 'span' });
   }
   for (const match of markdown.matchAll(LINK)) {
-    const target = match[1];
+    const target = captured(match);
     if (/^[a-z]+:/.test(target) || target.startsWith('//')) continue;
     found.push({ rel, path: target, kind: 'link' });
   }

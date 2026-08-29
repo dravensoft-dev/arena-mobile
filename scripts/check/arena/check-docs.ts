@@ -92,6 +92,7 @@ export function commentProblems(rel: string, source: string) {
   }
   const errs: string[] = [];
   const [header, ...rest] = found;
+  if (header === undefined) return errs;
   if (header.line !== 1 || !header.leading) {
     errs.push(`${rel} carries its one allowed comment at line ${header.line}, and the allowance is a file HEADER`);
   }

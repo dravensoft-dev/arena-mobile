@@ -6,6 +6,7 @@
  * carry is a fact about that runner rather than one worth writing down. */
 
 import { isMainModule } from '../../utils/main-module.ts';
+import { captured } from '../../utils/captured.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { findHostBinary } from '../../lib/arena/host-binary.ts';
 import { runCapturing } from '../../lib/arena/child-output.ts';
@@ -54,8 +55,10 @@ export function pickSimulator(listing: string) {
     const found = (devices[runtime.key] ?? [])
       .filter((device) => device.isAvailable !== false && device.name.startsWith('iPhone'));
     if (found.length === 0) continue;
-    const version = `${runtime.version[1]}.${runtime.version[2]}`;
-    return { udid: found[0].udid, label: `${found[0].name}, iOS ${version}` };
+    const [first] = found;
+    if (first === undefined) continue;
+    const version = `${captured(runtime.version)}.${captured(runtime.version, 2)}`;
+    return { udid: first.udid, label: `${first.name}, iOS ${version}` };
   }
   return null;
 }

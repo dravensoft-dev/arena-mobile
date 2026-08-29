@@ -13,11 +13,21 @@ directory, and a sibling suite named for it, covering it. It exports its logic a
 returning problem strings, and its private `main()` prints them and exits non-zero. That is
 why a suite can assert on a gate's exception map by name without running the gate.
 
-**A reason-carrying map is part of the gate, not documentation of it.** `UNMAPPED`,
-`NOT_A_VALUE`, `SCOPES`, `EXEMPT`, `UNMARKED`, `UNTRACKED`, `SIZE_ALLOWANCE`, `DEPARTURES`,
-`NEVER_SUBSCRIBES`: each entry names a case and says why, as a string value rather than a
-comment, and **a stale entry fails the gate itself**. That is what keeps an exception list
-from outliving the exception, and it is why a debt lives beside its gate rather than in prose.
+**A reason-carrying map is part of the gate, not documentation of it.** `NOT_A_VALUE` in
+`scripts/lib/contracts/payload.ts` is the shape and `OWED` in
+`scripts/check/arena/check-composition.ts` is the shape under load: each entry names a case and
+says why, as a string value rather than a comment, and **a stale entry fails the gate itself**.
+That is what keeps an exception list from outliving the exception, and it is why a debt lives
+beside its gate rather than in prose.
+
+**Which maps the tree carries is a question for the tree and never for this page.** A roster here
+would be the exception list this rule refuses, one level up: nothing fails when it goes stale, and
+it named a part of what the tree carries while reading as all of it. Ask instead, and read the
+shape above to tell a reason-carrying map from a plain lookup:
+
+```bash
+grep -rn 'export const [A-Z_]\+ = new Map' scripts/ --include=*.ts | grep -v '\.test\.'
+```
 
 **A gate declares no `writes`, and `check:graph` fails one that does.** A gate that emits is
 an artifact another gate can read, and a reader of a failed writer either runs against a stale
@@ -82,13 +92,18 @@ from `GATES` and fails this table when the two disagree.
 | domain | gates | |
 | --- | --- | --- |
 | `contracts/` | 3 | the payload, and the field that pins it |
-| `arena/` | 13 | two or more layers at once, or the repository root |
+| `arena/` | 32 | two or more layers at once, or the repository root |
 | `compose/` | 1 | the Compose layer |
 | `swiftui/` | 1 | the SwiftUI layer |
 
 **CI narrows a run by domain, never by gate name.** `check-all` takes `--domain=`, the jobs
 partition `GATES`, and the suite asserts the partition, so a gate cannot join `GATES` and then
 run in no job.
+
+**The suites are a step of the sweep and not a gate**, so `TEST_STEP` names no domain and sits
+outside `GATES`. A full run spends it; a `--domain=` run leaves it to the job that owns it, and
+`--no-tests` opts out. `check-all` takes those two arguments and nothing else, and refuses a
+third rather than ignoring it.
 
 ## Adding a gate
 

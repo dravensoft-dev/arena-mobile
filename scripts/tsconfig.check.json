@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "lib": [
+      "ES2023"
+    ],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "types": [
+      "node",
+      "bun"
+    ],
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": [
+    "./**/*.ts"
+  ],
+  "exclude": [
+    "./node_modules"
+  ]
+}

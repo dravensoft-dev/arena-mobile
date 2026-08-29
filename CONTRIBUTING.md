@@ -30,6 +30,11 @@ checklist, and it is stated there only.
   claims, and both move together or neither does.
 - **No value is expressed twice.** A number in a hand-authored native source is a copy of a
   token that stops moving when the token moves, and `check:literals` refuses it.
+- **The tooling answers to a compiler.** `scripts/tsconfig.check.json` carries no allowance,
+  and `check:script-types` asks both whether the project compiles and whether its globs reach
+  every script on disk. A `?? ''` or a non-null `!` added to quiet it converts the question
+  into a value nobody sees, and `scripts/utils/captured.ts` is what a capture read goes
+  through instead.
 
 ## Before you open one
 
@@ -50,6 +55,7 @@ than after merge.
 - English only, in code, comments, documents and commit messages.
 - A commit message containing a backtick is written with a quoted here-doc, never with
   `git commit -m "…"`.
-- A document cites code as `path/to/file:member(parameters)` and never by line number.
+- How a document cites code, and why a line number is refused, is stated once on
+  [`AGENTS.md`](./AGENTS.md).
 - History is never rewritten. A published tag is a promise about the tree it resolves to, and
   SwiftPM resolves a package from a tag directly.

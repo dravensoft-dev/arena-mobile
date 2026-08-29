@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { walkFiles } from '../../utils/walk-files.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
+import { captured } from '../../utils/captured.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 
 export const WAIT_IMPLEMENTATIONS = new Map<string, string>([
@@ -73,7 +74,7 @@ export function budgetProblems(files: { file: string; source: string }[]) {
       errs.push(`${file} declares a deadline and derives no budget, so its case can outrun the wait it owns and be abandoned with its child still running`);
     }
     for (const budget of budgets) {
-      if (budget[1].trim() === '') {
+      if (captured(budget).trim() === '') {
         errs.push(`${file} calls budgetFor with no deadline, which is a hand-written number wearing a call`);
       }
     }

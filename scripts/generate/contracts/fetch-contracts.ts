@@ -43,7 +43,13 @@ export const node = {
   name: 'generate:contracts',
   reads: [REPO_CONFIG],
   writes: [`${CONTRACTS_DIR}/**`],
-  feeds: ['generate:tokens', 'check:pin', 'check:catalogue', 'check:coverage', 'check:user-scale'],
+  feeds: [
+    'generate:tokens', 'generate:api-types',
+    'check:pin', 'check:catalogue', 'check:coverage', 'check:api-types', 'check:user-scale',
+    'check:literals', 'check:members', 'check:structure',
+    'check:affordances', 'check:behaviour', 'check:composition', 'check:fonts', 'check:environment',
+    'check:contrast', 'check:control', 'check:target', 'check:parity', 'check:motion',
+  ],
 };
 
 export function metadataUrl(version: string, registry = REGISTRY) {

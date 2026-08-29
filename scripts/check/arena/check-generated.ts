@@ -14,8 +14,14 @@ import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { findHostBinary } from '../../lib/arena/host-binary.ts';
 import { cannotRun } from '../../lib/arena/check-vars.ts';
 import { CONTRACTS_DIR } from '../../lib/contracts/payload.ts';
-import { COMMAND } from '../../lib/arena/emit.ts';
+import { API_COMMAND, COMMAND } from '../../lib/arena/emit.ts';
 import { TARGETS } from '../../generate/arena/generate-tokens.ts';
+import { API_TARGETS } from '../../generate/arena/generate-api-types.ts';
+
+export const EMITTED = new Map<string, string>([
+  ...TARGETS.map((target) => [target, COMMAND] as [string, string]),
+  ...API_TARGETS.map((target) => [target, API_COMMAND] as [string, string]),
+]);
 
 export const UNMARKED = new Map<string, string>([
   [
@@ -37,7 +43,7 @@ export const GITATTRIBUTES = '.gitattributes';
 
 export const node = {
   name: 'check:generated',
-  reads: [GITATTRIBUTES, '.gitignore', ...TARGETS],
+  reads: [GITATTRIBUTES, '.gitignore', ...TARGETS, ...API_TARGETS],
   writes: [],
   feeds: [],
 };
@@ -54,10 +60,12 @@ export function namingProblems(targets: readonly string[]) {
     .map((target) => `${target} is written by a generator and its name does not say so, and it is not in UNMARKED`);
 }
 
-export function bannerProblems(targets: readonly string[], read: (target: string) => string) {
-  return targets.flatMap((target) => {
-    const first = read(target).split('\n', 1)[0];
-    return first.includes(COMMAND)
+export function bannerProblems(commands: ReadonlyMap<string, string>, read: (target: string) => string) {
+  return [...commands].flatMap(([target, command]) => {
+    const source = read(target);
+    const end = source.indexOf('\n');
+    const first = end === -1 ? source : source.slice(0, end);
+    return first.includes(command)
       ? []
       : [`${target} does not name the command that writes it on its first line, so a reader has to guess`];
   });
@@ -86,8 +94,8 @@ export function crlfPatterns(gitattributes: string) {
   return gitattributes
     .split('\n')
     .filter((line) => !line.trimStart().startsWith('#') && /\beol=crlf\b/.test(line))
-    .map((line) => line.trim().split(/\s+/)[0])
-    .filter(Boolean);
+    .map((line) => line.trim().split(/\s+/)[0] ?? '')
+    .filter((pattern) => pattern !== '');
 }
 
 export function matchesAttribute(pattern: string, path: string) {
@@ -138,9 +146,9 @@ function main() {
   const zero = zeroTrackedProblem(tracked);
   const errs = [
     ...(zero ? [zero] : []),
-    ...namingProblems(TARGETS),
-    ...bannerProblems(TARGETS, (target) => readFileSync(join(root, target), 'utf8')),
-    ...trackingProblems(TARGETS, set),
+    ...namingProblems([...EMITTED.keys()]),
+    ...bannerProblems(EMITTED, (target) => readFileSync(join(root, target), 'utf8')),
+    ...trackingProblems([...EMITTED.keys()], set),
     ...staleUnmarkedProblems(set),
     ...staleUntrackedProblems(set),
     ...carriageReturnProblems(tracked, (path) => readFileSync(join(root, path)), crlf),
@@ -152,7 +160,7 @@ function main() {
     process.exit(1);
   }
   console.log(
-    `check-generated: ${TARGETS.length} emitted file(s) named, bannered and tracked, `
+    `check-generated: ${EMITTED.size} emitted file(s) named, bannered and tracked by the ${new Set(EMITTED.values()).size} command(s) that write them, `
     + `${UNMARKED.size} file(s) that can carry neither with a reason, ${UNTRACKED.size} ignored output(s) with a reason, `
     + `and ${tracked.length - crlf.size} tracked text file(s) carrying no carriage return beside the `
     + `${crlf.size} ${GITATTRIBUTES} declares CRLF`,
