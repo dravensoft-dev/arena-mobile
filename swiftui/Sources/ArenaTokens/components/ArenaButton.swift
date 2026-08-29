@@ -94,7 +94,7 @@ public struct ArenaButton: View {
             }
             .frame(maxWidth: full ? .infinity : nil, minHeight: box)
             .padding(.horizontal, ArenaControl.padding)
-            .background(shape.fill(ArenaButtonPaint.fill(variant, colors)))
+            .background(shape.fill(ArenaButtonPaint.edge(variant, colors)))
             .overlay(shape.strokeBorder(ArenaButtonPaint.edge(variant, colors), lineWidth: ArenaContrast.border(increasedContrast)))
             .padding(gutter)
             .overlay(ringShape.strokeBorder(focused ? colors.focusRing : Color.clear, lineWidth: ring))

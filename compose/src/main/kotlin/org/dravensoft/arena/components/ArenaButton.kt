@@ -112,7 +112,7 @@ public fun ArenaButton(
                 .padding(gutter)
                 .sizeIn(minHeight = painted)
                 .clip(shape)
-                .background(ArenaButtonPaint.fill(variant, colors))
+                .background(ArenaButtonPaint.edge(variant, colors))
                 .border(ArenaContrast.border(increasedContrast), ArenaButtonPaint.edge(variant, colors), shape)
                 .padding(horizontal = ArenaControl.padding),
             horizontalArrangement = Arrangement.spacedBy(ArenaControl.gap, Alignment.CenterHorizontally),
