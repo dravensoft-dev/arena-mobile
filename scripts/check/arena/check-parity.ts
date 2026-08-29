@@ -36,7 +36,9 @@ export const AXES = new Map<string, Axis>([
     claim: 'paintedHeight',
     authority: 'ArenaControl.height',
     why: 'the run of painted pixels down the column at the middle of the render, which is what says the drawing '
-      + 'keeps the height the density scale names rather than the one a floor asks for',
+      + 'keeps the height the density scale names rather than the one a floor asks for. It renders on the base '
+      + 'ladder with a floor passed, because a rung already above the floor grows by nothing and a control that '
+      + 'took the box as its own minimum would draw the same pixels',
   }],
   ['activation box', {
     claim: 'activationBox',

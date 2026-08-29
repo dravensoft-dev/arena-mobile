@@ -110,13 +110,13 @@ private func gutter(_ contrast: Bool) -> CGFloat {
 @Test @MainActor func paintedHeightIsTheRungTheDensityNamesAndNeverTheFloor() throws {
     for (variant, size) in cases where variant != .ghost {
         let scheme = ArenaColorScheme.dark
-        let pixels = try captured(control(variant, size, floor: touchFloor))
+        let pixels = try captured(control(variant, size, density: .base, floor: touchFloor))
         let fill = inked(ArenaButtonPaint.fill(variant, scheme))
         let edge = inked(ArenaButtonPaint.edge(variant, scheme))
         let column = pixels.width / 2
         let rows = (0..<pixels.height).filter { isPainted(pixels.at(column, $0), fill, edge) }
         let paintedHeight = (rows.last ?? 0) - (rows.first ?? 0) + (rows.isEmpty ? 0 : 1)
-        let rung = px(ArenaScale.control(ArenaControl.height(size, .comfortable)))
+        let rung = px(ArenaScale.control(ArenaControl.height(size, .base)))
         #expect(abs(paintedHeight - rung) <= 1,
                 "\(variant) \(size) draws \(paintedHeight) row(s) of its own paint and the rung it is born at is \(rung)")
     }

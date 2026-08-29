@@ -120,14 +120,14 @@ class ArenaButtonTest {
 
     @Test
     fun paintedHeightIsTheRungTheDensityNamesAndNeverTheFloor() {
-        render(listOf(Triple(ArenaComfortableDensity, TOUCH_FLOOR, false)))
+        render(listOf(Triple(ArenaBaseDensity, TOUCH_FLOOR, false)))
         for ((at, case) in CASES.withIndex()) {
             val (variant, size) = case
             if (variant == ArenaButtonVariant.Ghost) continue
             val pixels = pixelsAt(at)
             val paintedHeight = paintedRun(pixels, ArenaButtonPaint.fill(variant, colors), ArenaButtonPaint.edge(variant, colors))
             val rung = with(compose.density) {
-                ArenaScale.control(ArenaControl.height(size, ArenaComfortableDensity), 1f).roundToPx()
+                ArenaScale.control(ArenaControl.height(size, ArenaBaseDensity), 1f).roundToPx()
             }
             assertTrue(
                 abs(paintedHeight - rung) <= 1,
