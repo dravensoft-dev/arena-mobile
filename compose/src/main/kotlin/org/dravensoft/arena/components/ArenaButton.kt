@@ -95,7 +95,7 @@ public fun ArenaButton(
         modifier = modifier
             .then(if (full) Modifier.fillMaxWidth() else Modifier)
             .onFocusChanged { focused = it.isFocused }
-            .sizeIn(minHeight = painted)
+            .sizeIn(minHeight = box)
             .clickable(enabled = !inactive, onClick = click)
             .semantics {
                 role = Role.Button
