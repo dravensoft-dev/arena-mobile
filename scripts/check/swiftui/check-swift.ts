@@ -84,7 +84,7 @@ function main() {
   const destination = `platform=iOS Simulator,id=${(simulator as { udid: string }).udid}`;
   const child = runCapturing(
     xcodebuild as string,
-    ['-scheme', SCHEME, '-destination', destination, 'build', 'test'],
+    ['-scheme', SCHEME, '-destination', destination, 'build', 'test', '-quiet'],
     root,
     COMPILE.ms,
   );
