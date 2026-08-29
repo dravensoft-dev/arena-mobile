@@ -113,7 +113,7 @@ public fun ArenaButton(
                 .sizeIn(minHeight = painted)
                 .clip(shape)
                 .background(ArenaButtonPaint.fill(variant, colors))
-                .border(ArenaContrast.border(increasedContrast), ArenaButtonPaint.edge(variant, colors), shape)
+                .border(ArenaContrast.border(increasedContrast), ArenaButtonPaint.fill(variant, colors), shape)
                 .padding(horizontal = ArenaControl.padding),
             horizontalArrangement = Arrangement.spacedBy(ArenaControl.gap, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
