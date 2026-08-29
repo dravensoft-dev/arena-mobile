@@ -110,7 +110,7 @@ public fun ArenaButton(
                 .then(if (full) Modifier.fillMaxWidth() else Modifier)
                 .border(ring, if (focused) colors.focusRing else Color.Transparent, RoundedCornerShape(ArenaControl.radius + gutter))
                 .padding(gutter)
-                .sizeIn(minHeight = painted)
+                .sizeIn(minHeight = box)
                 .clip(shape)
                 .background(ArenaButtonPaint.fill(variant, colors))
                 .border(ArenaContrast.border(increasedContrast), ArenaButtonPaint.edge(variant, colors), shape)
