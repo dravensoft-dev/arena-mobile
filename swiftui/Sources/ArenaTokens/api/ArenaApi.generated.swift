@@ -69,6 +69,13 @@ public enum ArenaAvatarStatus: String, CaseIterable, Sendable {
     case offline = "offline"
 }
 
+/// One of the breakpoints Arena's components branch on, named as the --bp-* tokens name them. A member taking one compares the width of its own container against that token.
+public enum ArenaBreakpoint: String, CaseIterable, Sendable {
+    case sm = "sm"
+    case md = "md"
+    case lg = "lg"
+}
+
 /// One action an ArenaBulkActionBar offers for the current selection. A destructive action stays outline in --error (transparent at rest, the soft --danger-soft tint only on hover), never the filled danger surface, which is ArenaConfirmDialog's alone.
 public struct ArenaBulkAction: Sendable {
     /// A stable identity for the action, so a host can switch on it rather than on the label.
@@ -188,6 +195,42 @@ public struct ArenaCommand: Sendable {
     }
 }
 
+/// A confirmation asked for from code rather than from a template, drawn by the ArenaConfirmDialog the consumer renders once at the head of the queue. Every field means what the dialog's member of the same name means; an absent label reaches the dialog absent and the dialog answers it through the locale.
+public struct ArenaConfirmRequest: Sendable {
+    /// Names the dialog. Required: asking with a blank title is refused at once.
+    public let title: String
+    /// The dialog's body text.
+    public let message: String?
+    /// The short kicker above the title.
+    public let eyebrow: String?
+    /// The confirming button.
+    public let confirmLabel: String?
+    /// The cancelling button.
+    public let cancelLabel: String?
+    /// Whether confirming is the final irreversible step, drawn as the one filled danger surface.
+    public let destructive: Bool?
+    /// Text the reader must type before the confirming button is enabled.
+    public let requireText: String?
+
+    public init(
+        title: String,
+        message: String? = nil,
+        eyebrow: String? = nil,
+        confirmLabel: String? = nil,
+        cancelLabel: String? = nil,
+        destructive: Bool? = nil,
+        requireText: String? = nil
+    ) {
+        self.title = title
+        self.message = message
+        self.eyebrow = eyebrow
+        self.confirmLabel = confirmLabel
+        self.cancelLabel = cancelLabel
+        self.destructive = destructive
+        self.requireText = requireText
+    }
+}
+
 /// The three-step size scale shared by Arena's controls. What each step measures is the component's own decision and only some of them re-densify: ArenaButton and ArenaIconButton take their heights from the density tokens, so they shrink with the rows around them in the compact density, while ArenaProgressBar's thickness and ArenaSpinner's diameter are spacing and icon tokens the compact density does not redefine. The enum is shared because all four implement the same three steps, not because they resolve them the same way.
 public enum ArenaControlSize: String, CaseIterable, Sendable {
     case sm = "sm"
@@ -291,6 +334,254 @@ public struct ArenaKeyValueRow: Sendable {
         self.term = term
         self.value = value
         self.numeric = numeric
+    }
+}
+
+/// The words Arena draws itself and the locale it formats dates in, provided once for a tree of components. Each word resolves to the component's own member when one answers it, then to the provided locale, then to the default here. A field whose default carries a {name} is a sentence with a value in it: Arena replaces each {name} it knows, so a language may put them in any order.
+public struct ArenaLocale: Sendable {
+    /// A BCP 47 tag. Every date Arena formats uses it; hour labels keep a 24-hour clock whatever it says.
+    public let locale: String
+    /// The calendar button that returns to the current period.
+    public let calendarToday: String
+    /// Names the calendar button that moves back one period.
+    public let calendarPrevious: String
+    /// Names the calendar button that moves forward one period.
+    public let calendarNext: String
+    /// Names the calendar's region. {range} is the range title.
+    public let calendarRegion: String
+    /// Names the calendar's grid. {range} is the range title.
+    public let calendarGrid: String
+    /// Names the button that opens a calendar event's action panel.
+    public let calendarEventActions: String
+    /// Names the pager's previous-page button.
+    public let paginationPrevious: String
+    /// Names the pager's next-page button.
+    public let paginationNext: String
+    /// Labels the sort select a table draws in its card layout.
+    public let tableSortBy: String
+    /// What a table shows when no row is written and its empty slot is not filled.
+    public let tableEmpty: String
+    /// Names a dismissible toast's close button.
+    public let toastClose: String
+    /// The mark a toast that does not dismiss itself carries.
+    public let toastPinned: String
+    /// The title on the pinned mark.
+    public let toastPinnedHint: String
+    /// Names a dismissible sheet's close button.
+    public let sheetClose: String
+    /// Names a dismissible alert's close button.
+    public let alertDismiss: String
+    /// Names a removable tag's remove button.
+    public let tagRemove: String
+    /// Names a skeleton's status region.
+    public let skeletonLabel: String
+    /// Names a spinner when its own label is absent.
+    public let spinnerLabel: String
+    /// The title on the guard glyph of a switch that asks before it changes.
+    public let switchConfirmHint: String
+    /// Names the bulk action toolbar.
+    public let bulkActionBarLabel: String
+    /// The text of the button that clears the selection.
+    public let bulkActionBarClear: String
+    /// Names the button that clears the selection.
+    public let bulkActionBarClearLabel: String
+    /// The selection count. {count} is drawn in bold; {noun} is the bar's noun.
+    public let bulkActionBarCount: String
+    /// What is counted, plural, when the bar's own noun is absent.
+    public let bulkActionBarNoun: String
+    /// Names the command palette's dialog.
+    public let commandPaletteDialog: String
+    /// Names the search field when no placeholder names it.
+    public let commandPaletteSearch: String
+    /// The search field's placeholder when the palette's own is absent.
+    public let commandPalettePlaceholder: String
+    /// Names the list of commands.
+    public let commandPaletteList: String
+    /// The key hint beside the search field.
+    public let commandPaletteEscape: String
+    /// What the list shows when nothing matches. {query} is what was typed.
+    public let commandPaletteEmpty: String
+    /// The button that returns to the previous step.
+    public let onboardingBack: String
+    /// The button that leaves the tour.
+    public let onboardingSkip: String
+    /// The button that moves to the next step.
+    public let onboardingNext: String
+    /// The button that closes the last step.
+    public let onboardingDone: String
+    /// Names a step that has no title and no eyebrow. {current} counts from one; {total} is the number of steps.
+    public let onboardingStep: String
+    /// Names the progress dots. {current} counts from one; {total} is the number of steps.
+    public let onboardingProgress: String
+    /// The confirmation's eyebrow when its own is absent.
+    public let confirmDialogEyebrow: String
+    /// The confirming button when its own label is absent.
+    public let confirmDialogConfirm: String
+    /// The cancelling button when its own label is absent.
+    public let confirmDialogCancel: String
+    /// The prompt above the field a confirmation requires. {text} is what must be typed.
+    public let confirmDialogRequire: String
+    /// An error state's title when its own is absent.
+    public let errorStateTitle: String
+    /// Names the online presence dot.
+    public let avatarOnline: String
+    /// Names the busy presence dot.
+    public let avatarBusy: String
+    /// Names the away presence dot.
+    public let avatarAway: String
+    /// Names the offline presence dot.
+    public let avatarOffline: String
+    /// A line chart's accessible name. {label} is the chart's label.
+    public let lineChartName: String
+    /// A bar chart's accessible name. {label} is the chart's label.
+    public let barChartName: String
+    /// A horizontal bar chart's accessible name. {label} is the chart's label.
+    public let horizontalBarChartName: String
+    /// A pyramid chart's accessible name, which reads as the horizontal bars it draws. {label} is the chart's label.
+    public let pyramidChartName: String
+    /// A doughnut chart's accessible name. {label} is the chart's label.
+    public let doughnutChartName: String
+    /// The same chart's accessible name in its pie shape. {label} is the chart's label.
+    public let doughnutChartPieName: String
+    /// A radar chart's accessible name. {label} is the chart's label.
+    public let radarChartName: String
+    /// A scatter chart's accessible name. {label} is the chart's label.
+    public let scatterChartName: String
+    /// The first heading of the data table a categorical chart writes.
+    public let chartTableCategory: String
+    /// The first heading of the data table a line chart writes.
+    public let chartTablePoint: String
+    /// The first heading of the data table a radar chart writes.
+    public let chartTableAxis: String
+    /// The first heading of the data table a scatter chart writes.
+    public let chartTableSeries: String
+    /// Names a doughnut chart's legend.
+    public let doughnutChartLegend: String
+    /// Names the legend in the pie shape.
+    public let doughnutChartPieLegend: String
+
+    public init(
+        locale: String,
+        calendarToday: String,
+        calendarPrevious: String,
+        calendarNext: String,
+        calendarRegion: String,
+        calendarGrid: String,
+        calendarEventActions: String,
+        paginationPrevious: String,
+        paginationNext: String,
+        tableSortBy: String,
+        tableEmpty: String,
+        toastClose: String,
+        toastPinned: String,
+        toastPinnedHint: String,
+        sheetClose: String,
+        alertDismiss: String,
+        tagRemove: String,
+        skeletonLabel: String,
+        spinnerLabel: String,
+        switchConfirmHint: String,
+        bulkActionBarLabel: String,
+        bulkActionBarClear: String,
+        bulkActionBarClearLabel: String,
+        bulkActionBarCount: String,
+        bulkActionBarNoun: String,
+        commandPaletteDialog: String,
+        commandPaletteSearch: String,
+        commandPalettePlaceholder: String,
+        commandPaletteList: String,
+        commandPaletteEscape: String,
+        commandPaletteEmpty: String,
+        onboardingBack: String,
+        onboardingSkip: String,
+        onboardingNext: String,
+        onboardingDone: String,
+        onboardingStep: String,
+        onboardingProgress: String,
+        confirmDialogEyebrow: String,
+        confirmDialogConfirm: String,
+        confirmDialogCancel: String,
+        confirmDialogRequire: String,
+        errorStateTitle: String,
+        avatarOnline: String,
+        avatarBusy: String,
+        avatarAway: String,
+        avatarOffline: String,
+        lineChartName: String,
+        barChartName: String,
+        horizontalBarChartName: String,
+        pyramidChartName: String,
+        doughnutChartName: String,
+        doughnutChartPieName: String,
+        radarChartName: String,
+        scatterChartName: String,
+        chartTableCategory: String,
+        chartTablePoint: String,
+        chartTableAxis: String,
+        chartTableSeries: String,
+        doughnutChartLegend: String,
+        doughnutChartPieLegend: String
+    ) {
+        self.locale = locale
+        self.calendarToday = calendarToday
+        self.calendarPrevious = calendarPrevious
+        self.calendarNext = calendarNext
+        self.calendarRegion = calendarRegion
+        self.calendarGrid = calendarGrid
+        self.calendarEventActions = calendarEventActions
+        self.paginationPrevious = paginationPrevious
+        self.paginationNext = paginationNext
+        self.tableSortBy = tableSortBy
+        self.tableEmpty = tableEmpty
+        self.toastClose = toastClose
+        self.toastPinned = toastPinned
+        self.toastPinnedHint = toastPinnedHint
+        self.sheetClose = sheetClose
+        self.alertDismiss = alertDismiss
+        self.tagRemove = tagRemove
+        self.skeletonLabel = skeletonLabel
+        self.spinnerLabel = spinnerLabel
+        self.switchConfirmHint = switchConfirmHint
+        self.bulkActionBarLabel = bulkActionBarLabel
+        self.bulkActionBarClear = bulkActionBarClear
+        self.bulkActionBarClearLabel = bulkActionBarClearLabel
+        self.bulkActionBarCount = bulkActionBarCount
+        self.bulkActionBarNoun = bulkActionBarNoun
+        self.commandPaletteDialog = commandPaletteDialog
+        self.commandPaletteSearch = commandPaletteSearch
+        self.commandPalettePlaceholder = commandPalettePlaceholder
+        self.commandPaletteList = commandPaletteList
+        self.commandPaletteEscape = commandPaletteEscape
+        self.commandPaletteEmpty = commandPaletteEmpty
+        self.onboardingBack = onboardingBack
+        self.onboardingSkip = onboardingSkip
+        self.onboardingNext = onboardingNext
+        self.onboardingDone = onboardingDone
+        self.onboardingStep = onboardingStep
+        self.onboardingProgress = onboardingProgress
+        self.confirmDialogEyebrow = confirmDialogEyebrow
+        self.confirmDialogConfirm = confirmDialogConfirm
+        self.confirmDialogCancel = confirmDialogCancel
+        self.confirmDialogRequire = confirmDialogRequire
+        self.errorStateTitle = errorStateTitle
+        self.avatarOnline = avatarOnline
+        self.avatarBusy = avatarBusy
+        self.avatarAway = avatarAway
+        self.avatarOffline = avatarOffline
+        self.lineChartName = lineChartName
+        self.barChartName = barChartName
+        self.horizontalBarChartName = horizontalBarChartName
+        self.pyramidChartName = pyramidChartName
+        self.doughnutChartName = doughnutChartName
+        self.doughnutChartPieName = doughnutChartPieName
+        self.radarChartName = radarChartName
+        self.scatterChartName = scatterChartName
+        self.chartTableCategory = chartTableCategory
+        self.chartTablePoint = chartTablePoint
+        self.chartTableAxis = chartTableAxis
+        self.chartTableSeries = chartTableSeries
+        self.doughnutChartLegend = doughnutChartLegend
+        self.doughnutChartPieLegend = doughnutChartPieLegend
     }
 }
 

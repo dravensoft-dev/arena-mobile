@@ -28,6 +28,11 @@ public enum ArenaTokens {
     /// overlap, so the chip keeps reserving a lateral band instead. Script-readable
     /// because it is compared against a projected pixel height.
     public static let calendarActionsBelowMinH: CGFloat = 56
+    /// The height one detail line adds to what a chip needs before it may draw
+    /// it. Measured: the time label's line box, which the detail lines share, reads
+    /// 16px in both layers at --dz-text-2xs, already on the 4px scale. Script-readable
+    /// because it is compared against a projected pixel height, like time-min-h.
+    public static let calendarDetailLineH: CGFloat = 16
     /// The width of the hour-label gutter down the left of the grid.
     /// Script-readable because the width term of arenaShowsTime() subtracts it from the
     /// measured container to get the grid's width, and no CSS expression hands a
