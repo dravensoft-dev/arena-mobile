@@ -8,8 +8,11 @@
 package org.dravensoft.arena
 
 import org.dravensoft.arena.api.ArenaAlertTone
+import org.dravensoft.arena.api.ArenaBreakpoint
 import org.dravensoft.arena.api.ArenaCatSlot
 import org.dravensoft.arena.api.ArenaInputType
+import org.dravensoft.arena.api.ArenaLocale
+import org.dravensoft.arena.api.ArenaMenuItem
 import org.dravensoft.arena.api.ArenaSwitchSize
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,5 +50,18 @@ class ArenaApiTest {
         for (entry in ArenaInputType.entries) assertEquals(entry, ArenaInputType.from(entry.value))
         for (entry in ArenaSwitchSize.entries) assertEquals(entry, ArenaSwitchSize.from(entry.value))
         for (entry in ArenaCatSlot.entries) assertEquals(entry, ArenaCatSlot.from(entry.value))
+    }
+
+    @Test
+    fun aFieldTheContractDefaultsIsAnsweredByThatDefaultWhenTheCallerSaysNothing() {
+        assertEquals("en-GB", ArenaLocale().locale)
+        assertEquals("Today", ArenaLocale().calendarToday)
+        assertEquals("Hoy", ArenaLocale(calendarToday = "Hoy").calendarToday)
+        assertEquals(false, ArenaMenuItem(label = "Delete").destructive)
+    }
+
+    @Test
+    fun aBreakpointIsOneOfTheThreeTheContractNames() {
+        assertEquals(listOf("sm", "md", "lg"), ArenaBreakpoint.entries.map { it.value })
     }
 }

@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test';
 import {
-  CASE_NAMES, REPHRASED, caseStemFor, docTextFor, enumCases, fieldTypes, kotlinCase, literalFor,
+  CASE_NAMES, REPHRASED, caseStemFor, defaultLiterals, docTextFor, enumCases, fieldTypes, kotlinCase, literalFor,
   owedDocs, rawTypes, staleCaseNameProblems, staleRephrasedProblems, swiftCase,
 } from './api-emit.ts';
 import type { ApiType } from '../contracts/api-types.ts';
@@ -65,6 +65,26 @@ test('a number is a Double in both layers, which is not the row the unit bridge 
   expect(fieldTypes({ form: 'primitive', type: 'boolean' }, 'X.b')).toEqual({ kotlin: 'Boolean', swift: 'Bool' });
   expect(fieldTypes({ form: 'enum', type: 'ArenaTone' }, 'X.t')).toEqual({ kotlin: 'ArenaTone', swift: 'ArenaTone' });
   expect(fieldTypes({ form: 'array', of: 'number' }, 'X.v')).toEqual({ kotlin: 'List<Double>', swift: '[Double]' });
+});
+
+test('a default is spelled once for both emitters, in the literal each language compiles', () => {
+  const tone = anEnum('ArenaTone', ['soft-danger']);
+  expect(defaultLiterals({ form: 'primitive', type: 'string' }, [], 'X.s')).toBeNull();
+  expect(defaultLiterals({ form: 'primitive', type: 'boolean', default: false }, [], 'X.b')).toEqual({ kotlin: 'false', swift: 'false' });
+  expect(defaultLiterals({ form: 'primitive', type: 'number', default: 280 }, [], 'X.n')).toEqual({ kotlin: '280.0', swift: '280.0' });
+  expect(defaultLiterals({ form: 'primitive', type: 'number', default: 0.5 }, [], 'X.n')).toEqual({ kotlin: '0.5', swift: '0.5' });
+  expect(defaultLiterals({ form: 'primitive', type: 'string', default: 'Type "{text}"' }, [], 'X.s'))
+    .toEqual({ kotlin: '"Type \\"{text}\\""', swift: '"Type \\"{text}\\""' });
+  expect(defaultLiterals({ form: 'primitive', type: 'string', default: '$1' }, [], 'X.s')).toEqual({ kotlin: '"\\$1"', swift: '"$1"' });
+  expect(defaultLiterals({ form: 'enum', type: 'ArenaTone', default: 'soft-danger' }, [tone], 'X.t'))
+    .toEqual({ kotlin: 'ArenaTone.SoftDanger', swift: '.softDanger' });
+  expect(defaultLiterals({ form: 'array', of: 'string', default: [] }, [], 'X.v')).toEqual({ kotlin: 'emptyList()', swift: '[]' });
+});
+
+test('a default the emit cannot spell throws where it is met rather than dropping to null', () => {
+  expect(() => defaultLiterals({ form: 'enum', type: 'ArenaTone', default: 'loud' }, [anEnum('ArenaTone', ['soft'])], 'X.t'))
+    .toThrow(/does not declare/);
+  expect(() => defaultLiterals({ form: 'array', of: 'string', default: ['a'] }, [], 'X.v')).toThrow(/the empty one/);
 });
 
 test('a form with no native shape throws where it is met rather than emitting nothing', () => {

@@ -11,11 +11,11 @@ import { isMainModule } from '../../utils/main-module.ts';
 import { repoRoot } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR, MANIFEST, readManifest } from '../../lib/contracts/payload.ts';
 import {
-  TYPES_PREFIX, loadApiTypes, requiredFirst, structureProblems, type ApiType,
+  TYPES_PREFIX, loadApiTypes, requiredFirst, structureProblems, type ApiField, type ApiType,
 } from '../../lib/contracts/api-types.ts';
 import { surfaceProblems } from '../../lib/arena/component-surface.ts';
 import {
-  enumCases, fieldTypes, rawTypes, staleCaseNameProblems, staleRephrasedProblems, docTextFor,
+  defaultLiterals, enumCases, fieldTypes, rawTypes, staleCaseNameProblems, staleRephrasedProblems, docTextFor,
 } from '../../lib/arena/api-emit.ts';
 import { API_COMMAND, API_SUBJECT, banner, kdoc, tripleSlash } from '../../lib/arena/emit.ts';
 import { dirFor } from '../../lib/arena/layer-trees.ts';
@@ -54,13 +54,20 @@ function kotlinEnum(type: ApiType) {
   ];
 }
 
-function kotlinObject(type: ApiType) {
+function tailFor(spec: ApiField, literal: string | undefined, absent: string) {
+  if (literal !== undefined) return ` = ${literal}`;
+  return spec.required === true ? '' : absent;
+}
+
+function kotlinObject(type: ApiType, types: ApiType[]) {
   const fields = requiredFirst(type.fields).map(([name, spec]) => {
-    const { kotlin } = fieldTypes(spec, `${type.name}.${name}`);
-    const optional = spec.required === true ? '' : '? = null';
+    const where = `${type.name}.${name}`;
+    const { kotlin } = fieldTypes(spec, where);
+    const literal = defaultLiterals(spec, types, where)?.kotlin;
+    const nullable = spec.required !== true && literal === undefined ? '?' : '';
     return [
       ...kdoc(doc(type, name, spec.description), '    '),
-      `    public val ${name}: ${kotlin}${optional},`,
+      `    public val ${name}: ${kotlin}${nullable}${tailFor(spec, literal, ' = null')},`,
     ];
   });
   return [
@@ -81,20 +88,24 @@ function swiftEnum(type: ApiType) {
   ];
 }
 
-function swiftObject(type: ApiType) {
-  const fields = requiredFirst(type.fields).map(([name, spec]) => ({
-    name,
-    spec,
-    swift: fieldTypes(spec, `${type.name}.${name}`).swift,
-    optional: spec.required !== true,
-  }));
+function swiftObject(type: ApiType, types: ApiType[]) {
+  const fields = requiredFirst(type.fields).map(([name, spec]) => {
+    const literal = defaultLiterals(spec, types, `${type.name}.${name}`)?.swift;
+    return {
+      name,
+      spec,
+      literal,
+      swift: fieldTypes(spec, `${type.name}.${name}`).swift,
+      optional: spec.required !== true && literal === undefined,
+    };
+  });
   const members = fields.flatMap((one) => [
     ...tripleSlash(doc(type, one.name, one.spec.description), '    '),
     `    public let ${one.name}: ${one.swift}${one.optional ? '?' : ''}`,
   ]);
   const parameters = fields.map((one, index) => {
     const tail = index === fields.length - 1 ? '' : ',';
-    return `        ${one.name}: ${one.swift}${one.optional ? '? = nil' : ''}${tail}`;
+    return `        ${one.name}: ${one.swift}${one.optional ? '?' : ''}${tailFor(one.spec, one.literal, ' = nil')}${tail}`;
   });
   const initialiser = fields.length === 0
     ? ['    public init() {}']
@@ -118,8 +129,8 @@ export function emitApi(types: ApiType[]) {
   const kotlinHead = [banner('/*', API_COMMAND, API_SUBJECT), '', `package ${KOTLIN_API_PACKAGE}`];
   const swiftHead = [banner('//', API_COMMAND, API_SUBJECT)];
   const files = new Map<string, string>();
-  files.set(API_TARGETS[0], render(types, kotlinHead, (type) => (type.kind === 'enum' ? kotlinEnum(type) : kotlinObject(type))));
-  files.set(API_TARGETS[1], render(types, swiftHead, (type) => (type.kind === 'enum' ? swiftEnum(type) : swiftObject(type))));
+  files.set(API_TARGETS[0], render(types, kotlinHead, (type) => (type.kind === 'enum' ? kotlinEnum(type) : kotlinObject(type, types))));
+  files.set(API_TARGETS[1], render(types, swiftHead, (type) => (type.kind === 'enum' ? swiftEnum(type) : swiftObject(type, types))));
   return files;
 }
 

@@ -279,6 +279,12 @@ a second copy here would drift the first time a form changes. `NATIVE_FORMS` in
 a slot and an event, and `DERIVED_DEFAULT` beside it names a default reached through a constant
 rather than a literal. It is empty, and the emptiness is the claim.
 
+**A field of a predefined object carries its default into the emit for the same reason**, and one
+function spells it for both: `scripts/lib/arena/api-emit.ts:defaultLiterals(field, types, where)` is
+what the API emitter writes and what `check:members` accepts, so a field the contract defaults is
+never nullable here, and a caller who says nothing gets the contract's answer rather than a null
+each consumer has to resolve again.
+
 `bun run check:members` holds it, over the components it finds by walking the two source trees
 rather than by a list, so a component that lands and registers nothing is a failure. **What a
 green run does not say is that the component draws what the contract describes**: what it says is

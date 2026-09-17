@@ -7,7 +7,7 @@
 
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import type { ApiType, ComponentMember } from '../contracts/api-types.ts';
-import { enumCases, fieldTypes } from './api-emit.ts';
+import { defaultLiterals, fieldTypes } from './api-emit.ts';
 import { LAYERS, type Layer } from './behaviour-obligations.ts';
 
 export type Answer = { parameter: string } | { excepted: string };
@@ -137,14 +137,10 @@ export function acceptedDefaults(
 ) {
   const derived = DERIVED_DEFAULT.get(member);
   if (derived) return [derived[layer]];
-  if (field.default === undefined) return [];
-  if (field.form !== 'enum') return [String(field.default)];
-  const type = types.find((one) => one.name === field.type);
-  const found = type ? enumCases(type).find((one) => one.value === field.default) : undefined;
-  if (!found) return [];
-  return layer === 'compose'
-    ? [`${field.type}.${found.kotlin}`]
-    : [`.${found.swift}`, `${field.type}.${found.swift}`];
+  const literals = defaultLiterals(field, types, member);
+  if (!literals) return [];
+  if (layer === 'compose') return [literals.kotlin];
+  return field.form === 'enum' ? [literals.swift, `${field.type}${literals.swift}`] : [literals.swift];
 }
 
 export function shapeProblems(

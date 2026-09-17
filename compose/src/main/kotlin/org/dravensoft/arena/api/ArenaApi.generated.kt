@@ -214,7 +214,7 @@ public data class ArenaConfirmRequest(
     /** The cancelling button. */
     public val cancelLabel: String? = null,
     /** Whether confirming is the final irreversible step, drawn as the one filled danger surface. */
-    public val destructive: Boolean? = null,
+    public val destructive: Boolean = false,
     /** Text the reader must type before the confirming button is enabled. */
     public val requireText: String? = null,
 )
@@ -346,125 +346,125 @@ public data class ArenaKeyValueRow(
 /** The words Arena draws itself and the locale it formats dates in, provided once for a tree of components. Each word resolves to the component's own member when one answers it, then to the provided locale, then to the default here. A field whose default carries a {name} is a sentence with a value in it: Arena replaces each {name} it knows, so a language may put them in any order. */
 public data class ArenaLocale(
     /** A BCP 47 tag. Every date Arena formats uses it; hour labels keep a 24-hour clock whatever it says. */
-    public val locale: String,
+    public val locale: String = "en-GB",
     /** The calendar button that returns to the current period. */
-    public val calendarToday: String,
+    public val calendarToday: String = "Today",
     /** Names the calendar button that moves back one period. */
-    public val calendarPrevious: String,
+    public val calendarPrevious: String = "Previous",
     /** Names the calendar button that moves forward one period. */
-    public val calendarNext: String,
+    public val calendarNext: String = "Next",
     /** Names the calendar's region. {range} is the range title. */
-    public val calendarRegion: String,
+    public val calendarRegion: String = "Schedule, {range}",
     /** Names the calendar's grid. {range} is the range title. */
-    public val calendarGrid: String,
+    public val calendarGrid: String = "Schedule grid, {range}",
     /** Names the button that opens a calendar event's action panel. */
-    public val calendarEventActions: String,
+    public val calendarEventActions: String = "Actions",
     /** Names the pager's previous-page button. */
-    public val paginationPrevious: String,
+    public val paginationPrevious: String = "Previous",
     /** Names the pager's next-page button. */
-    public val paginationNext: String,
+    public val paginationNext: String = "Next",
     /** Labels the sort select a table draws in its card layout. */
-    public val tableSortBy: String,
+    public val tableSortBy: String = "Sort by",
     /** What a table shows when no row is written and its empty slot is not filled. */
-    public val tableEmpty: String,
+    public val tableEmpty: String = "No data.",
     /** Names a dismissible toast's close button. */
-    public val toastClose: String,
+    public val toastClose: String = "Close",
     /** The mark a toast that does not dismiss itself carries. */
-    public val toastPinned: String,
+    public val toastPinned: String = "Pinned",
     /** The title on the pinned mark. */
-    public val toastPinnedHint: String,
+    public val toastPinnedHint: String = "Does not auto-dismiss",
     /** Names a dismissible sheet's close button. */
-    public val sheetClose: String,
+    public val sheetClose: String = "Close",
     /** Names a dismissible alert's close button. */
-    public val alertDismiss: String,
+    public val alertDismiss: String = "Dismiss",
     /** Names a removable tag's remove button. */
-    public val tagRemove: String,
+    public val tagRemove: String = "Remove",
     /** Names a skeleton's status region. */
-    public val skeletonLabel: String,
+    public val skeletonLabel: String = "Loading",
     /** Names a spinner when its own label is absent. */
-    public val spinnerLabel: String,
+    public val spinnerLabel: String = "Loading",
     /** The title on the guard glyph of a switch that asks before it changes. */
-    public val switchConfirmHint: String,
+    public val switchConfirmHint: String = "Requires confirmation",
     /** Names the bulk action toolbar. */
-    public val bulkActionBarLabel: String,
+    public val bulkActionBarLabel: String = "Actions on the selection",
     /** The text of the button that clears the selection. */
-    public val bulkActionBarClear: String,
+    public val bulkActionBarClear: String = "Clear",
     /** Names the button that clears the selection. */
-    public val bulkActionBarClearLabel: String,
+    public val bulkActionBarClearLabel: String = "Clear selection",
     /** The selection count. {count} is drawn in bold; {noun} is the bar's noun. */
-    public val bulkActionBarCount: String,
+    public val bulkActionBarCount: String = "{count} {noun} selected",
     /** What is counted, plural, when the bar's own noun is absent. */
-    public val bulkActionBarNoun: String,
+    public val bulkActionBarNoun: String = "items",
     /** Names the command palette's dialog. */
-    public val commandPaletteDialog: String,
+    public val commandPaletteDialog: String = "Command palette",
     /** Names the search field when no placeholder names it. */
-    public val commandPaletteSearch: String,
+    public val commandPaletteSearch: String = "Search commands",
     /** The search field's placeholder when the palette's own is absent. */
-    public val commandPalettePlaceholder: String,
+    public val commandPalettePlaceholder: String = "Search for an action or project…",
     /** Names the list of commands. */
-    public val commandPaletteList: String,
+    public val commandPaletteList: String = "Commands",
     /** The key hint beside the search field. */
-    public val commandPaletteEscape: String,
+    public val commandPaletteEscape: String = "ESC",
     /** What the list shows when nothing matches. {query} is what was typed. */
-    public val commandPaletteEmpty: String,
+    public val commandPaletteEmpty: String = "No results for \"{query}\".",
     /** The button that returns to the previous step. */
-    public val onboardingBack: String,
+    public val onboardingBack: String = "Back",
     /** The button that leaves the tour. */
-    public val onboardingSkip: String,
+    public val onboardingSkip: String = "Skip",
     /** The button that moves to the next step. */
-    public val onboardingNext: String,
+    public val onboardingNext: String = "Next",
     /** The button that closes the last step. */
-    public val onboardingDone: String,
+    public val onboardingDone: String = "Got it",
     /** Names a step that has no title and no eyebrow. {current} counts from one; {total} is the number of steps. */
-    public val onboardingStep: String,
+    public val onboardingStep: String = "Step {current} of {total}",
     /** Names the progress dots. {current} counts from one; {total} is the number of steps. */
-    public val onboardingProgress: String,
+    public val onboardingProgress: String = "Progress: step {current} of {total}",
     /** The confirmation's eyebrow when its own is absent. */
-    public val confirmDialogEyebrow: String,
+    public val confirmDialogEyebrow: String = "Confirm",
     /** The confirming button when its own label is absent. */
-    public val confirmDialogConfirm: String,
+    public val confirmDialogConfirm: String = "Confirm",
     /** The cancelling button when its own label is absent. */
-    public val confirmDialogCancel: String,
+    public val confirmDialogCancel: String = "Cancel",
     /** The prompt above the field a confirmation requires. {text} is what must be typed. */
-    public val confirmDialogRequire: String,
+    public val confirmDialogRequire: String = "Type \"{text}\" to confirm",
     /** An error state's title when its own is absent. */
-    public val errorStateTitle: String,
+    public val errorStateTitle: String = "Something went wrong",
     /** Names the online presence dot. */
-    public val avatarOnline: String,
+    public val avatarOnline: String = "online",
     /** Names the busy presence dot. */
-    public val avatarBusy: String,
+    public val avatarBusy: String = "busy",
     /** Names the away presence dot. */
-    public val avatarAway: String,
+    public val avatarAway: String = "away",
     /** Names the offline presence dot. */
-    public val avatarOffline: String,
+    public val avatarOffline: String = "offline",
     /** A line chart's accessible name. {label} is the chart's label. */
-    public val lineChartName: String,
+    public val lineChartName: String = "{label} — line chart",
     /** A bar chart's accessible name. {label} is the chart's label. */
-    public val barChartName: String,
+    public val barChartName: String = "{label} — bar chart",
     /** A horizontal bar chart's accessible name. {label} is the chart's label. */
-    public val horizontalBarChartName: String,
+    public val horizontalBarChartName: String = "{label} — horizontal bar chart",
     /** A pyramid chart's accessible name, which reads as the horizontal bars it draws. {label} is the chart's label. */
-    public val pyramidChartName: String,
+    public val pyramidChartName: String = "{label} — horizontal bar chart",
     /** A doughnut chart's accessible name. {label} is the chart's label. */
-    public val doughnutChartName: String,
+    public val doughnutChartName: String = "{label} — doughnut chart",
     /** The same chart's accessible name in its pie shape. {label} is the chart's label. */
-    public val doughnutChartPieName: String,
+    public val doughnutChartPieName: String = "{label} — pie chart",
     /** A radar chart's accessible name. {label} is the chart's label. */
-    public val radarChartName: String,
+    public val radarChartName: String = "{label} — radar chart",
     /** A scatter chart's accessible name. {label} is the chart's label. */
-    public val scatterChartName: String,
+    public val scatterChartName: String = "{label} — scatter chart",
     /** The first heading of the data table a categorical chart writes. */
-    public val chartTableCategory: String,
+    public val chartTableCategory: String = "Category",
     /** The first heading of the data table a line chart writes. */
-    public val chartTablePoint: String,
+    public val chartTablePoint: String = "Point",
     /** The first heading of the data table a radar chart writes. */
-    public val chartTableAxis: String,
+    public val chartTableAxis: String = "Axis",
     /** The first heading of the data table a scatter chart writes. */
-    public val chartTableSeries: String,
+    public val chartTableSeries: String = "Series",
     /** Names a doughnut chart's legend. */
-    public val doughnutChartLegend: String,
+    public val doughnutChartLegend: String = "Doughnut chart legend",
     /** Names the legend in the pie shape. */
-    public val doughnutChartPieLegend: String,
+    public val doughnutChartPieLegend: String = "Pie chart legend",
 )
 
 /** Both halves of the brand lock-up at once: the mark's slot and the wordmark. A fixed repertoire, not a ratio: sm an application frame, md a signed-out panel, lg the manual's Primary, xl the hero case. */
@@ -498,11 +498,11 @@ public data class ArenaMenuItem(
     /** The keyboard hint drawn right-aligned in the mono face. Display only: ArenaMenu binds no key for it. */
     public val shortcut: String? = null,
     /** Draws the row in the danger ink. Destructive entries go last. */
-    public val destructive: Boolean? = null,
+    public val destructive: Boolean = false,
     /** The row is drawn muted and reports no `select`. */
-    public val disabled: Boolean? = null,
+    public val disabled: Boolean = false,
     /** Draws a hairline rule in place of a row. Carries no other field. */
-    public val divider: Boolean? = null,
+    public val divider: Boolean = false,
     /** Draws a group label in place of a row. Carries no other field. */
     public val header: String? = null,
 )
@@ -514,9 +514,9 @@ public data class ArenaNumberFormat(
     /** How many digits after the decimal separator, fixed. Absent, the locale decides. This is where a chart stops needing its data rounded before it is bound: rounding in the model to make a label read well loses the value everywhere else it is used. */
     public val fractionDigits: Double? = null,
     /** Whether thousands are separated. True by default because a five-digit tick is unreadable without it; false for a year, an identifier, or anything whose digits are not a quantity. */
-    public val grouping: Boolean? = null,
+    public val grouping: Boolean = true,
     /** Writes 48.2K rather than 48200. For an axis over a wide range, where a full number is wider than the space between two ticks. it applies to every number the chart writes, ticks and tooltip and table alike, because a tooltip disagreeing with the tick above it is worse than a long label. */
-    public val compact: Boolean? = null,
+    public val compact: Boolean = false,
 )
 
 /** Where the coachmark attaches: the two viewport coordinates it positions from. Declared as its own object rather than borrowed from a platform, because a contract states no platform's own types, and because these are the only two fields ArenaOnboarding reads. */
@@ -753,15 +753,15 @@ public data class ArenaTableColumn(
     /** The column's label, drawn in the header row. */
     public val header: String,
     /** How this column's cells align. */
-    public val align: ArenaCellAlign? = null,
+    public val align: ArenaCellAlign = ArenaCellAlign.Left,
     /** A fixed width for the column. Omit to let the table distribute. */
     public val width: String? = null,
     /** Draw this column's cells in the mono face, figure-aligned, and in the gold ink -- for identifiers and figures. The ink is the half that does not travel outside a table: gold reads as an identifier, so a sale total in gold inside a card says the wrong thing. Each layer offers the face and the digit alignment on their own, for a figure the consumer draws elsewhere, and its usage document says how. */
-    public val mono: Boolean? = null,
+    public val mono: Boolean = false,
     /** Whether this column's header is an activation target. A declared boolean rather than "is sortChange bound?", because Arena never derives what it draws from what a consumer listens for, the same reason ArenaTableRow.interactive is one. It costs no tab stop: the header row is already row 0 of the grid's roving cursor, so a sortable header is activated with Enter or Space on the cell the user is already on. Without ArenaTable.sort no header is a target however many columns declare it, because a control that draws a direction it does not know is worse than no control. */
-    public val sortable: Boolean? = null,
+    public val sortable: Boolean = false,
     /** How this column renders in card mode: a label/value pair, or a full-width strip with no label whose contents sit at its end, which suits an actions cell rather than a long value. */
-    public val mobileLayout: ArenaTableCellLayout? = null,
+    public val mobileLayout: ArenaTableCellLayout = ArenaTableCellLayout.Row,
 )
 
 /** Which page of a longer list is on screen. Present, ArenaTable draws its own ArenaPagination below the grid and names it from `label`. ArenaTable does not slice: it does not hold the rows, so the consumer passes the page they already sliced and ArenaTable draws the control over it. */

@@ -61,6 +61,22 @@ test('an enum field names a declared enum, and naming an object where an enum be
   expect(structureProblems(wrong)[0]).toContain('is a object, used where an enum belongs');
 });
 
+test('a default is a value of the form it sits on, so a wrong one is reported before anything is emitted', () => {
+  const tone = enumType({ name: 'ArenaTone', values: ['a'] });
+  const right = objectType({
+    label: { form: 'primitive', type: 'string', required: true, default: 'Close' },
+    tone: { form: 'enum', type: 'ArenaTone', default: 'a' },
+    lines: { form: 'array', of: 'string', default: [] },
+  });
+  expect(structureProblems([tone, right])).toEqual([]);
+  expect(structureProblems([objectType({ on: { form: 'primitive', type: 'boolean', default: 'yes' } })])[0])
+    .toContain('which is not a boolean');
+  expect(structureProblems([tone, objectType({ tone: { form: 'enum', type: 'ArenaTone', default: 'b' } })])[0])
+    .toContain('which ArenaTone does not declare');
+  expect(structureProblems([objectType({ lines: { form: 'array', of: 'string', default: ['x'] } })])[0])
+    .toContain('the empty one');
+});
+
 test('required fields come first, because Kotlin binds a positional call to the wrong one otherwise', () => {
   const fields = {
     id: { form: 'primitive', type: 'string' },

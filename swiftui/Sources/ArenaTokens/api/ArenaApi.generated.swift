@@ -208,7 +208,7 @@ public struct ArenaConfirmRequest: Sendable {
     /// The cancelling button.
     public let cancelLabel: String?
     /// Whether confirming is the final irreversible step, drawn as the one filled danger surface.
-    public let destructive: Bool?
+    public let destructive: Bool
     /// Text the reader must type before the confirming button is enabled.
     public let requireText: String?
 
@@ -218,7 +218,7 @@ public struct ArenaConfirmRequest: Sendable {
         eyebrow: String? = nil,
         confirmLabel: String? = nil,
         cancelLabel: String? = nil,
-        destructive: Bool? = nil,
+        destructive: Bool = false,
         requireText: String? = nil
     ) {
         self.title = title
@@ -461,66 +461,66 @@ public struct ArenaLocale: Sendable {
     public let doughnutChartPieLegend: String
 
     public init(
-        locale: String,
-        calendarToday: String,
-        calendarPrevious: String,
-        calendarNext: String,
-        calendarRegion: String,
-        calendarGrid: String,
-        calendarEventActions: String,
-        paginationPrevious: String,
-        paginationNext: String,
-        tableSortBy: String,
-        tableEmpty: String,
-        toastClose: String,
-        toastPinned: String,
-        toastPinnedHint: String,
-        sheetClose: String,
-        alertDismiss: String,
-        tagRemove: String,
-        skeletonLabel: String,
-        spinnerLabel: String,
-        switchConfirmHint: String,
-        bulkActionBarLabel: String,
-        bulkActionBarClear: String,
-        bulkActionBarClearLabel: String,
-        bulkActionBarCount: String,
-        bulkActionBarNoun: String,
-        commandPaletteDialog: String,
-        commandPaletteSearch: String,
-        commandPalettePlaceholder: String,
-        commandPaletteList: String,
-        commandPaletteEscape: String,
-        commandPaletteEmpty: String,
-        onboardingBack: String,
-        onboardingSkip: String,
-        onboardingNext: String,
-        onboardingDone: String,
-        onboardingStep: String,
-        onboardingProgress: String,
-        confirmDialogEyebrow: String,
-        confirmDialogConfirm: String,
-        confirmDialogCancel: String,
-        confirmDialogRequire: String,
-        errorStateTitle: String,
-        avatarOnline: String,
-        avatarBusy: String,
-        avatarAway: String,
-        avatarOffline: String,
-        lineChartName: String,
-        barChartName: String,
-        horizontalBarChartName: String,
-        pyramidChartName: String,
-        doughnutChartName: String,
-        doughnutChartPieName: String,
-        radarChartName: String,
-        scatterChartName: String,
-        chartTableCategory: String,
-        chartTablePoint: String,
-        chartTableAxis: String,
-        chartTableSeries: String,
-        doughnutChartLegend: String,
-        doughnutChartPieLegend: String
+        locale: String = "en-GB",
+        calendarToday: String = "Today",
+        calendarPrevious: String = "Previous",
+        calendarNext: String = "Next",
+        calendarRegion: String = "Schedule, {range}",
+        calendarGrid: String = "Schedule grid, {range}",
+        calendarEventActions: String = "Actions",
+        paginationPrevious: String = "Previous",
+        paginationNext: String = "Next",
+        tableSortBy: String = "Sort by",
+        tableEmpty: String = "No data.",
+        toastClose: String = "Close",
+        toastPinned: String = "Pinned",
+        toastPinnedHint: String = "Does not auto-dismiss",
+        sheetClose: String = "Close",
+        alertDismiss: String = "Dismiss",
+        tagRemove: String = "Remove",
+        skeletonLabel: String = "Loading",
+        spinnerLabel: String = "Loading",
+        switchConfirmHint: String = "Requires confirmation",
+        bulkActionBarLabel: String = "Actions on the selection",
+        bulkActionBarClear: String = "Clear",
+        bulkActionBarClearLabel: String = "Clear selection",
+        bulkActionBarCount: String = "{count} {noun} selected",
+        bulkActionBarNoun: String = "items",
+        commandPaletteDialog: String = "Command palette",
+        commandPaletteSearch: String = "Search commands",
+        commandPalettePlaceholder: String = "Search for an action or project…",
+        commandPaletteList: String = "Commands",
+        commandPaletteEscape: String = "ESC",
+        commandPaletteEmpty: String = "No results for \"{query}\".",
+        onboardingBack: String = "Back",
+        onboardingSkip: String = "Skip",
+        onboardingNext: String = "Next",
+        onboardingDone: String = "Got it",
+        onboardingStep: String = "Step {current} of {total}",
+        onboardingProgress: String = "Progress: step {current} of {total}",
+        confirmDialogEyebrow: String = "Confirm",
+        confirmDialogConfirm: String = "Confirm",
+        confirmDialogCancel: String = "Cancel",
+        confirmDialogRequire: String = "Type \"{text}\" to confirm",
+        errorStateTitle: String = "Something went wrong",
+        avatarOnline: String = "online",
+        avatarBusy: String = "busy",
+        avatarAway: String = "away",
+        avatarOffline: String = "offline",
+        lineChartName: String = "{label} — line chart",
+        barChartName: String = "{label} — bar chart",
+        horizontalBarChartName: String = "{label} — horizontal bar chart",
+        pyramidChartName: String = "{label} — horizontal bar chart",
+        doughnutChartName: String = "{label} — doughnut chart",
+        doughnutChartPieName: String = "{label} — pie chart",
+        radarChartName: String = "{label} — radar chart",
+        scatterChartName: String = "{label} — scatter chart",
+        chartTableCategory: String = "Category",
+        chartTablePoint: String = "Point",
+        chartTableAxis: String = "Axis",
+        chartTableSeries: String = "Series",
+        doughnutChartLegend: String = "Doughnut chart legend",
+        doughnutChartPieLegend: String = "Pie chart legend"
     ) {
         self.locale = locale
         self.calendarToday = calendarToday
@@ -608,11 +608,11 @@ public struct ArenaMenuItem: Sendable {
     /// The keyboard hint drawn right-aligned in the mono face. Display only: ArenaMenu binds no key for it.
     public let shortcut: String?
     /// Draws the row in the danger ink. Destructive entries go last.
-    public let destructive: Bool?
+    public let destructive: Bool
     /// The row is drawn muted and reports no `select`.
-    public let disabled: Bool?
+    public let disabled: Bool
     /// Draws a hairline rule in place of a row. Carries no other field.
-    public let divider: Bool?
+    public let divider: Bool
     /// Draws a group label in place of a row. Carries no other field.
     public let header: String?
 
@@ -620,9 +620,9 @@ public struct ArenaMenuItem: Sendable {
         label: String? = nil,
         icon: String? = nil,
         shortcut: String? = nil,
-        destructive: Bool? = nil,
-        disabled: Bool? = nil,
-        divider: Bool? = nil,
+        destructive: Bool = false,
+        disabled: Bool = false,
+        divider: Bool = false,
         header: String? = nil
     ) {
         self.label = label
@@ -642,15 +642,15 @@ public struct ArenaNumberFormat: Sendable {
     /// How many digits after the decimal separator, fixed. Absent, the locale decides. This is where a chart stops needing its data rounded before it is bound: rounding in the model to make a label read well loses the value everywhere else it is used.
     public let fractionDigits: Double?
     /// Whether thousands are separated. True by default because a five-digit tick is unreadable without it; false for a year, an identifier, or anything whose digits are not a quantity.
-    public let grouping: Bool?
+    public let grouping: Bool
     /// Writes 48.2K rather than 48200. For an axis over a wide range, where a full number is wider than the space between two ticks. it applies to every number the chart writes, ticks and tooltip and table alike, because a tooltip disagreeing with the tick above it is worse than a long label.
-    public let compact: Bool?
+    public let compact: Bool
 
     public init(
         locale: String? = nil,
         fractionDigits: Double? = nil,
-        grouping: Bool? = nil,
-        compact: Bool? = nil
+        grouping: Bool = true,
+        compact: Bool = false
     ) {
         self.locale = locale
         self.fractionDigits = fractionDigits
@@ -911,23 +911,23 @@ public struct ArenaTableColumn: Sendable {
     /// The column's label, drawn in the header row.
     public let header: String
     /// How this column's cells align.
-    public let align: ArenaCellAlign?
+    public let align: ArenaCellAlign
     /// A fixed width for the column. Omit to let the table distribute.
     public let width: String?
     /// Draw this column's cells in the mono face, figure-aligned, and in the gold ink -- for identifiers and figures. The ink is the half that does not travel outside a table: gold reads as an identifier, so a sale total in gold inside a card says the wrong thing. Each layer offers the face and the digit alignment on their own, for a figure the consumer draws elsewhere, and its usage document says how.
-    public let mono: Bool?
+    public let mono: Bool
     /// Whether this column's header is an activation target. A declared boolean rather than "is sortChange bound?", because Arena never derives what it draws from what a consumer listens for, the same reason ArenaTableRow.interactive is one. It costs no tab stop: the header row is already row 0 of the grid's roving cursor, so a sortable header is activated with Enter or Space on the cell the user is already on. Without ArenaTable.sort no header is a target however many columns declare it, because a control that draws a direction it does not know is worse than no control.
-    public let sortable: Bool?
+    public let sortable: Bool
     /// How this column renders in card mode: a label/value pair, or a full-width strip with no label whose contents sit at its end, which suits an actions cell rather than a long value.
-    public let mobileLayout: ArenaTableCellLayout?
+    public let mobileLayout: ArenaTableCellLayout
 
     public init(
         header: String,
-        align: ArenaCellAlign? = nil,
+        align: ArenaCellAlign = .left,
         width: String? = nil,
-        mono: Bool? = nil,
-        sortable: Bool? = nil,
-        mobileLayout: ArenaTableCellLayout? = nil
+        mono: Bool = false,
+        sortable: Bool = false,
+        mobileLayout: ArenaTableCellLayout = .row
     ) {
         self.header = header
         self.align = align

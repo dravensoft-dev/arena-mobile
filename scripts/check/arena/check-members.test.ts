@@ -129,6 +129,7 @@ test('an enum default is spelled the way each language spells its own case', () 
     .toEqual(['.primary', 'ArenaButtonVariant.primary']);
   expect(acceptedDefaults('full', FLAG, [], 'compose')).toEqual(['false']);
   expect(acceptedDefaults('content', SLOT, [], 'compose')).toEqual([]);
+  expect(acceptedDefaults('label', { form: 'primitive', type: 'string', default: 'md' }, [], 'swiftui')).toEqual(['"md"']);
 });
 
 test('a type, a default and a missing default are each reported against the contract', () => {

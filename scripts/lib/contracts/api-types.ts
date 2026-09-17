@@ -25,10 +25,11 @@ export type ApiField = {
   type?: string;
   of?: string;
   required?: boolean;
+  default?: string | number | boolean | unknown[];
   description?: string;
 };
 
-export type ComponentMember = ApiField & { default?: string | number | boolean };
+export type ComponentMember = ApiField;
 
 export type ApiType = {
   name: string;
@@ -82,10 +83,29 @@ export function requiredFirst(fields: Record<string, ApiField> | undefined) {
   ];
 }
 
-function fieldProblems(type: ApiType, kindByName: Map<string, string>) {
+function defaultProblems(where: string, spec: ApiField, declared: Map<string, ApiType>) {
+  const value = spec.default;
+  if (value === undefined) return [];
+  if (spec.form === 'primitive' && typeof value !== spec.type) {
+    return [`${where}: defaults to ${JSON.stringify(value)}, which is not a ${spec.type}`];
+  }
+  if (spec.form === 'enum') {
+    const values = declared.get(spec.type ?? '')?.values ?? [];
+    if (!values.includes(value as string | number)) {
+      return [`${where}: defaults to ${JSON.stringify(value)}, which ${spec.type} does not declare`];
+    }
+  }
+  if (spec.form === 'array' && !(Array.isArray(value) && value.length === 0)) {
+    return [`${where}: defaults to ${JSON.stringify(value)}, and the one array default this emit states is the empty one`];
+  }
+  return [];
+}
+
+function fieldProblems(type: ApiType, kindByName: Map<string, string>, declared: Map<string, ApiType>) {
   const errs: string[] = [];
   for (const [field, spec] of fieldEntries(type.fields)) {
     const where = `${type.name}.${field}`;
+    errs.push(...defaultProblems(where, spec, declared));
     if (spec.form === 'primitive') {
       if (!isPrimitive(spec.type)) errs.push(`${where}: "${spec.type}" is none of ${PRIMITIVES.join(', ')}`);
       continue;
@@ -113,6 +133,7 @@ export function structureProblems(types: ApiType[]) {
   const errs: string[] = [];
   const seen = new Set<string>();
   const kindByName = new Map(types.filter((type) => type.name).map((type) => [type.name, type.kind]));
+  const declared = new Map(types.filter((type) => type.name).map((type) => [type.name, type]));
 
   for (const type of types) {
     if (!type.name) { errs.push(`${TYPES_PREFIX}: a type declares no name`); continue; }
@@ -130,7 +151,7 @@ export function structureProblems(types: ApiType[]) {
       continue;
     }
     if (type.kind !== 'object') { errs.push(`${type.name}: unknown kind "${type.kind}"`); continue; }
-    errs.push(...fieldProblems(type, kindByName));
+    errs.push(...fieldProblems(type, kindByName, declared));
   }
   return sortedByCodeUnit(errs);
 }

@@ -211,6 +211,29 @@ export function fieldTypes(field: ApiField, where: string) {
   );
 }
 
+function numberLiteral(value: number) {
+  return Number.isInteger(value) ? `${value}.0` : String(value);
+}
+
+export function defaultLiterals(field: ApiField, types: readonly ApiType[], where: string) {
+  const value = field.default;
+  if (value === undefined) return null;
+  if (field.form === 'enum') {
+    const type = types.find((one) => one.name === field.type);
+    const found = type ? enumCases(type).find((one) => one.value === value) : undefined;
+    if (!found) throw new Error(`${where}: defaults to ${JSON.stringify(value)}, which ${field.type} does not declare`);
+    return { kotlin: `${field.type}.${found.kotlin}`, swift: `.${found.swift}` };
+  }
+  if (Array.isArray(value)) {
+    if (value.length > 0) throw new Error(`${where}: the one array default this emit states is the empty one`);
+    return { kotlin: 'emptyList()', swift: '[]' };
+  }
+  if (typeof value === 'number') return { kotlin: numberLiteral(value), swift: numberLiteral(value) };
+  if (typeof value === 'boolean') return { kotlin: String(value), swift: String(value) };
+  const quoted = JSON.stringify(value);
+  return { kotlin: quoted.replaceAll('$', '\\$'), swift: quoted };
+}
+
 export function keyFor(type: string, field: string | null) {
   return field === null ? type : `${type}.${field}`;
 }

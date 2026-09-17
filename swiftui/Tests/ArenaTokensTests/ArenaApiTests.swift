@@ -37,3 +37,14 @@ import ArenaTokens
     #expect(crumb.href == nil)
     #expect(ArenaCrumb(label: "Customers", href: "/customers").href == "/customers")
 }
+
+@Test func aFieldTheContractDefaultsIsAnsweredByThatDefaultWhenTheCallerSaysNothing() {
+    #expect(ArenaLocale().locale == "en-GB")
+    #expect(ArenaLocale().calendarToday == "Today")
+    #expect(ArenaLocale(calendarToday: "Hoy").calendarToday == "Hoy")
+    #expect(ArenaMenuItem(label: "Delete").destructive == false)
+}
+
+@Test func aBreakpointIsOneOfTheThreeTheContractNames() {
+    #expect(ArenaBreakpoint.allCases.map(\.rawValue) == ["sm", "md", "lg"])
+}
