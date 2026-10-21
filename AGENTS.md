@@ -65,6 +65,31 @@ argument says. That matters more here than upstream, because SwiftPM resolves a 
 a tag directly rather than from a registry: rewriting one moves a dependency under a consumer
 with no version number changing.
 
+## What a suspended layer is
+
+**The SwiftUI layer is suspended, and this release line ships Android alone.** Its sources, its
+suites and `Package.swift` stay tracked and untouched, frozen at the emit of the pin they were last
+generated from, and nothing that runs here reads them. `SUSPENDED` in
+`scripts/lib/arena/behaviour-obligations.ts` names the layer with its reason, and `LAYERS` beside it
+is every layer that map leaves, so a gate that walks the layers walks the active ones alone.
+`ALL_LAYERS` is the full set: the data maps are typed over it, and a suite exercising a comparison
+between two layers passes it explicitly.
+
+**A suspension stops four things.** The generators write no target under a suspended root, which
+`scripts/lib/arena/layer-trees.ts:isActive(path, layers)` decides. Every gate that reads or compares
+a layer skips it. `check-all` prints a gate whose domain is suspended as `OFF` with the reason
+rather than running it, so a host with no Xcode reports a green run rather than an INCOMPLETE one.
+And no workflow carries a job for it.
+
+**It does not stop a tag from serving the frozen package**, because SwiftPM resolves the repository
+at a tag and nothing here can withhold it. A consumer resolving one gets the Swift of the last emit,
+and never the values the tag's pin describes.
+
+**Resuming is deleting the entry**, then restoring the macOS job in each guarding workflow, running
+`bun run build` so the emit catches up with the pin, and answering whatever the gates report. A map
+typed over every layer still owes its SwiftUI answer while the layer is suspended, so what resuming
+catches up is the sources and never the registers.
+
 ## What a behaviour requirement obliges here
 
 **Arena's rule that a requirement met by an element's own native semantics counts as met does

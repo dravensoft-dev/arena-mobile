@@ -6,6 +6,7 @@ import {
   operandProblems, parityProblems, partitionProblems, rungProblems, rungsIn, targetIn,
   zeroMemberProblem, zeroRoleProblem, node,
 } from './check-control.ts';
+import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 
 const emitted = new Map([['sp.3', 'sp3'], ['sp.2', 'sp2'], ['r.sm', 'rSm'], ['fw.semibold', 'fwSemibold'],
   ['dz.ctl-h', 'ctlH'], ['dz.ctl-h-sm', 'ctlHSm'], ['dz.ctl-h-lg', 'ctlHLg'], ['dz.text', 'text'], ['dz.text-md', 'textMd']]);
@@ -103,7 +104,7 @@ test('zero is a failure, because a gate that walked nothing reports no gaps behi
   expect(zeroRoleProblem(1)).toBeNull();
   expect(zeroMemberProblem(0, 'Compose')).toContain('reports a clean pass');
   expect(zeroMemberProblem(1, 'Compose')).toBeNull();
-  expect(missingSeamProblems(() => false)).toHaveLength(2);
+  expect(missingSeamProblems(() => false)).toHaveLength(LAYERS.length);
   expect(missingSeamProblems(() => true)).toEqual([]);
 });
 

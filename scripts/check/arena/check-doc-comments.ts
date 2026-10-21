@@ -14,12 +14,13 @@ import { docTextFor, flatten, densityTokens, scaleTokens, staleRephrasedProblems
 import { apiKotlinDocs, apiSwiftDocs, docProblems, kotlinDocs, swiftDocs } from '../../lib/arena/doc-comments.ts';
 import { TARGETS, tokensOf } from '../../generate/arena/generate-tokens.ts';
 import { API_TARGETS, apiTypesOf } from '../../generate/arena/generate-api-types.ts';
+import { isActive } from '../../lib/arena/layer-trees.ts';
 import { owedDocs } from '../../lib/arena/api-emit.ts';
 import type { Emitted } from '../../lib/arena/bridge.ts';
 
 export const node = {
   name: 'check:doc-comments',
-  reads: [...TARGETS, ...API_TARGETS],
+  reads: [...TARGETS, ...API_TARGETS].filter((target) => isActive(target)),
   writes: [],
   feeds: [],
 };
@@ -40,7 +41,7 @@ export function owedByFile(tokens: ReturnType<typeof tokensOf>, types: ReturnTyp
     [TARGETS[0], scales], [TARGETS[1], colors], [TARGETS[2], density],
     [TARGETS[3], scales], [TARGETS[4], colors], [TARGETS[5], density],
     [API_TARGETS[0], api], [API_TARGETS[1], api],
-  ]);
+  ].filter(([target]) => isActive(target as string)) as [string, Map<string, string>][]);
 }
 
 export function readerFor(target: string) {

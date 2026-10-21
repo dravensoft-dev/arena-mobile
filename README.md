@@ -106,6 +106,9 @@ dependencies {
 
 **Swift Package Manager**
 
+Android only for now. A tag still resolves the Swift package, frozen at its last emit, for the
+reason [`AGENTS.md`](./AGENTS.md) gives under the suspended layer.
+
 ```swift
 .package(url: "https://github.com/dravensoft-dev/arena-mobile", from: "0.1.0")
 ```

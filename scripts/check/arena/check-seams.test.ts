@@ -5,7 +5,7 @@ import {
   zeroSubjectProblem,
 } from './check-seams.ts';
 import { GATES } from './check-all.ts';
-import type { Layer } from '../../lib/arena/behaviour-obligations.ts';
+import { ALL_LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
 
 const CARRIED = new Set([...HELD_BY.keys(), ...HELD_HERE.keys()]);
 
@@ -50,13 +50,14 @@ test('a seam one layer carries alone offers a consumer two libraries', () => {
     ['compose', new Set(['ArenaScale'])],
     ['swiftui', new Set(['ArenaScale'])],
   ]);
-  expect(parityProblems(both)).toEqual([]);
+  expect(parityProblems(both, ALL_LAYERS)).toEqual([]);
   const lopsided = new Map<Layer, ReadonlySet<string>>([
     ['compose', new Set(['ArenaScale', 'ArenaGhost'])],
     ['swiftui', new Set(['ArenaScale'])],
   ]);
-  expect(parityProblems(lopsided)).toHaveLength(1);
-  expect(parityProblems(lopsided)[0]).toContain('ArenaGhost');
+  expect(parityProblems(lopsided, ALL_LAYERS)).toHaveLength(1);
+  expect(parityProblems(lopsided, ALL_LAYERS)[0]).toContain('ArenaGhost');
+  expect(parityProblems(lopsided, ['compose'])).toEqual([]);
 });
 
 test('a constant is read by the name each language spells it with', () => {
@@ -79,25 +80,26 @@ test('a constant on one layer alone, and one with two values, are both reported'
     ['compose', new Map([['cap', { spelling: 'CAP', value: 2 }]])],
     ['swiftui', new Map([['cap', { spelling: 'cap', value: 2 }]])],
   ]);
-  expect(constantProblems(equal)).toEqual([]);
+  expect(constantProblems(equal, ALL_LAYERS)).toEqual([]);
 
   const apart = new Map<Layer, ReadonlyMap<string, { spelling: string; value: number }>>([
     ['compose', new Map([['cap', { spelling: 'CAP', value: 2 }]])],
     ['swiftui', new Map([['cap', { spelling: 'cap', value: 3 }]])],
   ]);
-  expect(constantProblems(apart)).toHaveLength(1);
-  expect(constantProblems(apart)[0]).toContain('two libraries from one contract');
+  expect(constantProblems(apart, ALL_LAYERS)).toHaveLength(1);
+  expect(constantProblems(apart, ALL_LAYERS)[0]).toContain('two libraries from one contract');
 
   const alone = new Map<Layer, ReadonlyMap<string, { spelling: string; value: number }>>([
     ['compose', new Map([['cap', { spelling: 'CAP', value: 2 }]])],
     ['swiftui', new Map()],
   ]);
-  expect(constantProblems(alone)).toHaveLength(1);
+  expect(constantProblems(alone, ALL_LAYERS)).toHaveLength(1);
   const other = new Map<Layer, ReadonlyMap<string, { spelling: string; value: number }>>([
     ['compose', new Map()],
     ['swiftui', new Map([['cap', { spelling: 'cap', value: 2 }]])],
   ]);
-  expect(constantProblems(other)).toHaveLength(1);
+  expect(constantProblems(other, ALL_LAYERS)).toHaveLength(1);
+  expect(constantProblems(other, ['compose'])).toEqual([]);
 });
 
 test('an empty walk and an empty comparison are each a claim', () => {

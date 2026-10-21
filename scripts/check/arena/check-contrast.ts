@@ -10,7 +10,8 @@ import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
-import { dirFor } from '../../lib/arena/layer-trees.ts';
+import { dirFor, isActive } from '../../lib/arena/layer-trees.ts';
+import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 import { CONTRACTS_DIR } from '../../lib/contracts/payload.ts';
 import { identifierFor } from '../../lib/arena/identifier.ts';
 import { tokensOf } from '../../generate/arena/generate-tokens.ts';
@@ -22,7 +23,7 @@ export const SPACING = `${CONTRACTS_DIR}/contracts/design/spacing.json`;
 
 export const node = {
   name: 'check:contrast',
-  reads: [EFFECTS, SPACING, KOTLIN_SEAM, SWIFT_SEAM],
+  reads: [EFFECTS, SPACING, KOTLIN_SEAM, SWIFT_SEAM].filter((path) => isActive(path)),
   writes: [],
   feeds: [],
 };
@@ -203,7 +204,7 @@ export function operandProblems(tokens: readonly { name: string; type?: string; 
 
 export function missingSeamProblems(present: (path: string) => boolean) {
   return [KOTLIN_SEAM, SWIFT_SEAM]
-    .filter((path) => !present(path))
+    .filter((path) => isActive(path) && !present(path))
     .map((path) => `${path} is not in the tree, so every claim below would hold over a seam this gate never opened`);
 }
 
@@ -226,34 +227,40 @@ function main() {
   }
   const tokens = tokensOf(root);
   const kotlin = membersIn(readFileSync(join(root, KOTLIN_SEAM), 'utf8'), KOTLIN_MEMBER);
-  const swift = membersIn(readFileSync(join(root, SWIFT_SEAM), 'utf8'), SWIFT_MEMBER);
   const noCase = zeroCaseProblem(CASES.size);
   const noKotlin = zeroMemberProblem(kotlin.size, 'Compose');
-  const noSwift = zeroMemberProblem(swift.size, 'SwiftUI');
   const errs = [
     ...(noCase ? [noCase] : []),
     ...(noKotlin ? [noKotlin] : []),
-    ...(noSwift ? [noSwift] : []),
     ...coverageProblems(kotlin, 'Compose'),
-    ...coverageProblems(swift, 'SwiftUI'),
-    ...parityProblems(kotlin, swift),
     ...shapeProblems(kotlin, expectedKotlin, 'Compose'),
-    ...shapeProblems(swift, expectedSwift, 'SwiftUI'),
     ...refusedProblems(kotlin, 'Compose'),
-    ...refusedProblems(swift, 'SwiftUI'),
     ...staleCaseProblems(tokens),
     ...operandProblems(tokens),
   ];
+  let read = kotlin.size;
+  if (LAYERS.includes('swiftui')) {
+    const swift = membersIn(readFileSync(join(root, SWIFT_SEAM), 'utf8'), SWIFT_MEMBER);
+    const noSwift = zeroMemberProblem(swift.size, 'SwiftUI');
+    read += swift.size;
+    errs.push(
+      ...(noSwift ? [noSwift] : []),
+      ...coverageProblems(swift, 'SwiftUI'),
+      ...parityProblems(kotlin, swift),
+      ...shapeProblems(swift, expectedSwift, 'SwiftUI'),
+      ...refusedProblems(swift, 'SwiftUI'),
+    );
+  }
   if (errs.length) {
     console.error(`check-contrast: ${errs.length} problem(s)\n`);
     for (const problem of sortedByCodeUnit(errs)) console.error(`  ${problem}`);
     process.exit(1);
   }
   console.log(
-    `check-contrast: ${CASES.size} case(s) answered by both seams over ${AXES.size} axis/axes, `
+    `check-contrast: ${CASES.size} case(s) answered by the seam of each of ${LAYERS.length} layer(s) not suspended over ${AXES.size} axis/axes, `
     + `each on a non-scaling length the pinned contract names, `
     + `${REFUSED.size} case(s) refused, `
-    + `and ${kotlin.size + swift.size} member(s) read out of the two layers`,
+    + `and ${read} member(s) read out of them`,
   );
 }
 

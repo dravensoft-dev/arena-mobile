@@ -4,6 +4,7 @@ import {
   parityProblems, shapeProblems, staleClassProblems, SWIFT_MEMBER, zeroClassProblem,
   zeroMemberProblem,
 } from './check-motion.ts';
+import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 
 const KOTLIN = [
   'public object ArenaMotion {',
@@ -89,6 +90,6 @@ test('a gate that read nothing fails rather than passing over nothing', () => {
   expect(zeroClassProblem(CLASSES.size)).toBeNull();
   expect(zeroMemberProblem(0, 'SwiftUI')).not.toBeNull();
   expect(zeroMemberProblem(3, 'SwiftUI')).toBeNull();
-  expect(missingSeamProblems(() => false)).toHaveLength(2);
+  expect(missingSeamProblems(() => false)).toHaveLength(LAYERS.length);
   expect(missingSeamProblems(() => true)).toEqual([]);
 });

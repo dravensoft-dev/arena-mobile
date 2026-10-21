@@ -4,6 +4,7 @@ import {
   KOTLIN_MEMBER, membersIn, missingSeamProblems, parityProblems, staleFloorProblems,
   SWIFT_COMPOSITION, SWIFT_MEMBER, zeroEdgeProblem, zeroMemberProblem,
 } from './check-environment.ts';
+import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 
 const KOTLIN = [
   'public object ArenaSafeArea {',
@@ -85,7 +86,7 @@ test('a floor the pinned contract stops carrying fails the map that names it', (
 
 test('a seam that moves is a named failure and never an empty scan', () => {
   expect(missingSeamProblems(() => true)).toEqual([]);
-  expect(missingSeamProblems(() => false)).toHaveLength(2);
+  expect(missingSeamProblems(() => false)).toHaveLength(LAYERS.length);
 });
 
 test('finding nothing is a failure and not a pass', () => {

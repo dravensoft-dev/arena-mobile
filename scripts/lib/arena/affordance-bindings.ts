@@ -152,7 +152,12 @@ export function vocabularyProblems(declared: readonly string[], known = AFFORDAN
   ]);
 }
 
-export function partitionProblems(component: string, entry: Entry, declared: readonly string[]) {
+export function partitionProblems(
+  component: string,
+  entry: Entry,
+  declared: readonly string[],
+  layers: readonly Layer[] = LAYERS,
+) {
   if (isAbsent(entry)) return [];
   const answers = entry.answers;
   const answered = Object.keys(answers);
@@ -165,7 +170,7 @@ export function partitionProblems(component: string, entry: Entry, declared: rea
       .map((affordance) => `${component}: names ${affordance}, which its contract does not declare, so the component `
         + 'draws a state its contract never asked it to'),
     ...Object.entries(answers).flatMap(([affordance, answer]) => (isDrawn(answer)
-      ? LAYERS.filter((layer) => !answer.drawn[layer])
+      ? layers.filter((layer) => !answer.drawn[layer])
         .map((layer) => `${component}: claims ${affordance} drawn and names no ${layer} symbol for it, so nothing `
           + 'can look for one')
       : [])),

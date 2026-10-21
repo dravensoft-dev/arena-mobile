@@ -5,7 +5,7 @@ import {
   zeroSuiteProblem,
 } from './check-suites.ts';
 import { PARTITIONS } from '../../lib/arena/layer-trees.ts';
-import type { Layer } from '../../lib/arena/behaviour-obligations.ts';
+import { ALL_LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
 
 const BOTH = new Map<Layer, ReadonlySet<string>>([
   ['compose', new Set(['ArenaScale', 'ArenaButton'])],
@@ -51,14 +51,15 @@ test('a suite whose stem carries no suffix is named rather than skipped', () => 
 });
 
 test('a subject with no suite and no entry is what this gate exists to report', () => {
-  expect(coverageProblems(BOTH, BOTH, COVERED_ELSEWHERE)).toEqual([]);
+  expect(coverageProblems(BOTH, BOTH, COVERED_ELSEWHERE, ALL_LAYERS)).toEqual([]);
   const missing = new Map<Layer, ReadonlySet<string>>([
     ['compose', new Set(['ArenaButton'])],
     ['swiftui', new Set()],
   ]);
-  const problems = coverageProblems(BOTH, missing, new Map());
+  const problems = coverageProblems(BOTH, missing, new Map(), ALL_LAYERS);
   expect(problems).toHaveLength(3);
   expect(problems.some((one) => one.includes(keyFor('ArenaScale', 'swiftui')))).toBe(true);
+  expect(coverageProblems(BOTH, missing, new Map(), ['compose'])).toHaveLength(1);
 });
 
 test('an entry covers a subject that would otherwise be reported', () => {
@@ -67,18 +68,19 @@ test('an entry covers a subject that would otherwise be reported', () => {
     ['ArenaScale:compose', { by: 'anywhere.kt', why: 'because' }],
     ['ArenaScale:swiftui', { by: 'anywhere.swift', why: 'because' }],
   ]);
-  const problems = coverageProblems(BOTH, missing, covered);
+  const problems = coverageProblems(BOTH, missing, covered, ALL_LAYERS);
   expect(problems.every((one) => one.includes('ArenaButton'))).toBe(true);
 });
 
 test('a suite on one layer with no counterpart is the invisible half', () => {
-  expect(symmetryProblems(BOTH)).toEqual([]);
+  expect(symmetryProblems(BOTH, ALL_LAYERS)).toEqual([]);
   const lopsided = new Map<Layer, ReadonlySet<string>>([
     ['compose', new Set(['ArenaDensity'])],
     ['swiftui', new Set()],
   ]);
-  expect(symmetryProblems(lopsided)).toHaveLength(1);
-  expect(symmetryProblems(lopsided)[0]).toContain('ArenaDensity');
+  expect(symmetryProblems(lopsided, ALL_LAYERS)).toHaveLength(1);
+  expect(symmetryProblems(lopsided, ALL_LAYERS)[0]).toContain('ArenaDensity');
+  expect(symmetryProblems(lopsided, ['compose'])).toEqual([]);
 });
 
 test('an entry goes stale three ways, and each one fails', () => {
@@ -94,6 +96,10 @@ test('an entry goes stale three ways, and each one fails', () => {
 
   const wrong = new Map([['ArenaScale:android', { by: 'anywhere.kt', why: 'because' }]]);
   expect(staleCoverProblems(new Set(['ArenaScale']), none, () => true, wrong)[0]).toContain('names neither layer');
+
+  const suspended = new Map([['ArenaScale:swiftui', { by: 'gone.swift', why: 'because' }]]);
+  expect(staleCoverProblems(new Set(['ArenaScale']), none, () => false, suspended, ['compose'])).toEqual([]);
+  expect(staleCoverProblems(new Set(['ArenaScale']), none, () => false, suspended, ALL_LAYERS)[0]).toContain('not in the tree');
 });
 
 test('an empty walk on either side is a claim and not a pass', () => {

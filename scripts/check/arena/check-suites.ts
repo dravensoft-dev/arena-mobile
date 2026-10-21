@@ -12,7 +12,7 @@ import { isMainModule } from '../../utils/main-module.ts';
 import { walkFiles } from '../../utils/walk-files.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
-import { LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
+import { ALL_LAYERS, LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
 import {
   EXTENSIONS, PARTITIONS, SUITE_ROOTS, SUITE_SUFFIXES, dirFor, type Partition,
 } from '../../lib/arena/layer-trees.ts';
@@ -74,8 +74,9 @@ export function coverageProblems(
   byLayer: ReadonlyMap<Layer, ReadonlySet<string>>,
   suitesByLayer: ReadonlyMap<Layer, ReadonlySet<string>>,
   covered = COVERED_ELSEWHERE,
+  layers: readonly Layer[] = LAYERS,
 ) {
-  return sortedByCodeUnit(LAYERS.flatMap((layer) => [...(byLayer.get(layer) ?? new Set<string>())]
+  return sortedByCodeUnit(layers.flatMap((layer) => [...(byLayer.get(layer) ?? new Set<string>())]
     .filter((subject) => !(suitesByLayer.get(layer) ?? new Set<string>()).has(subject))
     .filter((subject) => !covered.has(keyFor(subject, layer)))
     .map((subject) => `${keyFor(subject, layer)} is a subject that layer draws and no suite beside it covers, and `
@@ -83,9 +84,9 @@ export function coverageProblems(
       + 'the default failure mode')));
 }
 
-export function symmetryProblems(suitesByLayer: ReadonlyMap<Layer, ReadonlySet<string>>) {
-  return sortedByCodeUnit(LAYERS.flatMap((layer) => {
-    const others = LAYERS.filter((one) => one !== layer);
+export function symmetryProblems(suitesByLayer: ReadonlyMap<Layer, ReadonlySet<string>>, layers: readonly Layer[] = LAYERS) {
+  return sortedByCodeUnit(layers.flatMap((layer) => {
+    const others = layers.filter((one) => one !== layer);
     return [...(suitesByLayer.get(layer) ?? new Set<string>())]
       .filter((subject) => others.some((other) => !(suitesByLayer.get(other) ?? new Set<string>()).has(subject)))
       .map((subject) => `${subject} carries a suite on ${layer} and none on ${others.join(' and ')}. Both layers are `
@@ -98,14 +99,16 @@ export function staleCoverProblems(
   suitesByLayer: ReadonlyMap<Layer, ReadonlySet<string>>,
   present: (path: string) => boolean,
   covered = COVERED_ELSEWHERE,
+  layers: readonly Layer[] = LAYERS,
 ) {
   return sortedByCodeUnit([...covered].flatMap(([key, entry]) => {
     const cut = key.lastIndexOf(':');
     const subject = key.slice(0, cut);
     const layer = key.slice(cut + 1) as Layer;
-    if (!LAYERS.includes(layer)) {
+    if (!ALL_LAYERS.includes(layer)) {
       return [`COVERED_ELSEWHERE keys ${key} and ${layer} names neither layer, so the entry covers nothing`];
     }
+    if (!layers.includes(layer)) return [];
     if (!subjects.has(subject)) {
       return [`COVERED_ELSEWHERE covers ${key} and neither layer carries a subject by that name: ${entry.why}`];
     }

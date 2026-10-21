@@ -3,6 +3,7 @@ import {
   SIGNATURES, memberNamesOf, node, parametersIn, zeroDrawnProblem, zeroMemberProblem,
 } from './check-members.ts';
 import { drawnComponents, layerCoverageProblems } from '../../lib/arena/component-sources.ts';
+import { ALL_LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 import {
   BEYOND, DERIVED_DEFAULT, MEMBERS, NATIVE_FORMS, acceptedDefaults, expectedType, isAnswered,
   parameterProblems, partitionProblems, shapeProblems, staleComponentProblems, staleDerivedProblems,
@@ -85,7 +86,8 @@ test('a register entry for a component neither layer draws is a partition nobody
 test('a component drawn on one layer alone is reported from the side that is missing it', () => {
   const byLayer = new Map([['compose', new Map([['ArenaButton', 'a.kt']])], ['swiftui', new Map()]] as const);
   expect(drawnComponents(byLayer)).toEqual(['ArenaButton']);
-  expect(layerCoverageProblems('ArenaButton', byLayer)[0]).toContain('not on swiftui');
+  expect(layerCoverageProblems('ArenaButton', byLayer, ALL_LAYERS)[0]).toContain('not on swiftui');
+  expect(layerCoverageProblems('ArenaButton', byLayer, ['compose'])).toEqual([]);
 });
 
 test('zero is a failure, because a gate that walked nothing reports no gaps', () => {

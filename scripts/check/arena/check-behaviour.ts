@@ -23,9 +23,7 @@ import {
   isPublished, type Entry,
 } from '../../lib/arena/behaviour-bindings.ts';
 import { LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
-import {
-  KOTLIN_COMPONENTS, SWIFT_COMPONENTS, sourcesByLayer,
-} from '../../lib/arena/component-sources.ts';
+import { componentReads, sourcesByLayer } from '../../lib/arena/component-sources.ts';
 import { carries } from '../../lib/arena/native-symbol.ts';
 
 export const node = {
@@ -34,8 +32,7 @@ export const node = {
     `${CONTRACTS_DIR}/${MANIFEST}`,
     `${CONTRACTS_DIR}/${BEHAVIOUR_PREFIX}**`,
     `${CONTRACTS_DIR}/${COMPONENTS_PREFIX}**`,
-    `${KOTLIN_COMPONENTS}/**`,
-    `${SWIFT_COMPONENTS}/**`, `!${SWIFT_COMPONENTS}/**/*.generated.*`,
+    ...componentReads(),
   ],
   writes: [],
   feeds: [],
@@ -54,7 +51,7 @@ export function symbolProblems(component: string, entry: Entry, layer: Layer, so
     return [`${component} is published by the register and ${layer} carries no source for it, so every symbol its `
       + 'binding names would be held against a file this gate never opened'];
   }
-  const binding = bindingLayers(entry).find((one) => one.layer === layer);
+  const binding = bindingLayers(entry, [layer]).find((one) => one.layer === layer);
   const met = { ...binding?.met, ...Object.assign({}, ...(binding?.also ?? []).map((added) => added.met ?? {})) };
   return sortedByCodeUnit(Object.entries(met as Record<string, Partial<Record<Layer, string>>>)
     .flatMap(([key, answers]) => {
@@ -75,7 +72,7 @@ export function passLine(
   { patterns: number; keys: number; roles: number; components: number; published: number; absences: number; symbols: number },
 ) {
   return `check-behaviour: ${patterns} pattern(s) from the pinned contract, ${keys} requirement key(s) and ${roles} role(s), `
-    + `every one reaching a native obligation on both layers; ${components} component(s) declared, `
+    + `every one reaching a native obligation on every layer not suspended; ${components} component(s) declared, `
     + `${published} published and ${absences} recorded absence(s), every binding partitioning its pattern, `
     + `and ${symbols} symbol(s) found in the source of the layer that names them.\n`
     + '  (A green run says the declarations partition the contract, never that any component behaves,\n'

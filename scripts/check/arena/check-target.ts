@@ -94,14 +94,14 @@ export function floorProblems(layer: Layer, read: number, suite: string, floors 
   return [];
 }
 
-export function clearances(rungs: readonly Rung[], floors = FLOORS) {
-  return LAYERS.flatMap((layer) => rungs.map((rung) => ({
+export function clearances(rungs: readonly Rung[], floors = FLOORS, layers: readonly Layer[] = LAYERS) {
+  return layers.flatMap((layer) => rungs.map((rung) => ({
     layer, ...rung, clears: rung.points >= floors[layer].points,
   })));
 }
 
 export function decorativeProblems(rows: ReturnType<typeof clearances>, floors = FLOORS) {
-  return sortedByCodeUnit(LAYERS.flatMap((layer) => {
+  return sortedByCodeUnit([...new Set(rows.map((row) => row.layer))].flatMap((layer) => {
     const mine = rows.filter((row) => row.layer === layer);
     if (mine.length === 0 || mine.some((row) => !row.clears)) return [];
     return [`every rung the pinned contract carries already clears the ${floors[layer].points} this layer floors `
@@ -110,8 +110,8 @@ export function decorativeProblems(rows: ReturnType<typeof clearances>, floors =
   }));
 }
 
-export function arguedProblems(rungs: readonly Rung[], argued = ARGUED, floors = FLOORS) {
-  return sortedByCodeUnit([...argued].flatMap(([layer, tie]) => {
+export function arguedProblems(rungs: readonly Rung[], argued = ARGUED, floors = FLOORS, layers: readonly Layer[] = LAYERS) {
+  return sortedByCodeUnit([...argued].filter(([layer]) => layers.includes(layer)).flatMap(([layer, tie]) => {
     const rung = rungs.find((one) => one.name === tie.token && one.density === tie.density);
     if (!rung) {
       return [`ARGUED ties the ${layer} floor to ${tie.token} in the ${tie.density} density, and the pinned `
@@ -129,10 +129,11 @@ export function partitionProblems(
   components: readonly string[],
   measured: ReadonlyMap<string, ReadonlySet<string>>,
   unboxed = UNBOXED,
+  layers: readonly Layer[] = LAYERS,
 ) {
   return sortedByCodeUnit(components.flatMap((component) => {
     if (unboxed.has(component)) return [];
-    return LAYERS.filter((layer) => !(measured.get(layer) ?? new Set<string>()).has(component))
+    return layers.filter((layer) => !(measured.get(layer) ?? new Set<string>()).has(component))
       .map((layer) => `${component} is drawn and ${suiteFor(layer, component)} names no floor, so nothing measures `
         + 'an activation box for it and UNBOXED excuses none. A control whose target is held on one layer and not '
         + 'the other offers a thumb two libraries');
@@ -226,9 +227,9 @@ function main() {
 
   const below = clearances(rungs).filter((row) => !row.clears);
   console.log(
-    `check-target: ${components.length} component(s) drawn and measured on both layers over `
-    + `${rungs.length} rung(s), against ${FLOORS.compose.points} on Compose and ${FLOORS.swiftui.points} on `
-    + `SwiftUI, each tied to the rung arguing it; ${below.length} rung(s) sit below a floor and are what the `
+    `check-target: ${components.length} component(s) drawn and measured on every layer not suspended over `
+    + `${rungs.length} rung(s), against ${LAYERS.map((layer) => `${FLOORS[layer].points} on ${layer}`).join(' and ')}, `
+    + `each tied to the rung arguing it; ${below.length} rung(s) sit below a floor and are what the `
     + `activation box is for, and ${UNBOXED.size} geometry(ies) are excepted with a reason`,
   );
 }

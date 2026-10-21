@@ -24,21 +24,21 @@ Locally the build is free to keep what nothing has moved under. In a workflow th
 the wrong kind of green: the step after it proves the emit idempotent with
 `git diff --exit-code`, and a build that did nothing satisfies that by doing nothing.
 
-## The fan-out, and why three jobs
+## The fan-out, and why two jobs
 
 ```
 build              bun run build:release, then git diff --exit-code
    |
    +-- test-tooling    ubuntu   the contracts and arena domains, and the suites
    +-- test-compose    ubuntu   the compose domain, on a JDK 21 toolchain
-   +-- test-swiftui    macOS    the swiftui domain, which runs nowhere else
    |
 pr-gate            the only required check, and it waits for every job above
 ```
 
-**`test-swiftui` is on macOS because SwiftUI ships in the Apple SDKs alone**, and it is the
-one place `check:swift` can make its claim at all. A macOS runner bills several times a Linux
-one, which is the reason the partition is by domain: the expensive job runs one gate.
+**No job runs the swiftui domain, because the layer is suspended**, which
+[`../../AGENTS.md`](../../AGENTS.md) states once with what resuming it takes. Its job ran on macOS,
+since SwiftUI ships in the Apple SDKs alone, and a macOS runner bills several times a Linux one,
+which is the reason the partition is by domain: the expensive job runs one gate.
 
 **`pr-gate` is the single required check.** A job skipped by an `if` reports success to branch
 protection, so requiring `test-compose` directly would be satisfied by a run that never

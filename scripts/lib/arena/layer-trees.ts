@@ -2,7 +2,7 @@
  * generators write into, the walks read from and check:structure holds. A root written twice
  * drifts the first time one of them moves, which is the defect this module exists to stop. */
 
-import type { Layer } from './behaviour-obligations.ts';
+import { ALL_LAYERS, LAYERS, type Layer } from './behaviour-obligations.ts';
 
 export const PARTITIONS = ['api', 'components', 'theme', 'tokens'] as const;
 export type Partition = (typeof PARTITIONS)[number];
@@ -27,4 +27,13 @@ export function dirFor(layer: Layer, partition: Partition) {
 
 export function suiteFor(layer: Layer, component: string) {
   return `${SUITE_ROOTS[layer]}/${component}${SUITE_SUFFIXES[layer]}${EXTENSIONS[layer]}`;
+}
+
+export function layerOf(path: string): Layer | null {
+  return ALL_LAYERS.find((layer) => [ROOTS[layer], SUITE_ROOTS[layer]].some((one) => path.startsWith(`${one}/`))) ?? null;
+}
+
+export function isActive(path: string, layers: readonly Layer[] = LAYERS) {
+  const layer = layerOf(path);
+  return layer === null || layers.includes(layer);
 }

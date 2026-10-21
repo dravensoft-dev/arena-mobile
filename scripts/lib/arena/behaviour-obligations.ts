@@ -10,8 +10,15 @@
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { elementRoles, requirementKeys, type Pattern } from '../contracts/behaviour.ts';
 
-export const LAYERS = ['compose', 'swiftui'] as const;
-export type Layer = (typeof LAYERS)[number];
+export const ALL_LAYERS = ['compose', 'swiftui'] as const;
+export type Layer = (typeof ALL_LAYERS)[number];
+
+export const SUSPENDED = new Map<Layer, string>([
+  ['swiftui', 'the first major version ships Android alone, so the SwiftUI layer stays in the tree frozen at its last '
+    + 'emit and no gate, generator or workflow reads it until this entry is removed'],
+]);
+
+export const LAYERS: readonly Layer[] = ALL_LAYERS.filter((layer) => !SUSPENDED.has(layer));
 
 export type Answer = { symbol: string } | { refused: string };
 export type Obligation = { capability: string } & Record<Layer, Answer>;

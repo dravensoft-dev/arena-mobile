@@ -11,10 +11,11 @@ import { UNMAPPED, staleUnmappedProblems } from '../../lib/arena/bridge.ts';
 import { DENSITIES, THEMES } from '../../lib/contracts/payload.ts';
 import { densityTokens, scaleTokens, shapeProblems, themeTokens } from '../../lib/arena/emit.ts';
 import { TARGETS, tokensOf } from '../../generate/arena/generate-tokens.ts';
+import { isActive } from '../../lib/arena/layer-trees.ts';
 
 export const node = {
   name: 'check:coverage',
-  reads: [`${CONTRACTS_DIR}/contracts/design/**`, ...TARGETS],
+  reads: [`${CONTRACTS_DIR}/contracts/design/**`, ...TARGETS.filter((target) => isActive(target))],
   writes: [],
   feeds: [],
 };

@@ -10,7 +10,8 @@ import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { byCodeUnit, sortedByCodeUnit } from '../../utils/compare.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
-import { dirFor } from '../../lib/arena/layer-trees.ts';
+import { dirFor, isActive } from '../../lib/arena/layer-trees.ts';
+import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 import { CONTRACTS_DIR, type Token } from '../../lib/contracts/payload.ts';
 import { CSS_GENERIC_FAMILIES } from '../../lib/arena/bridge.ts';
 import { tokensOf } from '../../generate/arena/generate-tokens.ts';
@@ -21,7 +22,7 @@ export const TYPOGRAPHY = `${CONTRACTS_DIR}/contracts/design/typography.json`;
 
 export const node = {
   name: 'check:fonts',
-  reads: [TYPOGRAPHY, KOTLIN_SEAM, SWIFT_SEAM],
+  reads: [TYPOGRAPHY, KOTLIN_SEAM, SWIFT_SEAM].filter((path) => isActive(path)),
   writes: [],
   feeds: [],
 };
@@ -130,7 +131,7 @@ export function fixedSizeProblems(source: string) {
 
 export function missingSeamProblems(present: (path: string) => boolean) {
   return [KOTLIN_SEAM, SWIFT_SEAM]
-    .filter((path) => !present(path))
+    .filter((path) => isActive(path) && !present(path))
     .map((path) => `${path} is not in the tree, so every claim below would hold over a seam this gate never opened`);
 }
 
@@ -161,31 +162,35 @@ function main() {
   const tokens = tokensOf(root);
   const families = familiesOf(tokens);
   const kotlin = readFileSync(join(root, KOTLIN_SEAM), 'utf8');
-  const swift = readFileSync(join(root, SWIFT_SEAM), 'utf8');
   const kotlinMembers = membersIn(kotlin, KOTLIN_MEMBER);
-  const swiftMembers = membersIn(swift, SWIFT_MEMBER);
   const noFamily = zeroFamilyProblem(families.length);
   const noKotlin = zeroMemberProblem(kotlinMembers.length, 'Compose');
-  const noSwift = zeroMemberProblem(swiftMembers.length, 'SwiftUI');
   const errs = [
     ...(noFamily ? [noFamily] : []),
     ...(noKotlin ? [noKotlin] : []),
-    ...(noSwift ? [noSwift] : []),
     ...coverageProblems(families, kotlinMembers, 'Compose'),
-    ...coverageProblems(families, swiftMembers, 'SwiftUI'),
-    ...parityProblems(kotlinMembers, swiftMembers),
     ...defaultProblems(families, defaultsIn(kotlin, KOTLIN_DEFAULT), KOTLIN_GENERIC, 'Compose'),
-    ...defaultProblems(families, defaultsIn(swift, SWIFT_DEFAULT), SWIFT_GENERIC, 'SwiftUI'),
-    ...fixedSizeProblems(swift),
     ...staleOwedProblems(tokens),
   ];
+  if (LAYERS.includes('swiftui')) {
+    const swift = readFileSync(join(root, SWIFT_SEAM), 'utf8');
+    const swiftMembers = membersIn(swift, SWIFT_MEMBER);
+    const noSwift = zeroMemberProblem(swiftMembers.length, 'SwiftUI');
+    errs.push(
+      ...(noSwift ? [noSwift] : []),
+      ...coverageProblems(families, swiftMembers, 'SwiftUI'),
+      ...parityProblems(kotlinMembers, swiftMembers),
+      ...defaultProblems(families, defaultsIn(swift, SWIFT_DEFAULT), SWIFT_GENERIC, 'SwiftUI'),
+      ...fixedSizeProblems(swift),
+    );
+  }
   if (errs.length) {
     console.error(`check-fonts: ${errs.length} problem(s)\n`);
     for (const problem of sortedByCodeUnit(errs)) console.error(`  ${problem}`);
     process.exit(1);
   }
   console.log(
-    `check-fonts: ${families.length} contracted family/families carried by both seams, `
+    `check-fonts: ${families.length} contracted family/families carried by the seam of each of ${LAYERS.length} layer(s) not suspended, `
     + `each falling back to the generic its own contracted tail names, `
     + `and ${OWED.size} weight range(s) waiting on a raised pin`,
   );

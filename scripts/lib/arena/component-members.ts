@@ -113,10 +113,15 @@ export function parameterProblems(component: string, parameters: ReadonlySet<str
   ]);
 }
 
-export function staleExtraProblems(component: string, byLayer: ReadonlyMap<Layer, ReadonlySet<string>>) {
+export function staleExtraProblems(
+  component: string,
+  byLayer: ReadonlyMap<Layer, ReadonlySet<string>>,
+  active: readonly Layer[] = LAYERS,
+) {
   const extras = BEYOND.get(component) ?? new Map<string, Extra>();
   return sortedByCodeUnit([...extras].flatMap(([parameter, extra]) => {
-    const layers = extra.layer === undefined ? LAYERS : [extra.layer];
+    const layers = extra.layer === undefined ? active : [extra.layer].filter((layer) => active.includes(layer));
+    if (layers.length === 0) return [];
     const carried = layers.some((layer) => byLayer.get(layer)?.has(parameter) === true);
     return carried ? [] : [`BEYOND names ${component}.${parameter}, and no layer that owes it takes one: ${extra.why}`];
   }));

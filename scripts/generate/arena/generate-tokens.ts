@@ -10,7 +10,7 @@ import { isMainModule } from '../../utils/main-module.ts';
 import { repoRoot } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR, DENSITIES, loadTokens, readManifest, resolveAliases, THEMES, type Token } from '../../lib/contracts/payload.ts';
 import { staleUnmappedProblems, type Emitted } from '../../lib/arena/bridge.ts';
-import { dirFor } from '../../lib/arena/layer-trees.ts';
+import { dirFor, isActive } from '../../lib/arena/layer-trees.ts';
 import {
   banner, densityTokens, docTextFor, kdoc, scaleTokens, shapeProblems, staleRephrasedProblems,
   themeTokens, tripleSlash,
@@ -32,8 +32,8 @@ export const TARGETS = [
 export const node = {
   name: 'generate:tokens',
   reads: [`${CONTRACTS_DIR}/arena.contracts.json`, `${CONTRACTS_DIR}/contracts/design/**`],
-  writes: [...TARGETS],
-  feeds: ['check:emit', 'check:coverage', 'check:collisions', 'check:doc-comments', 'check:generated', 'check:structure', 'check:kotlin', 'check:swift'],
+  writes: TARGETS.filter((target) => isActive(target)),
+  feeds: ['check:emit', 'check:coverage', 'check:collisions', 'check:doc-comments', 'check:generated', 'check:structure', 'check:kotlin'],
 };
 
 const KOTLIN_IMPORTS = new Map([
@@ -179,7 +179,7 @@ function main() {
     for (const problem of problems) console.error(`  ${problem}`);
     process.exit(1);
   }
-  const files = emitAll(tokens);
+  const files = new Map([...emitAll(tokens)].filter(([target]) => isActive(target)));
   for (const [target, body] of files) {
     const full = join(repoRoot, target);
     mkdirSync(dirname(full), { recursive: true });

@@ -126,10 +126,10 @@ export function staleHeldHereProblems(subjects: ReadonlySet<string>) {
     : [`HELD_HERE names ${subject} and neither layer carries a source by that name: ${why}`])));
 }
 
-export function parityProblems(byLayer: ReadonlyMap<Layer, ReadonlySet<string>>) {
-  return sortedByCodeUnit(LAYERS.flatMap((layer) => {
+export function parityProblems(byLayer: ReadonlyMap<Layer, ReadonlySet<string>>, layers: readonly Layer[] = LAYERS) {
+  return sortedByCodeUnit(layers.flatMap((layer) => {
     const mine = byLayer.get(layer) ?? new Set<string>();
-    const others = LAYERS.filter((one) => one !== layer);
+    const others = layers.filter((one) => one !== layer);
     return [...mine]
       .filter((subject) => others.some((other) => !(byLayer.get(other) ?? new Set<string>()).has(subject)))
       .map((subject) => `${subject} is an authored seam on ${layer} and not on ${others.join(' and ')}, so one `
@@ -137,28 +137,34 @@ export function parityProblems(byLayer: ReadonlyMap<Layer, ReadonlySet<string>>)
   }));
 }
 
-export function constantProblems(byLayer: ReadonlyMap<Layer, ReadonlyMap<string, { spelling: string; value: number }>>) {
+export function constantProblems(
+  byLayer: ReadonlyMap<Layer, ReadonlyMap<string, { spelling: string; value: number }>>,
+  layers: readonly Layer[] = LAYERS,
+) {
   const errs: string[] = [];
-  const [first, second] = LAYERS;
+  const [first, ...rest] = layers;
+  if (first === undefined) return errs;
   const one = byLayer.get(first) ?? new Map();
-  const other = byLayer.get(second) ?? new Map();
-  for (const [name, mine] of one) {
-    const across = other.get(name);
-    if (across === undefined) {
-      errs.push(`${first} declares ${mine.spelling} by hand and ${second} declares no constant of that name. A value `
-        + 'written in one language and not the other is the cap this repository must state and states once');
-      continue;
+  for (const second of rest) {
+    const other = byLayer.get(second) ?? new Map();
+    for (const [name, mine] of one) {
+      const across = other.get(name);
+      if (across === undefined) {
+        errs.push(`${first} declares ${mine.spelling} by hand and ${second} declares no constant of that name. A value `
+          + 'written in one language and not the other is the cap this repository must state and states once');
+        continue;
+      }
+      if (across.value !== mine.value) {
+        errs.push(`${mine.spelling} is ${mine.value} on ${first} and ${across.spelling} is ${across.value} on ${second}. `
+          + 'A constant changed on one layer alone compiles, passes that layer\'s own suite, and ships two libraries '
+          + 'from one contract');
+      }
     }
-    if (across.value !== mine.value) {
-      errs.push(`${mine.spelling} is ${mine.value} on ${first} and ${across.spelling} is ${across.value} on ${second}. `
-        + 'A constant changed on one layer alone compiles, passes that layer\'s own suite, and ships two libraries '
-        + 'from one contract');
-    }
-  }
-  for (const [name, across] of other) {
-    if (!one.has(name)) {
-      errs.push(`${second} declares ${across.spelling} by hand and ${first} declares no constant of that name. A value `
-        + 'written in one language and not the other is the cap this repository must state and states once');
+    for (const [name, across] of other) {
+      if (!one.has(name)) {
+        errs.push(`${second} declares ${across.spelling} by hand and ${first} declares no constant of that name. A value `
+          + 'written in one language and not the other is the cap this repository must state and states once');
+      }
     }
   }
   return sortedByCodeUnit(errs);
@@ -218,9 +224,9 @@ function main() {
     process.exit(1);
   }
   console.log(
-    `check-seams: ${subjects.size} authored seam(s) carried by both layers, ${HELD_BY.size} of them handed to a `
+    `check-seams: ${subjects.size} authored seam(s) carried by every layer not suspended, ${HELD_BY.size} of them handed to a `
     + `registered gate with the reason and ${HELD_HERE.size} held here, and `
-    + `${(constants.get('compose') ?? new Map()).size} hand-declared constant(s) equal across the two languages by `
+    + `${(constants.get('compose') ?? new Map()).size} hand-declared constant(s) equal across every layer not suspended by `
     + 'the name each one spells them with',
   );
 }

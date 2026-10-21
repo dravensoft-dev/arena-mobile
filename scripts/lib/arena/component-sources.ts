@@ -18,6 +18,15 @@ export const TREES: Record<Layer, { dir: string; extension: string }> = {
   swiftui: { dir: SWIFT_COMPONENTS, extension: EXTENSIONS.swiftui },
 };
 
+export const COMPONENT_READS: Record<Layer, string[]> = {
+  compose: [`${KOTLIN_COMPONENTS}/**`],
+  swiftui: [`${SWIFT_COMPONENTS}/**`, `!${SWIFT_COMPONENTS}/**/*.generated.*`],
+};
+
+export function componentReads(layers: readonly Layer[] = LAYERS) {
+  return layers.flatMap((layer) => COMPONENT_READS[layer]);
+}
+
 export function sourcesIn(root: string, layer: Layer, components: readonly string[]) {
   const { dir, extension } = TREES[layer];
   const named = new Set(components);
@@ -37,8 +46,12 @@ export function drawnComponents(byLayer: ReadonlyMap<Layer, ReadonlyMap<string, 
   return sortedByCodeUnit([...new Set([...byLayer.values()].flatMap((found) => [...found.keys()]))]);
 }
 
-export function layerCoverageProblems(component: string, byLayer: ReadonlyMap<Layer, ReadonlyMap<string, string>>) {
-  return LAYERS.filter((layer) => !byLayer.get(layer)?.has(component))
-    .map((layer) => `${component} is drawn on ${LAYERS.filter((other) => other !== layer).join(' and ')} and not on `
+export function layerCoverageProblems(
+  component: string,
+  byLayer: ReadonlyMap<Layer, ReadonlyMap<string, string>>,
+  layers: readonly Layer[] = LAYERS,
+) {
+  return layers.filter((layer) => !byLayer.get(layer)?.has(component))
+    .map((layer) => `${component} is drawn on ${layers.filter((other) => other !== layer).join(' and ')} and not on `
       + `${layer}, so one contract offers a consumer two libraries`);
 }

@@ -14,10 +14,12 @@ import { enumCases } from '../../lib/arena/api-emit.ts';
 import { densityTokens, scaleTokens, themeTokens } from '../../lib/arena/emit.ts';
 import { TARGETS, tokensOf } from '../../generate/arena/generate-tokens.ts';
 import { API_TARGETS, apiTypesOf } from '../../generate/arena/generate-api-types.ts';
+import { isActive } from '../../lib/arena/layer-trees.ts';
+import { LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
 
 export const node = {
   name: 'check:collisions',
-  reads: [...TARGETS, ...API_TARGETS],
+  reads: [...TARGETS, ...API_TARGETS].filter((target) => isActive(target)),
   writes: [],
   feeds: [],
 };
@@ -34,7 +36,7 @@ export function namespaces(tokens: ReturnType<typeof tokensOf>): Namespace[] {
   ];
 }
 
-export function apiNamespaces(types: ApiType[]): Namespace[] {
+export function apiNamespaces(types: ApiType[], layers: readonly Layer[] = LAYERS): Namespace[] {
   const enums = types.filter((type) => type.kind === 'enum');
   const objects = types.filter((type) => type.kind === 'object');
   return [
@@ -44,8 +46,8 @@ export function apiNamespaces(types: ApiType[]): Namespace[] {
       const named = (spelling: 'kotlin' | 'swift') => cases
         .map((one) => ({ name: `${type.name}.${one.value}`, identifier: one[spelling] }));
       return [
-        { where: `${type.name} (Kotlin)`, named: named('kotlin') },
-        { where: `${type.name} (Swift)`, named: named('swift') },
+        ...(layers.includes('compose') ? [{ where: `${type.name} (Kotlin)`, named: named('kotlin') }] : []),
+        ...(layers.includes('swiftui') ? [{ where: `${type.name} (Swift)`, named: named('swift') }] : []),
       ];
     }),
     ...objects.map((type) => ({

@@ -15,6 +15,7 @@ import { contrast, type Rgb } from '../../utils/contrast.ts';
 import { CONTRACTS_DIR, THEMES, type Theme } from '../../lib/contracts/payload.ts';
 import { themeTokens } from '../../lib/arena/emit.ts';
 import { tokensOf } from '../../generate/arena/generate-tokens.ts';
+import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 
 export const KOTLIN_ROOT = 'compose/src/main/kotlin';
 export const SWIFT_ROOT = 'swiftui/Sources';
@@ -24,7 +25,7 @@ export const node = {
   reads: [
     `${CONTRACTS_DIR}/contracts/design/**`,
     `${KOTLIN_ROOT}/**`, `!${KOTLIN_ROOT}/**/*.generated.*`,
-    `${SWIFT_ROOT}/**`, `!${SWIFT_ROOT}/**/*.generated.*`,
+    ...(LAYERS.includes('swiftui') ? [`${SWIFT_ROOT}/**`, `!${SWIFT_ROOT}/**/*.generated.*`] : []),
   ],
   writes: [],
   feeds: [],
@@ -232,14 +233,14 @@ function colourTable(tokens: ReturnType<typeof tokensOf>, theme: Theme) {
 function main() {
   const tokens = tokensOf(root);
   const kotlin = aliasesIn(sourcesUnder(root, KOTLIN_ROOT, '.kt'));
-  const swift = aliasesIn(sourcesUnder(root, SWIFT_ROOT, '.swift'));
+  const swift = LAYERS.includes('swiftui') ? aliasesIn(sourcesUnder(root, SWIFT_ROOT, '.swift')) : null;
   const members = new Set(themeTokens(tokens, 'dark').map((field) => field.identifier));
-  const zero = zeroCompositionProblem(kotlin.size + swift.size);
+  const zero = zeroCompositionProblem(kotlin.size + (swift?.size ?? 0));
   const nothing = zeroMeasuredProblem(measured(kotlin));
   const errs = [
     ...(zero ? [zero] : []),
     ...(nothing ? [nothing] : []),
-    ...parityProblems(kotlin, swift),
+    ...(swift ? parityProblems(kotlin, swift) : []),
     ...resolutionProblems(kotlin, members),
     ...staleComposedProblems(kotlin),
     ...THEMES.flatMap((theme) => [
@@ -255,7 +256,7 @@ function main() {
     process.exit(1);
   }
   console.log(
-    `check-composition: ${kotlin.size} member(s) composed in both layers, `
+    `check-composition: ${kotlin.size} member(s) composed in each of ${LAYERS.length} layer(s) not suspended, `
     + `${measured(kotlin) * THEMES.length} ink(s) measured against a bar across ${THEMES.length} theme(s), `
     + `${UNMET.size} bar(s) the pinned palette does not clear, each with the reason it is not raised here, `
     + `and ${OWED.size} ratio(s) waiting on a raised pin`,

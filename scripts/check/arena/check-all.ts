@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { isMainModule } from '../../utils/main-module.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { isStrict, SKIP_EXIT_CODE } from '../../lib/arena/check-vars.ts';
+import { SUSPENDED, type Layer } from '../../lib/arena/behaviour-obligations.ts';
 
 export type Gate = { name: string; script: string };
 
@@ -70,6 +71,11 @@ export function domainOf(gate: Gate): Domain | null {
   return found ?? null;
 }
 
+export function suspensionOf(gate: Gate, suspended: ReadonlyMap<Layer, string> = SUSPENDED) {
+  const domain = domainOf(gate);
+  return domain === null ? null : suspended.get(domain as Layer) ?? null;
+}
+
 export function domainProblems(gates = GATES) {
   return gates
     .filter((gate) => domainOf(gate) === null)
@@ -102,16 +108,17 @@ export function verdictFor(status: number): Verdict {
   return 'FAIL';
 }
 
-export function summaryLine(results: { verdict: Verdict }[]) {
+export function summaryLine(results: { verdict: Verdict }[], suspended = 0) {
   const failed = results.filter((one) => one.verdict === 'FAIL').length;
   const skipped = results.filter((one) => one.verdict === 'SKIP').length;
+  const off = suspended > 0 ? `, beside ${suspended} gate(s) of a suspended layer that did not run` : '';
   if (failed > 0) {
-    return `check-all: ${failed} of ${results.length} step(s) failed, and ${skipped} could not run here`;
+    return `check-all: ${failed} of ${results.length} step(s) failed, and ${skipped} could not run here${off}`;
   }
   if (skipped > 0) {
-    return `check-all: INCOMPLETE. ${results.length - skipped} of ${results.length} step(s) passed and ${skipped} could not run on this host, so this run proves less than a green one`;
+    return `check-all: INCOMPLETE. ${results.length - skipped} of ${results.length} step(s) passed and ${skipped} could not run on this host, so this run proves less than a green one${off}`;
   }
-  return `check-all: all ${results.length} step(s) passed`;
+  return `check-all: all ${results.length} step(s) passed${off}`;
 }
 
 function main() {
@@ -141,12 +148,14 @@ function main() {
     return { gate: step, verdict };
   };
 
-  const running = selected(GATES, domain);
-  const results = running.map(run);
+  const chosen = selected(GATES, domain);
+  const off = chosen.filter((gate) => suspensionOf(gate) !== null);
+  const results = chosen.filter((gate) => suspensionOf(gate) === null).map(run);
+  for (const gate of off) console.log(`  OFF   ${gate.name}, because ${suspensionOf(gate)}`);
   if (wantsTests(argv)) results.push(run(TEST_STEP));
 
   console.log('');
-  console.log(summaryLine(results));
+  console.log(summaryLine(results, off.length));
   if (results.some((one) => one.verdict === 'FAIL')) process.exit(1);
   if (results.some((one) => one.verdict === 'SKIP') && isStrict()) process.exit(1);
 }

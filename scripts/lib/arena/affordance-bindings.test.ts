@@ -3,7 +3,7 @@ import {
   ABSENT_REASON, AFFORDANCES, DRAWN, answersOf, componentProblems, isAbsent, isDrawn,
   partitionProblems, presenceProblems, symbolProblems, vocabularyProblems, type Entry,
 } from './affordance-bindings.ts';
-import { LAYERS, type Layer } from './behaviour-obligations.ts';
+import { ALL_LAYERS, LAYERS, type Layer } from './behaviour-obligations.ts';
 
 const BUTTON = DRAWN.get('ArenaButton') as Entry;
 
@@ -54,9 +54,10 @@ test('drawn and excepted partition the contract, and silence over one is the fai
 
 test('an answer drawn on one layer and named on neither is a symbol nothing can look for', () => {
   const halfway: Entry = { answers: { focus: { drawn: { compose: 'Modifier.onFocusChanged', swiftui: '' } } } };
-  const problems = partitionProblems('ArenaGhost', halfway, ['focus']);
+  const problems = partitionProblems('ArenaGhost', halfway, ['focus'], ALL_LAYERS);
   expect(problems).toHaveLength(1);
   expect(problems[0]).toContain('swiftui');
+  expect(partitionProblems('ArenaGhost', halfway, ['focus'], ['compose'])).toEqual([]);
 });
 
 test('a recorded absence and a drawn component each fail when the tree disagrees', () => {

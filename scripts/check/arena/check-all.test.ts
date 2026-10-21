@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test';
-import { GATES, DOMAINS, TEST_STEP, countsByDomain, domainOf, domainProblems, selected, summaryLine, unknownArguments, verdictFor, wantsTests } from './check-all.ts';
+import { GATES, DOMAINS, TEST_STEP, countsByDomain, domainOf, domainProblems, selected, summaryLine, suspensionOf, unknownArguments, verdictFor, wantsTests } from './check-all.ts';
 import type { Domain } from './check-all.ts';
 
 test('GATES is asserted by literal value, so the array and this case move in one commit', () => {
@@ -84,6 +84,18 @@ test('a run carrying a skip says INCOMPLETE rather than collapsing the count', (
   expect(line).toContain('2');
   expect(summaryLine([{ verdict: 'PASS' }])).not.toContain('INCOMPLETE');
   expect(summaryLine([{ verdict: 'FAIL' }])).toContain('failed');
+  expect(summaryLine([{ verdict: 'PASS' }], 1)).toContain('1 gate(s) of a suspended layer that did not run');
+  expect(summaryLine([{ verdict: 'PASS' }], 1)).not.toContain('INCOMPLETE');
+});
+
+test('a gate whose domain is a suspended layer is named rather than run, and no other gate is', () => {
+  const swift = { name: 'check:swift', script: 'scripts/check/swiftui/check-swift.ts' };
+  const kotlin = { name: 'check:kotlin', script: 'scripts/check/compose/check-kotlin.ts' };
+  const suspended = new Map([['swiftui', 'because'] as const]);
+  expect(suspensionOf(swift, suspended)).toBe('because');
+  expect(suspensionOf(kotlin, suspended)).toBeNull();
+  expect(suspensionOf(swift, new Map())).toBeNull();
+  expect(GATES.filter((gate) => domainOf(gate) === 'arena').every((gate) => suspensionOf(gate, suspended) === null)).toBe(true);
 });
 
 test('a full sweep runs the suites, and a narrowed one leaves them to the job that owns them', () => {

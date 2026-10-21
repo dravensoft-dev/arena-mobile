@@ -4,6 +4,7 @@ import {
   missingSeamProblems, operandProblems, parityProblems, REFUSED, refusedProblems, shapeProblems,
   staleCaseProblems, SWIFT_MEMBER, zeroCaseProblem, zeroMemberProblem,
 } from './check-contrast.ts';
+import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 
 const KOTLIN = [
   'public object ArenaContrast {',
@@ -111,6 +112,6 @@ test('a gate that read nothing fails rather than passing over nothing', () => {
   expect(zeroCaseProblem(CASES.size)).toBeNull();
   expect(zeroMemberProblem(0, 'Compose')).not.toBeNull();
   expect(zeroMemberProblem(3, 'Compose')).toBeNull();
-  expect(missingSeamProblems(() => false)).toHaveLength(2);
+  expect(missingSeamProblems(() => false)).toHaveLength(LAYERS.length);
   expect(missingSeamProblems(() => true)).toEqual([]);
 });

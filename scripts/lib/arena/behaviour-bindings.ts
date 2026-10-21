@@ -26,8 +26,8 @@ export type LayerBinding = {
 
 export type Entry = LayerBinding & Partial<Record<Layer, LayerBinding>> & { divergesFrom?: string };
 
-export function bindingLayers(entry: Entry) {
-  return LAYERS.map((layer) => ({ layer, ...((entry[layer] as LayerBinding | undefined) ?? entry) }));
+export function bindingLayers(entry: Entry, layers: readonly Layer[] = LAYERS) {
+  return layers.map((layer) => ({ layer, ...((entry[layer] as LayerBinding | undefined) ?? entry) }));
 }
 
 function partitionProblems(where: string, binding: LayerBinding & { layer: Layer }, required: string[]) {
@@ -69,9 +69,14 @@ function refusalProblems(where: string, binding: LayerBinding & { layer: Layer }
   return errs;
 }
 
-export function bindingProblems(component: string, entry: Entry, patterns: Map<string, Pattern>) {
+export function bindingProblems(
+  component: string,
+  entry: Entry,
+  patterns: Map<string, Pattern>,
+  layers: readonly Layer[] = LAYERS,
+) {
   const errs: string[] = [];
-  for (const binding of bindingLayers(entry)) {
+  for (const binding of bindingLayers(entry, layers)) {
     const where = `${component}:${binding.layer}`;
     if (!binding.pattern) { errs.push(`${where}: declares no pattern`); continue; }
     const pattern = patterns.get(binding.pattern);
@@ -121,8 +126,8 @@ function addedSet(binding: LayerBinding) {
   return sortedByCodeUnit((binding.also ?? []).map((added) => added.pattern)).join(', ');
 }
 
-export function crossLayerProblems(component: string, entry: Entry) {
-  const [first, second] = bindingLayers(entry);
+export function crossLayerProblems(component: string, entry: Entry, layers: readonly Layer[] = LAYERS) {
+  const [first, second] = bindingLayers(entry, layers);
   if (!first || !second) return [];
   const reasonless = REASONLESS_PATTERNS.includes(first.pattern ?? '') || REASONLESS_PATTERNS.includes(second.pattern ?? '');
   if (reasonless || entry.divergesFrom) return [];

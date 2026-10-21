@@ -17,11 +17,12 @@ import { CONTRACTS_DIR } from '../../lib/contracts/payload.ts';
 import { API_COMMAND, COMMAND } from '../../lib/arena/emit.ts';
 import { TARGETS } from '../../generate/arena/generate-tokens.ts';
 import { API_TARGETS } from '../../generate/arena/generate-api-types.ts';
+import { isActive } from '../../lib/arena/layer-trees.ts';
 
 export const EMITTED = new Map<string, string>([
   ...TARGETS.map((target) => [target, COMMAND] as [string, string]),
   ...API_TARGETS.map((target) => [target, API_COMMAND] as [string, string]),
-]);
+].filter(([target]) => isActive(target)));
 
 export const UNMARKED = new Map<string, string>([
   [
@@ -43,7 +44,7 @@ export const GITATTRIBUTES = '.gitattributes';
 
 export const node = {
   name: 'check:generated',
-  reads: [GITATTRIBUTES, '.gitignore', ...TARGETS, ...API_TARGETS],
+  reads: [GITATTRIBUTES, '.gitignore', ...EMITTED.keys()],
   writes: [],
   feeds: [],
 };

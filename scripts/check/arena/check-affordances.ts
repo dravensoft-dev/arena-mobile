@@ -15,7 +15,7 @@ import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR, MANIFEST, readManifest } from '../../lib/contracts/payload.ts';
 import { COMPONENTS_PREFIX, componentNames } from '../../lib/contracts/api-types.ts';
 import { LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
-import { KOTLIN_COMPONENTS, SWIFT_COMPONENTS, sourcesByLayer } from '../../lib/arena/component-sources.ts';
+import { componentReads, sourcesByLayer } from '../../lib/arena/component-sources.ts';
 import {
   AFFORDANCES, DRAWN, answersOf, componentProblems, isDrawn, partitionProblems, presenceProblems,
   symbolProblems, vocabularyProblems,
@@ -26,8 +26,7 @@ export const node = {
   reads: [
     `${CONTRACTS_DIR}/${MANIFEST}`,
     `${CONTRACTS_DIR}/${COMPONENTS_PREFIX}**`,
-    `${KOTLIN_COMPONENTS}/**`,
-    `${SWIFT_COMPONENTS}/**`, `!${SWIFT_COMPONENTS}/**/*.generated.*`,
+    ...componentReads(),
   ],
   writes: [],
   feeds: [],

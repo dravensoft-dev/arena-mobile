@@ -1,6 +1,7 @@
 import { test, expect } from 'bun:test';
 import { apiNamespaces, zeroNamespaceProblem } from './check-collisions.ts';
 import { TYPES_PREFIX } from '../../lib/contracts/api-types.ts';
+import { ALL_LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 import { identifierFor, identifierProblems, RESERVED, typeNameFor } from '../../lib/arena/identifier.ts';
 
 test('a path is mangled to a bare identifier and never taken as one', () => {
@@ -38,13 +39,15 @@ test('the API tier is walked once per language, since a case is spelled in each 
   const sets = apiNamespaces([
     { name: 'ArenaInputType', kind: 'enum', values: ['text', 'datetime-local'] },
     { name: 'ArenaCrumb', kind: 'object', fields: { label: { form: 'primitive', type: 'string' } } },
-  ]);
+  ], ALL_LAYERS);
   const named = (where: string) => sets.find((one) => one.where === where)?.named.map((one) => one.identifier);
   expect(named(TYPES_PREFIX)).toEqual(['ArenaInputType', 'ArenaCrumb']);
   expect(named('ArenaInputType (Kotlin)')).toEqual(['Text', 'DatetimeLocal']);
   expect(named('ArenaInputType (Swift)')).toEqual(['text', 'datetimeLocal']);
   expect(named('ArenaCrumb')).toEqual(['label']);
   for (const one of sets) expect(identifierProblems(one.named)).toEqual([]);
+  const kotlinOnly = apiNamespaces([{ name: 'ArenaInputType', kind: 'enum', values: ['text'] }], ['compose']);
+  expect(kotlinOnly.map((one) => one.where)).toEqual([TYPES_PREFIX, 'ArenaInputType (Kotlin)']);
 });
 
 test('two types declaring the same field name never collide, because each object is its own namespace', () => {

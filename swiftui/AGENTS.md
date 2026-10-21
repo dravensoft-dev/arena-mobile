@@ -1,5 +1,9 @@
 # The SwiftUI layer
 
+**This layer is suspended.** It stays tracked and frozen at its last emit, and no gate, generator
+or workflow reads it; [`../AGENTS.md`](../AGENTS.md) states what that stops and what resuming it
+takes.
+
 A Swift package target, `ArenaTokens`, holding the emitted tokens and the themes over them.
 It builds with `swift-tools-version: 6.2` against the iOS 26 SDK, with a deployment target of
 iOS 16.

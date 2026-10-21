@@ -5,7 +5,7 @@ import {
   zeroSourceProblem,
 } from './check-structure.ts';
 import { PARTITIONS, ROOTS } from '../../lib/arena/layer-trees.ts';
-import type { Layer } from '../../lib/arena/behaviour-obligations.ts';
+import { ALL_LAYERS, LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
 import { TARGETS } from '../../generate/arena/generate-tokens.ts';
 import { API_TARGETS } from '../../generate/arena/generate-api-types.ts';
 
@@ -48,7 +48,7 @@ test('every emitted target is reachable by its own file name', () => {
 
 test('a layer missing one of the four directories is a named failure', () => {
   expect(missingDirectoryProblems(() => true)).toEqual([]);
-  expect(missingDirectoryProblems(() => false)).toHaveLength(PARTITIONS.length * 2);
+  expect(missingDirectoryProblems(() => false)).toHaveLength(PARTITIONS.length * LAYERS.length);
 });
 
 test('a source in the wrong directory is reported with what it is', () => {
@@ -75,13 +75,14 @@ test('one subject placed two ways across the layers is the tree answering twice'
     ['compose', new Map([['ArenaScale', 'tokens']])],
     ['swiftui', new Map([['ArenaScale', 'tokens']])],
   ]);
-  expect(crossLayerProblems(agreeing)).toEqual([]);
+  expect(crossLayerProblems(agreeing, ALL_LAYERS)).toEqual([]);
   const split = new Map<Layer, ReadonlyMap<string, string>>([
     ['compose', new Map([['ArenaScale', 'tokens']])],
     ['swiftui', new Map([['ArenaScale', 'theme']])],
   ]);
-  expect(crossLayerProblems(split)).toHaveLength(1);
-  expect(crossLayerProblems(split)[0]).toContain('ArenaScale');
+  expect(crossLayerProblems(split, ALL_LAYERS)).toHaveLength(1);
+  expect(crossLayerProblems(split, ['compose'])).toEqual([]);
+  expect(crossLayerProblems(split, ALL_LAYERS)[0]).toContain('ArenaScale');
 });
 
 test('a placement for a file that is gone places nothing', () => {

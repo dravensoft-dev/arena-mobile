@@ -12,7 +12,8 @@ import { isMainModule } from '../../utils/main-module.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { captured } from '../../utils/captured.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
-import { dirFor } from '../../lib/arena/layer-trees.ts';
+import { dirFor, isActive } from '../../lib/arena/layer-trees.ts';
+import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 import { CONTRACTS_DIR } from '../../lib/contracts/payload.ts';
 import { readJson } from '../../utils/read-json.ts';
 import { densityTokens, scaleTokens } from '../../lib/arena/emit.ts';
@@ -25,7 +26,7 @@ export const CONTROL_MARK = 'control';
 
 export const node = {
   name: 'check:control',
-  reads: [ROLES, `${CONTRACTS_DIR}/contracts/design/spacing.json`, KOTLIN_SEAM, SWIFT_SEAM],
+  reads: [ROLES, `${CONTRACTS_DIR}/contracts/design/spacing.json`, KOTLIN_SEAM, SWIFT_SEAM].filter((path) => isActive(path)),
   writes: [],
   feeds: [],
 };
@@ -263,7 +264,7 @@ export function parityProblems(kotlin: ReadonlyMap<string, string>, swift: Reado
 
 export function missingSeamProblems(present: (path: string) => boolean) {
   return [KOTLIN_SEAM, SWIFT_SEAM]
-    .filter((path) => !present(path))
+    .filter((path) => isActive(path) && !present(path))
     .map((path) => `${path} is not in the tree, so every claim below would hold over a seam this gate never opened`);
 }
 
@@ -288,32 +289,38 @@ function main() {
   const emitted = emittedNames(tokens);
   const roles = controlRoles(readJson<Record<string, unknown>>(join(root, ROLES)));
   const kotlinSource = readFileSync(join(root, KOTLIN_SEAM), 'utf8');
-  const swiftSource = readFileSync(join(root, SWIFT_SEAM), 'utf8');
   const kotlin = constantsIn(kotlinSource, KOTLIN_CONSTANT);
-  const swift = constantsIn(swiftSource, SWIFT_CONSTANT);
   const kotlinRungs = rungsIn(kotlinSource, KOTLIN_RUNG_HEAD, KOTLIN_RUNG);
-  const swiftRungs = rungsIn(swiftSource, SWIFT_RUNG_HEAD, SWIFT_RUNG);
   const noRole = zeroRoleProblem(roles.length);
   const noKotlin = zeroMemberProblem(kotlin.size + kotlinRungs.size, 'Compose');
-  const noSwift = zeroMemberProblem(swift.size + swiftRungs.size, 'SwiftUI');
 
   const errs = [
     ...(noRole ? [noRole] : []),
     ...(noKotlin ? [noKotlin] : []),
-    ...(noSwift ? [noSwift] : []),
     ...partitionProblems(roles),
     ...coverageProblems(kotlin, 'Compose'),
-    ...coverageProblems(swift, 'SwiftUI'),
     ...operandProblems(kotlin, emitted, 'Compose'),
-    ...operandProblems(swift, emitted, 'SwiftUI'),
     ...rungProblems(kotlinRungs, emitted, 'Compose'),
-    ...rungProblems(swiftRungs, emitted, 'SwiftUI'),
-    ...parityProblems(kotlin, swift, 'collapsed role'),
-    ...parityProblems(kotlinRungs, swiftRungs, 'rung'),
     ...axisProblems(tokens),
     ...compositionProblems(targetIn(kotlinSource, KOTLIN_TARGET), 'Compose'),
-    ...compositionProblems(targetIn(swiftSource, SWIFT_TARGET), 'SwiftUI'),
   ];
+  let read = kotlin.size + kotlinRungs.size;
+  if (LAYERS.includes('swiftui')) {
+    const swiftSource = readFileSync(join(root, SWIFT_SEAM), 'utf8');
+    const swift = constantsIn(swiftSource, SWIFT_CONSTANT);
+    const swiftRungs = rungsIn(swiftSource, SWIFT_RUNG_HEAD, SWIFT_RUNG);
+    const noSwift = zeroMemberProblem(swift.size + swiftRungs.size, 'SwiftUI');
+    read += swift.size + swiftRungs.size;
+    errs.push(
+      ...(noSwift ? [noSwift] : []),
+      ...coverageProblems(swift, 'SwiftUI'),
+      ...operandProblems(swift, emitted, 'SwiftUI'),
+      ...rungProblems(swiftRungs, emitted, 'SwiftUI'),
+      ...parityProblems(kotlin, swift, 'collapsed role'),
+      ...parityProblems(kotlinRungs, swiftRungs, 'rung'),
+      ...compositionProblems(targetIn(swiftSource, SWIFT_TARGET), 'SwiftUI'),
+    );
+  }
   if (errs.length) {
     console.error(`check-control: ${errs.length} problem(s)\n`);
     for (const problem of sortedByCodeUnit(errs)) console.error(`  ${problem}`);
@@ -321,8 +328,8 @@ function main() {
   }
   console.log(
     `check-control: ${roles.length} control role(s) partitioned, ${collapsedHere().length} of them collapsed onto a `
-    + `contracted step by both seams, ${RUNGS.size} rung(s) read off the density scale, and `
-    + `${kotlin.size + swift.size + kotlinRungs.size + swiftRungs.size} member(s) read out of the two layers`,
+    + `contracted step by the seam of each of ${LAYERS.length} layer(s) not suspended, ${RUNGS.size} rung(s) read off `
+    + `the density scale, and ${read} member(s) read out of them`,
   );
 }
 

@@ -5,6 +5,7 @@ import {
   staleOwedProblems, SWIFT_DEFAULT, SWIFT_GENERIC, SWIFT_MEMBER, zeroFamilyProblem,
   zeroMemberProblem,
 } from './check-fonts.ts';
+import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 
 const TOKENS = [
   { name: 'font.display', path: ['font', 'display'], type: 'fontFamily', value: ['Archivo', 'system-ui', 'sans-serif'] },
@@ -89,7 +90,7 @@ test('a named face resolved at a scaling size fails, because the size already sc
 
 test('a seam this gate cannot open is a failure and never an empty pass', () => {
   expect(missingSeamProblems(() => true)).toEqual([]);
-  expect(missingSeamProblems(() => false)).toHaveLength(2);
+  expect(missingSeamProblems(() => false)).toHaveLength(LAYERS.length);
 });
 
 test('reading no family and reading no member are both explicit failures', () => {

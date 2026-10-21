@@ -19,7 +19,7 @@ import {
 import { apiTypesOf } from '../../generate/arena/generate-api-types.ts';
 import { LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
 import {
-  KOTLIN_COMPONENTS, SWIFT_COMPONENTS, drawnComponents, layerCoverageProblems, sourcesByLayer,
+  componentReads, drawnComponents, layerCoverageProblems, sourcesByLayer,
 } from '../../lib/arena/component-sources.ts';
 import {
   DERIVED_DEFAULT, MEMBERS, isAnswered, parameterProblems, partitionProblems, shapeProblems,
@@ -31,8 +31,7 @@ export const node = {
   reads: [
     `${CONTRACTS_DIR}/${MANIFEST}`,
     `${CONTRACTS_DIR}/${COMPONENTS_PREFIX}**`,
-    `${KOTLIN_COMPONENTS}/**`,
-    `${SWIFT_COMPONENTS}/**`, `!${SWIFT_COMPONENTS}/**/*.generated.*`,
+    ...componentReads(),
   ],
   writes: [],
   feeds: [],
@@ -141,7 +140,7 @@ function main() {
     process.exit(1);
   }
   console.log(
-    `check-members: ${drawn.length} component(s) drawn by both layers, ${members} contracted member(s) each `
+    `check-members: ${drawn.length} component(s) drawn by every layer not suspended, ${members} contracted member(s) each `
     + 'answered by a native parameter or excepted with a reason, and every parameter beyond the contract named with one; '
     + `${shapes} parameter(s) read across the two layers, each carrying the type and the default the contract derives, `
     + `and ${DERIVED_DEFAULT.size} default(s) reached through a constant with a reason.\n`

@@ -13,6 +13,7 @@ import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { CONTRACTS_DIR, type Token } from '../../lib/contracts/payload.ts';
 import { familyHead } from '../../lib/arena/bridge.ts';
 import { tokensOf } from '../../generate/arena/generate-tokens.ts';
+import { LAYERS, type Layer } from '../../lib/arena/behaviour-obligations.ts';
 
 export const KOTLIN_ROOT = 'compose/src/main/kotlin';
 export const SWIFT_ROOT = 'swiftui/Sources';
@@ -23,7 +24,7 @@ export const node = {
   reads: [
     TYPOGRAPHY,
     `${KOTLIN_ROOT}/**`, `!${KOTLIN_ROOT}/**/*.generated.*`,
-    `${SWIFT_ROOT}/**`, `!${SWIFT_ROOT}/**/*.generated.*`,
+    ...(LAYERS.includes('swiftui') ? [`${SWIFT_ROOT}/**`, `!${SWIFT_ROOT}/**/*.generated.*`] : []),
   ],
   writes: [],
   feeds: [],
@@ -87,12 +88,14 @@ export function zeroScanProblem(counted: number) {
   return 'scanned 0 hand-authored native sources, so this gate reports a clean pass over a tree it never opened';
 }
 
-export function scanned(root_: string) {
+export function scanned(root_: string, layers: readonly Layer[] = LAYERS) {
   return [
     ...walkFiles(join(root_, KOTLIN_ROOT), (rel) => rel.endsWith('.kt') && !rel.includes('.generated.'))
       .map((rel) => `${KOTLIN_ROOT}/${rel}`),
-    ...walkFiles(join(root_, SWIFT_ROOT), (rel) => rel.endsWith('.swift') && !rel.includes('.generated.'))
-      .map((rel) => `${SWIFT_ROOT}/${rel}`),
+    ...(layers.includes('swiftui')
+      ? walkFiles(join(root_, SWIFT_ROOT), (rel) => rel.endsWith('.swift') && !rel.includes('.generated.'))
+        .map((rel) => `${SWIFT_ROOT}/${rel}`)
+      : []),
   ].sort();
 }
 

@@ -18,7 +18,7 @@ import {
   defaultLiterals, enumCases, fieldTypes, rawTypes, staleCaseNameProblems, staleRephrasedProblems, docTextFor,
 } from '../../lib/arena/api-emit.ts';
 import { API_COMMAND, API_SUBJECT, banner, kdoc, tripleSlash } from '../../lib/arena/emit.ts';
-import { dirFor } from '../../lib/arena/layer-trees.ts';
+import { dirFor, isActive } from '../../lib/arena/layer-trees.ts';
 
 export const KOTLIN_API_DIR = dirFor('compose', 'api');
 export const SWIFT_API_DIR = dirFor('swiftui', 'api');
@@ -32,8 +32,8 @@ export const API_TARGETS = [
 export const node = {
   name: 'generate:api-types',
   reads: [`${CONTRACTS_DIR}/${MANIFEST}`, `${CONTRACTS_DIR}/${TYPES_PREFIX}**`],
-  writes: [...API_TARGETS],
-  feeds: ['check:collisions', 'check:doc-comments', 'check:emit', 'check:generated', 'check:structure', 'check:kotlin', 'check:swift'],
+  writes: API_TARGETS.filter((target) => isActive(target)),
+  feeds: ['check:collisions', 'check:doc-comments', 'check:emit', 'check:generated', 'check:structure', 'check:kotlin'],
 };
 
 const doc = (type: ApiType, field: string | null, description: string | undefined) => docTextFor(type.name, field, description);
@@ -155,7 +155,7 @@ function main() {
     for (const problem of problems) console.error(`  ${problem}`);
     process.exit(1);
   }
-  const files = emitApi(types);
+  const files = new Map([...emitApi(types)].filter(([target]) => isActive(target)));
   for (const [target, body] of files) {
     const full = join(repoRoot, target);
     mkdirSync(dirname(full), { recursive: true });

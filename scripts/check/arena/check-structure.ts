@@ -109,17 +109,23 @@ export function placementProblems(
   }));
 }
 
-export function crossLayerProblems(byLayer: ReadonlyMap<Layer, ReadonlyMap<string, string>>) {
+export function crossLayerProblems(
+  byLayer: ReadonlyMap<Layer, ReadonlyMap<string, string>>,
+  layers: readonly Layer[] = LAYERS,
+) {
   const errs: string[] = [];
-  const [first, second] = LAYERS;
-  const one = byLayer.get(first);
-  const other = byLayer.get(second);
-  if (!one || !other) return errs;
-  for (const [stem, partition] of one) {
-    const across = other.get(stem);
-    if (across !== undefined && across !== partition) {
-      errs.push(`${stem} sits in ${partition}/ on ${first} and in ${across}/ on ${second}, so one subject is two `
-        + 'decisions and a reader who learned the tree on one layer is wrong on the other');
+  const [first, ...rest] = layers;
+  const one = first === undefined ? undefined : byLayer.get(first);
+  if (!one) return errs;
+  for (const second of rest) {
+    const other = byLayer.get(second);
+    if (!other) continue;
+    for (const [stem, partition] of one) {
+      const across = other.get(stem);
+      if (across !== undefined && across !== partition) {
+        errs.push(`${stem} sits in ${partition}/ on ${first} and in ${across}/ on ${second}, so one subject is two `
+          + 'decisions and a reader who learned the tree on one layer is wrong on the other');
+      }
     }
   }
   return sortedByCodeUnit(errs);
@@ -174,7 +180,7 @@ function main() {
   }
   console.log(
     `check-structure: ${counted} source(s) across ${LAYERS.length} layer(s), each in one of ${PARTITIONS.length} `
-    + `director(ies) both layers carry, ${emitted} of them at the path their own generator declares, `
+    + `director(ies) every layer not suspended carries, ${emitted} of them at the path their own generator declares, `
     + `${stems.size} subject(s) placed the same way on both sides, and ${PLACED.size} placement(s) with a reason`,
   );
 }

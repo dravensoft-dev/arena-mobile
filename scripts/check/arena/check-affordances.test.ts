@@ -2,12 +2,15 @@ import { test, expect } from 'bun:test';
 import {
   affordancesOf, node, passLine, zeroAffordanceProblem, zeroAnswerProblem, zeroComponentProblem,
 } from './check-affordances.ts';
-import { SWIFT_COMPONENTS } from '../../lib/arena/component-sources.ts';
+import { SWIFT_COMPONENTS, componentReads } from '../../lib/arena/component-sources.ts';
+import { ALL_LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 
-test('the gate reads the two component trees and no emitted source', () => {
+test('the gate reads the component tree of every layer not suspended and no emitted source', () => {
   expect(node.writes).toEqual([]);
   expect(node.feeds).toEqual([]);
-  expect(node.reads).toContain(`!${SWIFT_COMPONENTS}/**/*.generated.*`);
+  expect(node.reads).toEqual(expect.arrayContaining(componentReads()));
+  expect(componentReads(ALL_LAYERS)).toContain(`!${SWIFT_COMPONENTS}/**/*.generated.*`);
+  expect(componentReads(['compose'])).not.toContain(`!${SWIFT_COMPONENTS}/**/*.generated.*`);
 });
 
 test('a contract that declares no affordances answers an empty list rather than throwing', () => {

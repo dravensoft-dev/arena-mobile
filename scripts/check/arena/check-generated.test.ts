@@ -7,6 +7,7 @@ import {
 import { API_COMMAND, COMMAND } from '../../lib/arena/emit.ts';
 import { TARGETS } from '../../generate/arena/generate-tokens.ts';
 import { API_TARGETS } from '../../generate/arena/generate-api-types.ts';
+import { isActive } from '../../lib/arena/layer-trees.ts';
 
 test('a generated file says so in its name', () => {
   expect(namingProblems(TARGETS)).toEqual([]);
@@ -27,10 +28,11 @@ test('each emitted file is held to the command that writes IT, since the two emi
   expect(COMMAND).not.toBe(API_COMMAND);
 });
 
-test('EMITTED names every target of both emitters and the command each one is written by', () => {
-  expect([...EMITTED.keys()]).toEqual([...TARGETS, ...API_TARGETS]);
-  for (const target of TARGETS) expect(EMITTED.get(target)).toBe(COMMAND);
-  for (const target of API_TARGETS) expect(EMITTED.get(target)).toBe(API_COMMAND);
+test('EMITTED names every target of both emitters on a layer not suspended, and the command each one is written by', () => {
+  const active = [...TARGETS, ...API_TARGETS].filter((target) => isActive(target));
+  expect([...EMITTED.keys()]).toEqual(active);
+  for (const target of TARGETS.filter((one) => isActive(one))) expect(EMITTED.get(target)).toBe(COMMAND);
+  for (const target of API_TARGETS.filter((one) => isActive(one))) expect(EMITTED.get(target)).toBe(API_COMMAND);
 });
 
 test('the emit is tracked, which is the opposite of what Arena does and is the architecture', () => {

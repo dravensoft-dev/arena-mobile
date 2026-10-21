@@ -44,10 +44,11 @@ bun run build
 bun run check
 ```
 
-`check:kotlin` and `check:swift` report SKIP unless the host carries a JDK and Xcode, and the
-run reports INCOMPLETE when they do. That is expected locally and is a failure in CI, where
-`CI=true` makes the run strict. Compilation is proved by the pull request workflow on a Linux
-runner and a macOS one, so a change that only compiles on your machine is caught there rather
+`check:kotlin` reports SKIP unless the host carries a JDK, and the run reports INCOMPLETE when it
+does. That is expected locally and is a failure in CI, where `CI=true` makes the run strict.
+`check:swift` reports OFF, because the SwiftUI layer is suspended and
+[`AGENTS.md`](./AGENTS.md) says what that means. Compilation is proved by the pull request
+workflow on a Linux runner, so a change that only compiles on your machine is caught there rather
 than after merge.
 
 ## Commit and review

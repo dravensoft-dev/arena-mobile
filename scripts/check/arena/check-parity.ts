@@ -387,7 +387,7 @@ function main() {
   }
 
   console.log(
-    `check-parity: ${components.length} component(s) enumerated on both layers over ${crossed.size} contracted `
+    `check-parity: ${components.length} component(s) enumerated on every layer not suspended over ${crossed.size} contracted `
     + `case(s) and ${AXES.size} axis(es), ${read} case(s) read out of the suites, with ${UNREACHED.size} axis(es) `
     + `out of reach and ${UNDECIDABLE.size} case-axis pair(s) undecidable, each with its reason`,
   );

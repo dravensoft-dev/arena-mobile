@@ -96,6 +96,10 @@ from `GATES` and fails this table when the two disagree.
 | `compose/` | 1 | the Compose layer |
 | `swiftui/` | 1 | the SwiftUI layer |
 
+**A domain named after a suspended layer is not run at all.** `check-all` prints each of its gates
+as `OFF` with the reason, and it counts toward neither a pass nor a skip; what a suspension is and
+what it stops is stated once on [`../../AGENTS.md`](../../AGENTS.md).
+
 **CI narrows a run by domain, never by gate name.** `check-all` takes `--domain=`, the jobs
 partition `GATES`, and the suite asserts the partition, so a gate cannot join `GATES` and then
 run in no job.
