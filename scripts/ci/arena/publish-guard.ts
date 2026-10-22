@@ -10,6 +10,7 @@
 import { spawnSync } from 'node:child_process';
 import { appendFileSync } from 'node:fs';
 import { isMainModule } from '../../utils/main-module.ts';
+import { captured } from '../../utils/captured.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { findHostBinary } from '../../lib/arena/host-binary.ts';
 import { runCapturing } from '../../lib/arena/child-output.ts';
@@ -39,7 +40,7 @@ export function metadataUrl(group = GROUP, artifact = ARTIFACT) {
 }
 
 export function publishedVersions(metadata: string) {
-  return [...metadata.matchAll(/<version>([^<]+)<\/version>/g)].map((match) => match[1]);
+  return [...metadata.matchAll(/<version>([^<]+)<\/version>/g)].map((match) => captured(match));
 }
 
 export function decide(version: string, published: readonly string[], movedPaths: readonly string[]) {

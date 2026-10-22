@@ -1,10 +1,8 @@
-/* Arena states no cap on user text scale and this repository must, because both platforms
- * scale text several times over at their accessibility sizes and a control that grows without
- * bound stops fitting a phone before an auditor ever sees it. ArenaScale.cap is 2, and it
- * bounds the geometry derived from a control floor while the text itself stays uncapped.
- * The two asymmetric rows of the bridge are held here as well: lineSpacing is ADDITIONAL
- * space on SwiftUI where Compose takes the whole line height, and tracking is a point value
- * where Compose takes an em, so the same token is applied two different ways. */
+/* The two asymmetric rows of the bridge, held on the layer that carries the asymmetry:
+ * lineSpacing is ADDITIONAL space on SwiftUI where Compose takes the whole line height, and
+ * tracking is a point value where Compose takes an em, so the same token is applied two
+ * different ways and reading either off the other layer produces a value that compiles and is
+ * wrong by a factor of the font size. */
 
 import Testing
 import SwiftUI
@@ -13,21 +11,6 @@ import SwiftUI
 @Test func aFixedDimensionCrossesAtOneToOne() {
     #expect(ArenaTokens.sp4 == 16)
     #expect(ArenaTokens.sp1 == 4)
-}
-
-@Test func comfortableClearsApplesTouchFloor() {
-    for rung in [ArenaDensityScale.comfortable.ctlHSm, ArenaDensityScale.comfortable.ctlH, ArenaDensityScale.comfortable.ctlHLg] {
-        #expect(rung >= 44)
-    }
-}
-
-@Test func compactIsNotOfferableToAThumb() {
-    #expect(ArenaDensityScale.compact.ctlHSm < 44)
-}
-
-@Test func controlGeometryIsCapped() {
-    #expect(ArenaScale.cap == 2)
-    #expect(ArenaScale.control(48) <= 96)
 }
 
 @Test func lineSpacingIsAdditionalAndTrackingIsPoints() {

@@ -13,17 +13,17 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 
 public object ArenaTokens {
+    /** A portrait frame, four by five. */
+    public val aspectPortrait: Float = 0.8f
+    /** A square frame, one by one. */
+    public val aspectSquare: Float = 1f
+    /** A video frame, sixteen by nine. */
+    public val aspectVideo: Float = 1.777778f
+    /** A cinema frame, twenty-one by nine. */
+    public val aspectWide: Float = 2.333333f
     public val avatarLg: Dp = 56.dp
     public val avatarMd: Dp = 40.dp
     public val avatarSm: Dp = 32.dp
-    /**
-     * Script-readable, and so are its three siblings, for one reason: an <img>
-     * reserves its box before the stylesheet arrives through the width and height
-     * attributes, which take a bare integer and cannot take a custom property. So the
-     * number has to reach JavaScript or the avatar is the one image in the library
-     * whose space is not held. Reading it here rather than restating it in each layer
-     * is what keeps the reserved box and the drawn box the same number.
-     */
     public val avatarXs: Dp = 24.dp
     public val bpLg: Dp = 1024.dp
     public val bpMd: Dp = 768.dp
@@ -39,6 +39,13 @@ public object ArenaTokens {
      * because it is compared against a projected pixel height.
      */
     public val calendarActionsBelowMinH: Dp = 56.dp
+    /**
+     * The height one detail line adds to what a chip needs before it may draw
+     * it. Measured: the time label's line box, which the detail lines share, reads
+     * 16px in both layers at --dz-text-2xs, already on the 4px scale. Script-readable
+     * because it is compared against a projected pixel height, like time-min-h.
+     */
+    public val calendarDetailLineH: Dp = 16.dp
     /**
      * The width of the hour-label gutter down the left of the grid.
      * Script-readable because the width term of arenaShowsTime() subtracts it from the
@@ -260,10 +267,9 @@ public object ArenaTokens {
      * as inside it: the page reserves it as bottom padding so the last row is not covered,
      * and a stack of toasts sits above it rather than under it, so a bar whose height only
      * the bar knows is a number retyped in three files. The safe-area inset is NOT included:
-     * add var(--pad-safe-bottom) to it, since a value that already carried the inset could
-     * not be used as a plain height. Not script-readable: nothing computes a position from
-     * it, a stylesheet holds every use, and a number bound at import time could not
-     * re-densify.
+     * add the bottom safe area to it, which ArenaSafeArea.bottom composes, since a value that
+     * already carried the inset could not be used as a plain height. Nothing computes a
+     * position from it, and a value bound at import time could not re-densify.
      */
     public val layoutBar: Dp = 64.dp
     /** The width of the console shell's navigation column. */
@@ -304,7 +310,7 @@ public object ArenaTokens {
     public val loopBrand: Int = 8000
     /** Rotor's reduced step: the brand mark is three times slower again, because it is decoration that happens to also mean 'alive' */
     public val loopBrandReduced: Int = 24000
-    /** What a working loop slows to under prefers-reduced-motion. Motion that reports work slows rather than stopping: a frozen spinner reads as a hung process. */
+    /** What a working loop slows to when the reader has asked for less movement. Motion that reports work slows rather than stopping: a frozen spinner reads as a hung process, which is what ArenaMotion.working composes this step for. */
     public val loopReduced: Int = 2400
     /** ArenaSkeleton */
     public val loopShimmer: Int = 1400
@@ -403,13 +409,13 @@ public object ArenaTokens {
      * body contrast keeps its ratio over it, which is why it is well under area.
      */
     public val tintSoft: Float = 0.12f
-    /** ArenaMenu's panel: a dropdown anchored to its trigger */
+    /** ArenaMenu's panel: a dropdown anchored to its trigger. A calendar event's panel stands on the same step */
     public val zDropdown: Float = 900f
     /** ArenaDialog */
     public val zModal: Float = 1000f
     /** ArenaConfirmDialog, which opens from an ArenaDialog */
     public val zModalNested: Float = 1050f
-    /** Fixed page navigation: a bottom bar, a sticky top bar. Arena draws one of these, ArenaBottomNav, and the slot is not there for it: it is there because the invariant is system-wide and a consumer's own shell is part of the system, so a host's sticky header and Arena's bar interleave with Arena's overlays by design rather than by DOM order. That was the reason before any component carried it and it is the reason still; what changed is only that the set of things standing on this step is no longer empty. Below dropdown, so an ArenaMenu opened from the bar covers it rather than resolving by DOM order, which is the failure this family was created to end. Anything drawn against this slot also reads --pad-safe-bottom, in contracts/design/environment.css, and --layout-bar for its own height */
+    /** Fixed page navigation: a bottom bar, a sticky top bar. Arena draws one of these, ArenaBottomNav, and the slot is not there for it: it is there because the invariant is system-wide and a consumer's own shell is part of the system, so a host's sticky header and Arena's bar interleave with Arena's overlays by design rather than by stacking order. The slot is the system's, whether or not a component stands on it. Below dropdown, so an ArenaMenu opened from the bar covers it rather than resolving by the order it was drawn in, which is the failure this family was created to end. Anything drawn against this slot also reads the bottom safe area, which ArenaSafeArea.bottom composes, and layoutBar for its own height */
     public val zNav: Float = 800f
     /** the coachmark and the scrim beneath it: one slot, two uses. The scrim takes the slot and the coachmark is drawn inside it, so the two are separated by containment rather than by a second number; nothing else on the page may sit between them, which is what a single slot means here */
     public val zOnboarding: Float = 1200f

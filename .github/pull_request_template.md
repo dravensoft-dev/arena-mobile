@@ -19,8 +19,8 @@ bun run build
 bun run check
 ```
 
-Paste the summary line. `check:kotlin` and `check:swift` report SKIP unless the host carries
-a JDK and Xcode, and the run reports INCOMPLETE when they do; the workflow proves both.
+Paste the summary line. What a SKIP and an INCOMPLETE mean on a host without a JDK or Xcode is
+stated once on [`CONTRIBUTING.md`](../CONTRIBUTING.md); the workflow proves both.
 
 - [ ] `bun run check` reports no failure on this host
 - [ ] No emitted file is edited by hand

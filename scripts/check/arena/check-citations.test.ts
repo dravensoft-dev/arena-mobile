@@ -5,7 +5,7 @@ import { repoRoot } from '../../lib/arena/repo-root.ts';
 test('a citation is a code span or a link, and an external URL is neither', () => {
   const found = citationsIn('X.md', 'see `scripts/utils/compare.ts:byCodeUnit(a, b)` and [it](./AGENTS.md) and [there](https://x.test/a.md)');
   expect(found.map((one) => one.path)).toEqual(['scripts/utils/compare.ts', './AGENTS.md']);
-  expect(found[0].member).toBe('byCodeUnit');
+  expect(found[0]?.member).toBe('byCodeUnit');
 });
 
 test('a relative link resolves against the document that carries it', () => {

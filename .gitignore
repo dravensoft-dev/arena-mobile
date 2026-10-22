@@ -17,8 +17,7 @@ local.properties
 # opposite of what Arena does with `frameworks/**/*.generated.*`, and it is the architecture
 # rather than a preference: the property this repository exists to hold is that a clone with
 # no JS toolchain at all builds both libraries, and that is only true while the emit stays
-# committed. UNTRACKED in scripts/check/mobile/check-generated.ts is what names an exception,
-# and it is empty. Nothing here excludes a `.generated.` name.
+# committed. Nothing here excludes a `.generated.` name.
 
 # Xcode and SwiftPM local state
 DerivedData/

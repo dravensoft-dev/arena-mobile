@@ -22,6 +22,12 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 kotlin {
@@ -35,12 +41,17 @@ kotlin {
 dependencies {
     api(platform(libs.compose.bom))
     api(libs.compose.runtime)
+    api(libs.compose.ui)
+    api(libs.compose.foundation)
     api(libs.compose.ui.graphics)
     api(libs.compose.ui.text)
     api(libs.compose.ui.unit)
     api(libs.compose.animation.core)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.compose.ui.test.junit4)
+    testImplementation(libs.compose.ui.test.manifest)
+    testImplementation(libs.robolectric)
 }
 
 mavenPublishing {

@@ -66,6 +66,13 @@ public data class ArenaColorScheme(
     /** crimson */
     public val primary: Color,
     public val primaryContent: Color,
+    /**
+     * The ground primary-content sits on: a filled button, a checked box, a current page.
+     * OPTIONAL, like error-fill: omit it and the fill is primary. It exists for a
+     * palette whose accent, tuned to read as ink on its page, is too light to carry
+     * its content; crimson carries white in both themes, so this skin pins primary.
+     */
+    public val primaryFill: Color,
     /** gold */
     public val secondary: Color,
     public val secondaryContent: Color,
@@ -97,6 +104,7 @@ public val ArenaDarkColors: ArenaColorScheme = ArenaColorScheme(
     neutralContent = Color(red = 0.8471f, green = 0.8118f, blue = 0.7686f, alpha = 1f),
     primary = Color(red = 0.7098f, green = 0.1647f, blue = 0.1255f, alpha = 1f),
     primaryContent = Color(red = 1f, green = 1f, blue = 1f, alpha = 1f),
+    primaryFill = Color(red = 0.7098f, green = 0.1647f, blue = 0.1255f, alpha = 1f),
     secondary = Color(red = 0.7725f, green = 0.6275f, blue = 0.349f, alpha = 1f),
     secondaryContent = Color(red = 0.0784f, green = 0.0627f, blue = 0.0627f, alpha = 1f),
     success = Color(red = 0.2196f, green = 0.6314f, blue = 0.4118f, alpha = 1f),
@@ -127,6 +135,7 @@ public val ArenaLightColors: ArenaColorScheme = ArenaColorScheme(
     neutralContent = Color(red = 0.2275f, green = 0.1804f, blue = 0.1608f, alpha = 1f),
     primary = Color(red = 0.7098f, green = 0.1647f, blue = 0.1255f, alpha = 1f),
     primaryContent = Color(red = 1f, green = 1f, blue = 1f, alpha = 1f),
+    primaryFill = Color(red = 0.7098f, green = 0.1647f, blue = 0.1255f, alpha = 1f),
     secondary = Color(red = 0.7725f, green = 0.6275f, blue = 0.349f, alpha = 1f),
     secondaryContent = Color(red = 0.0784f, green = 0.0627f, blue = 0.0627f, alpha = 1f),
     success = Color(red = 0.2196f, green = 0.6314f, blue = 0.4118f, alpha = 1f),

@@ -24,7 +24,7 @@ test('an allowance is not an exemption: one that falls back inside the shared li
 });
 
 test('punctuation reaches prose only, so a fence and a code span keep what they quote', () => {
-  expect(BANNED_PUNCTUATION[0][0]).toBe('—');
+  expect(BANNED_PUNCTUATION[0]?.[0]).toBe('—');
   expect(punctuationProblems('X.md', 'a dash — here')[0]).toContain('em dash');
   expect(punctuationProblems('X.md', '```\na dash — here\n```')).toEqual([]);
   expect(punctuationProblems('X.md', 'a span `—` here')).toEqual([]);

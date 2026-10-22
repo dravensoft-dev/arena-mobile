@@ -4,17 +4,19 @@
  * path on Windows. Nothing else in this tree writes the host separator down, slices a base's
  * length off an absolute path, or hunts a path's last slash by hand. */
 
-import type { PlatformPath } from 'node:path';
+import type nodePath from 'node:path';
+
+type PathModule = typeof nodePath;
 
 export function toPosix(value: string) {
   return value.replace(/\\/g, '/');
 }
 
-export function relPosix(from: string, to: string, path: PlatformPath) {
+export function relPosix(from: string, to: string, path: PathModule) {
   return toPosix(path.relative(from, to));
 }
 
-export function isInside(base: string, candidate: string, path: PlatformPath) {
+export function isInside(base: string, candidate: string, path: PathModule) {
   const rel = path.relative(base, candidate);
   return rel.length > 0 && !rel.startsWith('..') && !path.isAbsolute(rel);
 }

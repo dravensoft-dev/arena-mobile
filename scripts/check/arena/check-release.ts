@@ -13,6 +13,7 @@ import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { findHostBinary } from '../../lib/arena/host-binary.ts';
 import { cannotRun } from '../../lib/arena/check-vars.ts';
 import { readRepoConfig, REPO_CONFIG, configProblems } from '../../lib/arena/repo-config.ts';
+import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 
 export const README = 'README.md';
 export const README_HEADING = '## Latest project artifacts';
@@ -66,7 +67,7 @@ function main() {
   const tags = listed.stdout.split('\n').map((one) => one.trim()).filter(Boolean);
   const errs = [
     ...readmeProblems(readFileSync(join(root, README), 'utf8'), version),
-    ...packageSwiftProblems(readFileSync(join(root, 'Package.swift'), 'utf8')),
+    ...(LAYERS.includes('swiftui') ? packageSwiftProblems(readFileSync(join(root, 'Package.swift'), 'utf8')) : []),
     ...tagProblems(version, tags),
   ];
   if (errs.length) {

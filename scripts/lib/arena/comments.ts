@@ -5,6 +5,8 @@
  * TypeScript, Kotlin and Swift; what differs between them is which files the rule reaches,
  * and that is the gate's question and not this module's. */
 
+import { captured } from '../../utils/captured.ts';
+
 export type Comment = { text: string; line: number; block: boolean; leading: boolean };
 
 const QUOTES = new Set(['"', "'", '`']);
@@ -17,7 +19,7 @@ export function startsRegex(before: string) {
   const last = trimmed.slice(-1);
   if (BEFORE_REGEX.has(last)) return true;
   const word = /([A-Za-z_$][A-Za-z0-9_$]*)$/.exec(trimmed);
-  return word !== null && KEYWORDS_BEFORE_REGEX.has(word[1]);
+  return word !== null && KEYWORDS_BEFORE_REGEX.has(captured(word));
 }
 
 export function comments(source: string, regexLiterals = true) {
@@ -26,7 +28,7 @@ export function comments(source: string, regexLiterals = true) {
   let index = 0;
   let codeSinceNewline = false;
   while (index < source.length) {
-    const here = source[index];
+    const here = source.charAt(index);
     if (here === '\n') {
       line += 1;
       codeSinceNewline = false;
@@ -36,8 +38,8 @@ export function comments(source: string, regexLiterals = true) {
     if (QUOTES.has(here)) {
       const quote = here;
       index += 1;
-      while (index < source.length && source[index] !== quote) {
-        if (source[index] === '\\') index += 1;
+      while (index < source.length && source.charAt(index) !== quote) {
+        if (source.charAt(index) === '\\') index += 1;
         if (source[index] === '\n') line += 1;
         index += 1;
       }
@@ -104,8 +106,9 @@ export function fencesAndSpans(markdown: string) {
   for (const line of markdown.split('\n')) {
     const fence = /^\s*(`{3,}|~{3,})/.exec(line);
     if (fence) {
-      if (inFence === null) inFence = fence[1][0].repeat(fence[1].length);
-      else if (fence[1][0] === inFence[0] && fence[1].length >= inFence.length) inFence = null;
+      const marker = captured(fence);
+      if (inFence === null) inFence = marker.charAt(0).repeat(marker.length);
+      else if (marker.charAt(0) === inFence.charAt(0) && marker.length >= inFence.length) inFence = null;
       masked.push('');
       continue;
     }

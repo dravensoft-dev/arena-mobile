@@ -12,6 +12,7 @@ import { walkFiles } from '../../utils/walk-files.ts';
 import { sortedByCodeUnit } from '../../utils/compare.ts';
 import { repoRoot as root } from '../../lib/arena/repo-root.ts';
 import { bodyAfterShebang, comments, fencesAndSpans, isPragma, lineCount } from '../../lib/arena/comments.ts';
+import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 
 export const MAX_DOCUMENT_CHARS = 60_000;
 export const HEADER_MAX_LINES = 10;
@@ -20,7 +21,7 @@ export const SIZE_ALLOWANCE = new Map<string, { limit: number; reason: string }>
 
 export const BANNED_PUNCTUATION: [string, string][] = [['—', 'an em dash']];
 
-export const SCANNED_TREES = ['scripts', 'compose', 'swiftui', '.github'];
+export const SCANNED_TREES = ['scripts', 'compose', ...(LAYERS.includes('swiftui') ? ['swiftui'] : []), '.github'];
 export const SOURCE_EXTENSIONS = ['.ts', '.kt', '.kts', '.swift'];
 
 export const COMMENT_RULE_SKIPS = new Map<string, string>([]);
@@ -92,6 +93,7 @@ export function commentProblems(rel: string, source: string) {
   }
   const errs: string[] = [];
   const [header, ...rest] = found;
+  if (header === undefined) return errs;
   if (header.line !== 1 || !header.leading) {
     errs.push(`${rel} carries its one allowed comment at line ${header.line}, and the allowance is a file HEADER`);
   }

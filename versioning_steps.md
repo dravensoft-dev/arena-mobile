@@ -38,9 +38,9 @@ bun run check
 answer fails on its own account rather than satisfying the next step by doing nothing.
 
 **A release is the one run where a wrong declaration has to surface**, because it is the run
-nothing downstream re-checks. Expect `check:swift` to report SKIP unless you are on macOS, and
-expect the summary to read INCOMPLETE when it does. A release is cut from a green CI run and
-not from a local one.
+nothing downstream re-checks. `check:swift` reports OFF while the SwiftUI layer is suspended, as
+[`AGENTS.md`](./AGENTS.md) states, and `check:kotlin` reports SKIP on a host with no JDK, which
+makes the summary read INCOMPLETE. A release is cut from a green CI run and not from a local one.
 
 ## 3. Tag it, and land it on `main`
 
