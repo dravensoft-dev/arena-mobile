@@ -3,7 +3,11 @@
  * in this path and no JS client is either. The integrity the registry publishes for that
  * exact version is verified before anything is extracted, and the extracted tree is then
  * compared against its own catalogue in both directions, because a payload that lost a file
- * and a payload that gained one are the same defect read from opposite ends. */
+ * and a payload that gained one are the same defect read from opposite ends. The version is
+ * read out of the package's own document rather than asked of the registry's per-version one,
+ * which answers a 502 after thirty seconds often enough to fail a run on its own, and each
+ * request is bounded and retried over curl's own doubling backoff, which knows which answers
+ * are transient. */
 
 import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -25,10 +29,20 @@ import {
   type ContractManifest,
 } from '../../lib/contracts/payload.ts';
 
+const ATTEMPT = deadline(
+  'fetch-contracts:attempt',
+  45_000,
+  'one HTTPS round trip to registry.npmjs.org from a runner whose egress may be proxied. A degraded registry answers '
+    + 'a 502 after thirty seconds, so an attempt outlasts that answer and abandons a hang for the next attempt',
+);
+
+export const RETRIES = 5;
+
 const DOWNLOAD = deadline(
   'fetch-contracts:download',
-  120_000,
-  'two HTTPS round trips to registry.npmjs.org from a runner whose egress may be proxied; the payload is under a megabyte, so the span is latency and not size',
+  (RETRIES + 1) * ATTEMPT.ms + 31_000,
+  'every attempt curl makes at one document, and the doubling backoff between them, which sums to 31 seconds over '
+    + 'five retries; the payload is under a megabyte, so the span is latency and not size',
 );
 
 const EXTRACT = deadline(
@@ -38,6 +52,8 @@ const EXTRACT = deadline(
 );
 
 export const REGISTRY = 'https://registry.npmjs.org';
+
+export const RETRY = ['--retry', String(RETRIES), '--max-time', String(ATTEMPT.ms / 1000)];
 
 export const node = {
   name: 'generate:contracts',
@@ -52,8 +68,14 @@ export const node = {
   ],
 };
 
-export function metadataUrl(version: string, registry = REGISTRY) {
-  return `${registry}/${PACKAGE_NAME}/${version}`;
+export function packumentUrl(registry = REGISTRY) {
+  return `${registry}/${PACKAGE_NAME}`;
+}
+
+export function distOf(packument: { versions?: Record<string, { dist?: unknown }> }, version: string) {
+  const dist = (packument.versions?.[version]?.dist ?? {}) as { tarball?: unknown; integrity?: unknown };
+  if (typeof dist.tarball !== 'string' || typeof dist.integrity !== 'string') return null;
+  return { tarball: dist.tarball, integrity: dist.integrity };
 }
 
 export function integrityProblems(expected: string, tarball: Buffer) {
@@ -90,7 +112,7 @@ export function payloadProblems(manifest: ContractManifest, onDisk: string[], ve
 
 function fetchBuffer(curl: string, url: string, cwd: string, ms: number) {
   const out = join(cwd, '.contracts-download');
-  const child = runCapturing(curl, ['--fail', '--location', '--silent', '--show-error', '--output', out, url], cwd, ms);
+  const child = runCapturing(curl, ['--fail', '--location', '--silent', '--show-error', ...RETRY, '--output', out, url], cwd, ms);
   if (child.status !== 0) {
     console.error(`fetch-contracts: curl exited ${child.status} for ${url}\n${child.output}`);
     process.exit(1);
@@ -108,10 +130,10 @@ async function main() {
   if (!tar) cannotRun('fetch-contracts', 'this host supplies no tar, and the payload arrives as a tarball');
 
   const version = contractsVersion(root);
-  const meta = JSON.parse(fetchBuffer(curl, metadataUrl(version), root, DOWNLOAD.ms).toString('utf8'));
-  const dist = meta?.dist ?? {};
-  if (typeof dist.tarball !== 'string' || typeof dist.integrity !== 'string') {
-    console.error(`fetch-contracts: the registry document for ${PACKAGE_NAME}@${version} carries no dist.tarball and dist.integrity pair`);
+  const packument = JSON.parse(fetchBuffer(curl, packumentUrl(), root, DOWNLOAD.ms).toString('utf8'));
+  const dist = distOf(packument, version);
+  if (dist === null) {
+    console.error(`fetch-contracts: the registry document for ${PACKAGE_NAME} carries no dist.tarball and dist.integrity pair for ${version}`);
     process.exit(1);
   }
 

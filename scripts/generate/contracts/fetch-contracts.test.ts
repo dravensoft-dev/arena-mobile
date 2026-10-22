@@ -1,12 +1,21 @@
 import { test, expect } from 'bun:test';
 import { createHash } from 'node:crypto';
-import { REGISTRY, integrityProblems, metadataUrl, payloadProblems } from './fetch-contracts.ts';
+import { REGISTRY, RETRIES, RETRY, distOf, integrityProblems, packumentUrl, payloadProblems } from './fetch-contracts.ts';
 import { PACKAGE_NAME } from '../../lib/contracts/payload.ts';
 
 const manifest = (contracts: string[], version = '10.2.0') => ({ name: PACKAGE_NAME, version, contracts });
 
-test('the version asked for is the version fetched, and it comes from repo.config.json', () => {
-  expect(metadataUrl('10.2.0')).toBe(`${REGISTRY}/${PACKAGE_NAME}/10.2.0`);
+test('the version asked for is read out of the package document, and a version it does not carry is null', () => {
+  expect(packumentUrl()).toBe(`${REGISTRY}/${PACKAGE_NAME}`);
+  const dist = { tarball: 'https://example.test/a.tgz', integrity: 'sha512-AAAA' };
+  expect(distOf({ versions: { '10.2.0': { dist } } }, '10.2.0')).toEqual(dist);
+  expect(distOf({ versions: { '10.2.0': { dist } } }, '10.2.1')).toBe(null);
+  expect(distOf({ versions: { '10.2.0': { dist: { tarball: 'x' } } } }, '10.2.0')).toBe(null);
+});
+
+test('a transient answer from the registry is retried by curl rather than failing the run', () => {
+  expect(RETRY.slice(0, 2)).toEqual(['--retry', String(RETRIES)]);
+  expect(RETRY).toContain('--max-time');
 });
 
 test('the tarball is verified against the digest the registry publishes for that exact version', () => {
