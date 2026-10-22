@@ -293,7 +293,7 @@ requirement is excepted rather than omitted: silence upstream means the browser 
 silence here would mean nothing at all.
 
 **A member is a name, a type and a default, and all three are held.** A contract states
-`"type": "ArenaButtonVariant"` and `"default": "primary"` beside the member, and a default changed
+`"type": "boolean"` and `"default": false` beside the member, and a default changed
 on one layer alone otherwise passes every gate in the tree and hands two consumers two different
 controls. The two are DERIVED from the contract rather than written down beside the parameter
 name: `scripts/lib/arena/api-emit.ts:fieldTypes(field, where)` already answers the Kotlin and the
@@ -469,17 +469,19 @@ name asks rather than the name, and both operands are contracted, so the collaps
 never a debt. `ArenaControl` on each layer carries it. The height and the text step are not part of
 it: they come off the density scale, so a control re-densifies without the seam saying so.
 
-**The room a control gives its content is one value and not one per rung.** Arena spends the
-contracted step at its smallest control and a literal at the other two, and a literal is a stylesheet
-the payload does not carry; two steps invented here would be this repository authoring over a tier it
-consumes, which is the row the table above sends to Arena.
+**A control stands at the default option of the size family.** Arena asks a control's height, its
+room across and its label step once per option of that family, and a family option is picked by a
+style plugin, a tier with no native counterpart here. So a control stands at the md option: its height
+and its text step come off the density scale, and its room is the one `pad-control-x` collapses onto.
+Answering another option here would be this repository authoring over a tier it consumes, which is the
+row the table above sends to Arena.
 
 **The activation box takes its floor as an argument and carries no default**, which is where it parts
 from `ArenaSafeArea`. A safe-area floor is a contracted step and this floor is a constant of a
 platform, 48dp on one side and 44pt on the other, so a default would be the one length in either
 library written by hand rather than read from the emit. Which floor a caller passes is that layer's
-own, and no density clears both floors at every rung: comfortable clears the Apple floor throughout and
-stands level with it at the smallest rung, where it misses the Android floor.
+own, and no density clears both floors with room to spare: comfortable stands level with the Android
+floor and clears the Apple one, and the other two densities sit below both.
 
 ## What a drawn control offers a thumb
 
@@ -549,8 +551,9 @@ lands on a half coordinate. A single number applied to every axis would be the b
 arrangement exists to refuse.
 
 **The case matrix is the component's own contracted axes and nothing else.** It is derived through
-`scripts/lib/arena/api-emit.ts:enumCases(type)` over the members `MEMBERS` in
-`scripts/lib/arena/component-members.ts` says cross, so a variant the payload adds enters the matrix
+`scripts/lib/arena/api-emit.ts:enumCases(type)` for an enum member, and as the two cases false and true
+for a boolean one, over the members `MEMBERS` in
+`scripts/lib/arena/component-members.ts` says cross, so a case the payload adds enters the matrix
 rather than landing in a silence, and both suites carry it as a literal the gate reads back. The
 density and the colour scheme stay out at their defaults, because each is the theme's axis rather
 than the component's; the activation box is the one axis that also renders at the base ladder, since
@@ -561,7 +564,8 @@ asserts an identity.
 is one equal to the fill or to the edge the paint names for that case, and where both are transparent
 nothing the control draws is painted. That is a claim rather than a gap, and it is why the control is
 drawn over the contracted ground: without one, "the control painted nothing here" and "the capture
-never reached here" are one reading, and a ghost is the case where the difference is the claim.
+never reached here" are one reading, and the ground inside a destructive outline is the case where the
+difference is the claim.
 
 **What a face decides is out, and it is out structurally rather than for want of a better fixture.**
 `ArenaFonts` takes the family from the consumer, so a suite here falls back to whatever the platform

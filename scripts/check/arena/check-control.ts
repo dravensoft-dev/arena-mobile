@@ -33,6 +33,10 @@ export const node = {
 
 export type Collapse = { member?: string; token?: string; why: string };
 
+const NO_FAMILY = 'an option of the size family other than its default. A family option is picked by a style '
+  + 'plugin, and that tier has no native counterpart here, so ArenaButton stands at the md option and nothing '
+  + 'selects another. The role lands with a native answer to a family';
+
 export const COLLAPSED = new Map<string, Collapse>([
   ['pad-control-x', {
     member: 'padding',
@@ -88,33 +92,45 @@ export const COLLAPSED = new Map<string, Collapse>([
   ['lift-control', {
     why: 'the role states its own default is nowhere, for the reason shadow-control-rest carries',
   }],
+  ['pad-control-text-y', {
+    why: 'the room around a control whose height is its text, which the role says ArenaSkipLink and the field of '
+      + 'ArenaTextarea read. Neither is published here, and the step lands with the first of them',
+  }],
+  ['size-md-control-h', {
+    why: 'answered by ArenaControl.height, which reads the rung RUNGS ties to dz.ctl-h. The md option is the one a '
+      + 'button stands at when nothing picks a size, and a rung re-densifies, so it is no constant of this seam',
+  }],
+  ['size-md-control-pad-x', {
+    why: 'answered by padding, which pad-control-x collapses onto. The md option is the one a button stands at when '
+      + 'nothing picks a size, and a second member for the same room would be one length carried twice',
+  }],
+  ['size-md-control-step', {
+    why: 'answered by ArenaControl.text, which reads the rung RUNGS ties to dz.text, for the reason size-md-control-h '
+      + 'carries',
+  }],
+  ['size-sm-control-h', { why: NO_FAMILY }],
+  ['size-sm-control-pad-x', { why: NO_FAMILY }],
+  ['size-sm-control-step', { why: NO_FAMILY }],
+  ['size-lg-control-h', { why: NO_FAMILY }],
+  ['size-lg-control-pad-x', { why: NO_FAMILY }],
+  ['size-lg-control-step', { why: NO_FAMILY }],
 ]);
 
 export type Rung = { token: string; axis: string; why: string };
 
 export const RUNGS = new Map<string, Rung>([
-  ['height.sm', { token: 'dz.ctl-h-sm', axis: 'fixed', why: 'the small rung of the control ladder' }],
-  ['height.md', { token: 'dz.ctl-h', axis: 'fixed', why: 'the rung the ladder is named for' }],
-  ['height.lg', { token: 'dz.ctl-h-lg', axis: 'fixed', why: 'the large rung' }],
-  ['text.sm', {
-    token: 'dz.text-md',
-    axis: 'scales',
-    why: 'the small rung drops a text step, which is what Arena spends at its own small control',
+  ['height', {
+    token: 'dz.ctl-h',
+    axis: 'fixed',
+    why: 'the rung the ladder is named for, which is the one a control stands at when nothing picks a size',
   }],
-  ['text.md', { token: 'dz.text', axis: 'scales', why: 'the control text step' }],
-  ['text.lg', {
-    token: 'dz.text',
-    axis: 'scales',
-    why: 'the large rung shares the control text step, because a taller control is more air and not larger type',
-  }],
+  ['text', { token: 'dz.text', axis: 'scales', why: 'the control text step' }],
 ]);
 
 export const KOTLIN_CONSTANT = /^\s*public val (\w+): [\w.]+ = ArenaTokens\.(\w+)$/;
 export const SWIFT_CONSTANT = /^\s*public static let (\w+): [\w.]+ = ArenaTokens\.(\w+)$/;
-export const KOTLIN_RUNG_HEAD = /^\s*public fun (\w+)\(size: ArenaControlSize/;
-export const SWIFT_RUNG_HEAD = /^\s*public static func (\w+)\(_ size: ArenaControlSize/;
-export const KOTLIN_RUNG = /^\s*ArenaControlSize\.(\w+) -> density\.(\w+)$/;
-export const SWIFT_RUNG = /^\s*case \.(\w+): density\.(\w+)$/;
+export const KOTLIN_RUNG = /^\s*public fun (\w+)\(density: ArenaDensityScale\): \w+ = density\.(\w+)$/;
+export const SWIFT_RUNG = /^\s*public static func (\w+)\(_ density: ArenaDensityScale\) -> CGFloat \{ density\.(\w+) \}$/;
 export const KOTLIN_TARGET = /^\s*public fun target\(painted: Dp, floor: Dp(.*)\): Dp = (.+)$/;
 export const SWIFT_TARGET = /^\s*public static func target\(_ painted: CGFloat, floor: CGFloat(.*)\) -> CGFloat \{ (.+) \}$/;
 
@@ -125,18 +141,6 @@ export function constantsIn(source: string, pattern: RegExp) {
   for (const line of source.split('\n')) {
     const match = pattern.exec(line);
     if (match?.[1] && match[2]) found.set(match[1], match[2]);
-  }
-  return found;
-}
-
-export function rungsIn(source: string, head: RegExp, rung: RegExp) {
-  const found = new Map<string, string>();
-  let member: string | null = null;
-  for (const line of source.split('\n')) {
-    const opened = head.exec(line);
-    if (opened?.[1]) { member = opened[1]; continue; }
-    const match = rung.exec(line);
-    if (member && match?.[1] && match[2]) found.set(`${member}.${match[1].toLowerCase()}`, match[2]);
   }
   return found;
 }
@@ -290,7 +294,7 @@ function main() {
   const roles = controlRoles(readJson<Record<string, unknown>>(join(root, ROLES)));
   const kotlinSource = readFileSync(join(root, KOTLIN_SEAM), 'utf8');
   const kotlin = constantsIn(kotlinSource, KOTLIN_CONSTANT);
-  const kotlinRungs = rungsIn(kotlinSource, KOTLIN_RUNG_HEAD, KOTLIN_RUNG);
+  const kotlinRungs = constantsIn(kotlinSource, KOTLIN_RUNG);
   const noRole = zeroRoleProblem(roles.length);
   const noKotlin = zeroMemberProblem(kotlin.size + kotlinRungs.size, 'Compose');
 
@@ -308,7 +312,7 @@ function main() {
   if (LAYERS.includes('swiftui')) {
     const swiftSource = readFileSync(join(root, SWIFT_SEAM), 'utf8');
     const swift = constantsIn(swiftSource, SWIFT_CONSTANT);
-    const swiftRungs = rungsIn(swiftSource, SWIFT_RUNG_HEAD, SWIFT_RUNG);
+    const swiftRungs = constantsIn(swiftSource, SWIFT_RUNG);
     const noSwift = zeroMemberProblem(swift.size + swiftRungs.size, 'SwiftUI');
     read += swift.size + swiftRungs.size;
     errs.push(

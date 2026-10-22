@@ -6,7 +6,6 @@
 package org.dravensoft.arena
 
 import androidx.compose.ui.unit.dp
-import org.dravensoft.arena.api.ArenaControlSize
 import org.dravensoft.arena.tokens.ArenaBaseDensity
 import org.dravensoft.arena.tokens.ArenaComfortableDensity
 import org.dravensoft.arena.tokens.ArenaCompactDensity
@@ -17,20 +16,11 @@ import kotlin.test.assertEquals
 
 class ArenaControlTest {
     @Test
-    fun aControlReDensifiesRungForRung() {
+    fun aControlReDensifiesWithTheScale() {
         for (density in listOf(ArenaBaseDensity, ArenaCompactDensity, ArenaComfortableDensity)) {
-            assertEquals(density.ctlHSm, ArenaControl.height(ArenaControlSize.Sm, density))
-            assertEquals(density.ctlH, ArenaControl.height(ArenaControlSize.Md, density))
-            assertEquals(density.ctlHLg, ArenaControl.height(ArenaControlSize.Lg, density))
+            assertEquals(density.ctlH, ArenaControl.height(density))
+            assertEquals(density.text, ArenaControl.text(density))
         }
-    }
-
-    @Test
-    fun theSmallRungDropsATextStepAndTheOtherTwoShareOne() {
-        val density = ArenaComfortableDensity
-        assertEquals(density.textMd, ArenaControl.text(ArenaControlSize.Sm, density))
-        assertEquals(density.text, ArenaControl.text(ArenaControlSize.Md, density))
-        assertEquals(density.text, ArenaControl.text(ArenaControlSize.Lg, density))
     }
 
     @Test
@@ -44,7 +34,7 @@ class ArenaControlTest {
     @Test
     fun theActivationBoxIsTheFloorWhereThePaintIsSmallerAndThePaintWhereItIsNot() {
         val floor = 48.dp
-        assertEquals(floor, ArenaControl.target(ArenaCompactDensity.ctlHSm, floor))
-        assertEquals(ArenaComfortableDensity.ctlHLg, ArenaControl.target(ArenaComfortableDensity.ctlHLg, floor))
+        assertEquals(floor, ArenaControl.target(ArenaCompactDensity.ctlH, floor))
+        assertEquals(ArenaComfortableDensity.ctlH, ArenaControl.target(ArenaComfortableDensity.ctlH, floor))
     }
 }

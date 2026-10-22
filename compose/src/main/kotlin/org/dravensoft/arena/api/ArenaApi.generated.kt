@@ -6,19 +6,19 @@ package org.dravensoft.arena.api
 
 /** One event in a feed: someone did something to something, then. Arena draws every field: a consumer cannot place their own markup inside a row. */
 public data class ArenaActivityItem(
-    /** Who. Drawn bold in --bone. */
+    /** Who. Drawn bold in the body ink. */
     public val actor: String,
-    /** What they did. Drawn in --bone-dim. */
+    /** What they did. Drawn in the body ink at its body level. */
     public val action: String,
     /** A stable identity for the row, so a reordered feed does not re-key by index. */
     public val id: String? = null,
-    /** What they did it to. Drawn monospaced in --gold: it is an identifier. */
+    /** What they did it to. Drawn monospaced in the secondary colour: it is an identifier. */
     public val target: String? = null,
-    /** When. Monospaced --mute, pushed to the trailing edge. Preformatted: ArenaActivityFeed never formats. */
+    /** When. Monospaced in the muted ink, pushed to the trailing edge. Preformatted: ArenaActivityFeed never formats. */
     public val time: String? = null,
     /** The same moment as an ISO 8601 string, which is the machine-readable half of what the row shows. Present, the row carries it beside its own text; absent, the text is drawn as before. Two fields rather than one because time is what a reader sees and is deliberately whatever the consumer preformatted, up to "3 min ago", which no parser can resolve to a date. The pair is what lets Arena carry the timestamp itself, which is the only way it can: a field inside an array of predefined objects can only be a primitive, so a consumer cannot place their own content inside one row of a list Arena renders, and the convention that says so is not being lifted here. */
     public val dateTime: String? = null,
-    /** ArenaBadge's vocabulary, driving the leading dot. Defaults to accent. */
+    /** ArenaBadge's vocabulary, driving the leading dot. An untoned item paints the feed's accent. */
     public val tone: ArenaTone? = null,
 )
 
@@ -35,25 +35,13 @@ public enum class ArenaAlertTone(public val value: String) {
     }
 }
 
-/** Circle for a person, rounded for a team or organisation. */
-public enum class ArenaAvatarShape(public val value: String) {
-    Circle("circle"),
-    Rounded("rounded");
+/** Whether an avatar stands for a person or for a team or organisation. */
+public enum class ArenaAvatarKind(public val value: String) {
+    Person("person"),
+    Team("team");
 
     public companion object {
-        public fun from(value: String): ArenaAvatarShape? = entries.firstOrNull { it.value == value }
-    }
-}
-
-/** The avatar's diameter, a fixed repertoire: xs a dense table row, sm a comment byline, md the default, lg a profile header. */
-public enum class ArenaAvatarSize(public val value: String) {
-    Xs("xs"),
-    Sm("sm"),
-    Md("md"),
-    Lg("lg");
-
-    public companion object {
-        public fun from(value: String): ArenaAvatarSize? = entries.firstOrNull { it.value == value }
+        public fun from(value: String): ArenaAvatarKind? = entries.firstOrNull { it.value == value }
     }
 }
 
@@ -80,7 +68,7 @@ public enum class ArenaBreakpoint(public val value: String) {
     }
 }
 
-/** One action an ArenaBulkActionBar offers for the current selection. A destructive action stays outline in --error (transparent at rest, the soft --danger-soft tint only on hover), never the filled danger surface, which is ArenaConfirmDialog's alone. */
+/** One action an ArenaBulkActionBar offers for the current selection. A destructive action stays outline in the danger hue's edge and ink, transparent at rest, rather than in the quiet control edge and body ink, and is never the filled danger surface, which is ArenaConfirmDialog's alone. */
 public data class ArenaBulkAction(
     /** A stable identity for the action, so a host can switch on it rather than on the label. */
     public val id: String,
@@ -88,7 +76,7 @@ public data class ArenaBulkAction(
     public val label: String,
     /** A Phosphor class name for the leading glyph Arena draws. */
     public val icon: String? = null,
-    /** Renders the action outline in --error rather than in --bone-dim. */
+    /** Renders the action outlined in the danger hue's edge and ink, transparent at rest, rather than in the quiet control edge and body ink. */
     public val destructive: Boolean? = null,
 )
 
@@ -113,18 +101,6 @@ public enum class ArenaButtonType(public val value: String) {
     }
 }
 
-/** Primary for the one main action in a view; secondary for neutral actions; ghost for tertiary ones; danger for destructive ones. Danger is outline and never filled: Arena's only filled danger surface is the final confirmation inside ArenaConfirmDialog. */
-public enum class ArenaButtonVariant(public val value: String) {
-    Primary("primary"),
-    Secondary("secondary"),
-    Ghost("ghost"),
-    Danger("danger");
-
-    public companion object {
-        public fun from(value: String): ArenaButtonVariant? = entries.firstOrNull { it.value == value }
-    }
-}
-
 /** How much of the schedule is on screen at once: a whole week of columns, or one day. Omitted on the component, it is derived from the container width rather than chosen. */
 public enum class ArenaCalendarView(public val value: String) {
     Week("week"),
@@ -135,7 +111,7 @@ public enum class ArenaCalendarView(public val value: String) {
     }
 }
 
-/** A slot in the categorical ramp, in fixed order and never cycled. Colour here means which thing, never what state. The same ramp the charts use (identity is one system across Arena, not one per component), but typed as an enum only here: a chart's own slot members still declare a bare number, which their runtime clamp makes safe rather than correct, and narrowing them is an open contract change and not a fact this type states. The bound is not authored here either: it is the count of categorical slots the palette declares, and the contract fails if this set stops matching it. */
+/** Which slot of the categorical ramp a thing takes, taken in fixed order and never cycled. Colour here means which thing, never what state. Slot n is the palette's n-th categorical colour, and the bound is the number of those slots the palette declares. A slot past the ramp clamps to its last one instead of wrapping to the first, so a series past the ramp never reuses a colour. The chart components take a series colour as a plain number and apply the same clamp. */
 public enum class ArenaCatSlot(public val value: Int) {
     Slot1(1),
     Slot2(2),
@@ -148,17 +124,6 @@ public enum class ArenaCatSlot(public val value: Int) {
 
     public companion object {
         public fun from(value: Int): ArenaCatSlot? = entries.firstOrNull { it.value == value }
-    }
-}
-
-/** How an ArenaTable column's cells align. Checked against every enum already declared here before it was added; ArenaPageHeadAlign is the near miss and is a different set: start/center on a flex axis, with no `right`, and a right-aligned column of figures is precisely what this exists for. */
-public enum class ArenaCellAlign(public val value: String) {
-    Left("left"),
-    Center("center"),
-    Right("right");
-
-    public companion object {
-        public fun from(value: String): ArenaCellAlign? = entries.firstOrNull { it.value == value }
     }
 }
 
@@ -219,17 +184,6 @@ public data class ArenaConfirmRequest(
     public val requireText: String? = null,
 )
 
-/** The three-step size scale shared by Arena's controls. What each step measures is the component's own decision and only some of them re-densify: ArenaButton and ArenaIconButton take their heights from the density tokens, so they shrink with the rows around them in the compact density, while ArenaProgressBar's thickness and ArenaSpinner's diameter are spacing and icon tokens the compact density does not redefine. The enum is shared because all four implement the same three steps, not because they resolve them the same way. */
-public enum class ArenaControlSize(public val value: String) {
-    Sm("sm"),
-    Md("md"),
-    Lg("lg");
-
-    public companion object {
-        public fun from(value: String): ArenaControlSize? = entries.firstOrNull { it.value == value }
-    }
-}
-
 /** One entry in a breadcrumb trail. `href` is omitted for the current page, which is never rendered as a link. */
 public data class ArenaCrumb(
     /** What the crumb reads. */
@@ -259,19 +213,7 @@ public enum class ArenaDirection(public val value: String) {
     }
 }
 
-/** How much air separates two cells. Checked against every enum already declared here before it was added; nothing carries this set. ArenaControlSize is the near miss and is a different question: it names how tall a control stands, and it has no `none` because a control of no height is not a size. Four named steps rather than the spacing scale restated: a set that merely repeats what the token layer already derives may only be an enum while something machine-checks the restatement, and there is nothing to tie a numeric step list back to. These four are a decision about rhythm, and each layer resolves its own step from the scale. */
-public enum class ArenaGridGap(public val value: String) {
-    None("none"),
-    Sm("sm"),
-    Md("md"),
-    Lg("lg");
-
-    public companion object {
-        public fun from(value: String): ArenaGridGap? = entries.firstOrNull { it.value == value }
-    }
-}
-
-/** Which rung of the document outline a title takes. Arena already declares a title ladder, hero over page head over section over card, and that ladder was a visual register alone: a style plugin re-pitches the four as a unit, while a reader walking headings met whichever rung each component had settled on for itself, which was one level deep or none at all. This is the same ladder said as structure. The value names the outline rung and nothing else, because a title is styled the same at every value, so choosing a level costs no appearance and a gate is what holds that. Each component defaults to its own rung, so a card inside a section nests with nobody saying so, and the member is there for the screens where the default rung is the wrong one. `none` draws the title with no heading at all, for a title that labels a surface rather than naming a region; a component whose title is required refuses `none` at runtime, since a title required because it names the thing it draws cannot also be told the name is not one. */
+/** Which rung of the document outline a title takes. Arena already declares a title ladder, hero over page head over section over card, and that ladder is a visual register alone: a style plugin re-pitches the four as a unit, while a reader walking headings meets whichever rung each component settles on for itself, which is one level deep or none at all. This type is the same ladder said as structure. The value names the outline rung and nothing else, because a title is styled the same at every value, so choosing a level costs no appearance. Each component defaults to its own rung, so a card inside a section nests with nobody saying so, and the member is there for the screens where the default rung is the wrong one. `none` draws the title with no heading at all, for a title that labels a surface rather than naming a region; a component whose title is required refuses `none` at runtime, since a title required because it names the thing it draws cannot also be told the name is not one. */
 public enum class ArenaHeadingLevel(public val value: String) {
     H1("h1"),
     H2("h2"),
@@ -281,37 +223,6 @@ public enum class ArenaHeadingLevel(public val value: String) {
 
     public companion object {
         public fun from(value: String): ArenaHeadingLevel? = entries.firstOrNull { it.value == value }
-    }
-}
-
-/** Whether a hero's words run from the start edge or sit centred in their column. ArenaPageHeadAlign carries this exact set for a different subject: that one aligns an actions block against a title across a row, and this aligns a whole column of text within itself. Sharing the name would have put a page head in the type of a member no page head is involved in, and the near miss is worth stating rather than leaving for a later reader to find. */
-public enum class ArenaHeroAlign(public val value: String) {
-    Start("start"),
-    Center("center");
-
-    public companion object {
-        public fun from(value: String): ArenaHeroAlign? = entries.firstOrNull { it.value == value }
-    }
-}
-
-/** How a hero arranges its words against its figure. Checked against every enum already declared here before it was added; nothing carries this set. Three arrangements rather than a boolean, because bleed is not split-with-the-figure-behind: stacked and split put the two side by side or one under the other and the figure keeps its own box, while bleed lays the words ON the figure and makes the wash under them load-bearing. A boolean would have hidden the third. */
-public enum class ArenaHeroLayout(public val value: String) {
-    Stacked("stacked"),
-    Split("split"),
-    Bleed("bleed");
-
-    public companion object {
-        public fun from(value: String): ArenaHeroLayout? = entries.firstOrNull { it.value == value }
-    }
-}
-
-/** 'ghost' sits on a surface and shows its hairline border; 'solid' is the filled accent treatment. Danger is not among them: Arena's danger convention is outline, and an icon-only danger control has no room to say what it destroys. */
-public enum class ArenaIconButtonVariant(public val value: String) {
-    Ghost("ghost"),
-    Solid("solid");
-
-    public companion object {
-        public fun from(value: String): ArenaIconButtonVariant? = entries.firstOrNull { it.value == value }
     }
 }
 
@@ -447,7 +358,7 @@ public data class ArenaLocale(
     public val pyramidChartName: String = "{label} — horizontal bar chart",
     /** A doughnut chart's accessible name. {label} is the chart's label. */
     public val doughnutChartName: String = "{label} — doughnut chart",
-    /** The same chart's accessible name in its pie shape. {label} is the chart's label. */
+    /** A doughnut chart's accessible name in its pie shape. {label} is the chart's label. */
     public val doughnutChartPieName: String = "{label} — pie chart",
     /** A radar chart's accessible name. {label} is the chart's label. */
     public val radarChartName: String = "{label} — radar chart",
@@ -467,19 +378,7 @@ public data class ArenaLocale(
     public val doughnutChartPieLegend: String = "Pie chart legend",
 )
 
-/** Both halves of the brand lock-up at once: the mark's slot and the wordmark. A fixed repertoire, not a ratio: sm an application frame, md a signed-out panel, lg the manual's Primary, xl the hero case. */
-public enum class ArenaLogoSize(public val value: String) {
-    Sm("sm"),
-    Md("md"),
-    Lg("lg"),
-    Xl("xl");
-
-    public companion object {
-        public fun from(value: String): ArenaLogoSize? = entries.firstOrNull { it.value == value }
-    }
-}
-
-/** Which edge of the trigger the dropdown panel lines its own edge up with. Checked against every enum already declared here before it was added; nothing carries this pair. ArenaPageHeadAlign is the near miss and is a different set -- start/center on a flex axis, with no `end`, where a panel hanging off a trigger has two edges to anchor to and no centre. */
+/** Which edge of the trigger the dropdown panel lines its own edge up with. No other enum declared here carries this pair. */
 public enum class ArenaMenuAlign(public val value: String) {
     Start("start"),
     End("end");
@@ -507,7 +406,7 @@ public data class ArenaMenuItem(
     public val header: String? = null,
 )
 
-/** How a chart writes each number before the prefix and the suffix are added. Every field is a primitive, so this stays a datum the component renders from rather than a function it calls, which is why a chart takes a format and never a formatter. It exists because "format the numbers before binding them" is not possible: what a chart is handed is number[], and the formatting has to reach the axis ticks, the tooltip and the accessible table, which the chart writes afterwards. Every field being absent is the raw JavaScript number, which is what a chart drew before this type existed. */
+/** How a chart writes each number before the prefix and the suffix are added. Every field is a primitive, so this stays a datum the component renders from rather than a function it calls, which is why a chart takes a format and never a formatter. It exists because "format the numbers before binding them" is not possible: what a chart is handed is number[], and the formatting has to reach the axis ticks, the tooltip and the accessible table, which the chart writes afterwards. Every field being absent is the raw JavaScript number, which is what a chart draws without this type. */
 public data class ArenaNumberFormat(
     /** A BCP-47 tag, such as "es-BO". Absent, the runtime's own default, which on a server is the SERVER's locale and on a client the reader's: pass it explicitly wherever a server render must match its hydration, the same hazard ArenaCalendar.timeZone carries. */
     public val locale: String? = null,
@@ -537,26 +436,6 @@ public data class ArenaOnboardingStep(
     public val body: String? = null,
 )
 
-/** Whether a component's parts lay out side by side or stacked: which axis it runs along. */
-public enum class ArenaOrientation(public val value: String) {
-    Horizontal("horizontal"),
-    Vertical("vertical");
-
-    public companion object {
-        public fun from(value: String): ArenaOrientation? = entries.firstOrNull { it.value == value }
-    }
-}
-
-/** How the actions block aligns against the title in ArenaPageHead's wide layout. */
-public enum class ArenaPageHeadAlign(public val value: String) {
-    Start("start"),
-    Center("center");
-
-    public companion object {
-        public fun from(value: String): ArenaPageHeadAlign? = entries.firstOrNull { it.value == value }
-    }
-}
-
 /** One plotted series of pairs: two parallel measurements, read at the same index. It is a separate type from ArenaSeries rather than a variant of it, because the two disagree about what a mark IS: an ArenaSeries value takes its place on the axis from its index, and a pair carries both coordinates. It is two arrays rather than an array of {x, y} because R1 refuses an array of objects, and the pairing by index is the same one every chart here already makes between labels and values, with the same rule when the two do not line up. */
 public data class ArenaPointSeries(
     /** Names this series, for its rows in the accessible table and for a legend. Required and guarded for the reason ArenaSeries.label is: nothing can derive what a series is about. */
@@ -568,8 +447,8 @@ public data class ArenaPointSeries(
     /** An optional third measurement per mark, drawn as the mark's SIZE, paired with `x` and `y` at the same index. A series that carries it turns its chart into a bubble chart. The mapping is by AREA and not by radius, because a reader compares the blot and doubling a radius quadruples it, so a linear radius would exaggerate the large value by a factor of four. Where a size is absent, at the series or at one index, the mark keeps the plain point radius and its table cell is empty: an unmeasured size is not a size of zero, and the mark still holds its place because its position WAS measured. */
     public val r: List<Double>? = null,
     /** One identity colour from the categorical ramp for the whole series. 1-based, clamped to the ramp, never cycled. Absent, the chart assigns the series its position in the list. */
-    public val slot: Double? = null,
-    /** Semantic colour, for a series that IS a state. Mutually exclusive with slot; passing both warns in development and tone wins. */
+    public val colorId: Double? = null,
+    /** Semantic colour, for a series that IS a state. Mutually exclusive with colorId; passing both warns in development and tone wins. */
     public val tone: ArenaSeriesTone? = null,
 )
 
@@ -585,8 +464,6 @@ public enum class ArenaProgressShape(public val value: String) {
 
 /** The bar's colour. No neutral and no warning: a progress bar reports work, and work is either running, done or failed. */
 public enum class ArenaProgressTone(public val value: String) {
-    Accent("accent"),
-    Gold("gold"),
     Success("success"),
     Danger("danger"),
     Info("info");
@@ -606,18 +483,6 @@ public enum class ArenaScrollerBehaviour(public val value: String) {
     }
 }
 
-/** How far a section's head stands from the body under it. Checked against every enum already declared here before it was added, and ArenaGridGap carries this exact set for a different subject: that one is the air between two CELLS, on both axes, and this is the air between a heading and the thing it names, on one. Sharing the name would have put grid in the type of a member no grid is involved in, and the near miss is worth stating rather than hiding, since a later reader will find them and wonder. Four named steps rather than a length, for the reason ArenaGridGap gives: these are a decision about rhythm and each layer resolves its own step from the scale. */
-public enum class ArenaSectionRhythm(public val value: String) {
-    None("none"),
-    Sm("sm"),
-    Md("md"),
-    Lg("lg");
-
-    public companion object {
-        public fun from(value: String): ArenaSectionRhythm? = entries.firstOrNull { it.value == value }
-    }
-}
-
 /** One option in an ArenaSegmentedControl. */
 public data class ArenaSegmentOption(
     /** What the option selects, and what `change` carries. */
@@ -625,16 +490,6 @@ public data class ArenaSegmentOption(
     /** What the option reads. One word: the track stops being compact past that. */
     public val label: String,
 )
-
-/** Compact or default. Both sit below ArenaButton on purpose: a filter never outweighs an action. Distinct from ArenaControlSize, which offers a large step this control does not. */
-public enum class ArenaSegmentedControlSize(public val value: String) {
-    Sm("sm"),
-    Md("md");
-
-    public companion object {
-        public fun from(value: String): ArenaSegmentedControlSize? = entries.firstOrNull { it.value == value }
-    }
-}
 
 /** One option in an ArenaSelect. */
 public data class ArenaSelectOption(
@@ -644,21 +499,21 @@ public data class ArenaSelectOption(
     public val label: String,
 )
 
-/** One plotted series: what it is called, its numbers in order, and the colour it carries. It is what replaced five loose members on every chart (values, seriesLabel, slot, slots and tone), because those five described ONE series and a chart that draws two had nowhere to put the second. The name is not decoration: it heads the series' own column in the accessible table and names the series in a legend, so a chart of three series says which is which without the reader guessing from colour alone. */
+/** One plotted series: what it is called, its numbers in order, and the colour it carries. It stands for what five loose members (values, seriesLabel, colorId, colorIds and tone) would otherwise describe on every chart, because those five describe ONE series and a chart that draws two would have nowhere to put the second. The name is not decoration: it heads the series' own column in the accessible table and names the series in a legend, so a chart of three series says which is which without the reader guessing from colour alone. */
 public data class ArenaSeries(
     /** Names this series, for its column in the accessible table and for a legend. Required and guarded rather than defaulted: "Series 2" satisfies a heading mechanically and tells a screen-reader user nothing, and nothing can derive what a series is about, which is the same reason ArenaTable.label is required. */
     public val label: String,
     /** The plotted numbers, in order, one per point or category. A series shorter than the labels stops early rather than padding, because a missing number and a zero are different facts and a chart may not invent the difference. */
     public val values: List<Double>,
     /** One identity colour from the categorical ramp for the whole series. 1-based, clamped to the ramp, never cycled. Absent, the chart assigns the series its position in the list, which is the rule rather than a starting point. */
-    public val slot: Double? = null,
-    /** Per-mark identity override, one ramp slot each. Wins over `slot`. For a chart whose marks are the identities rather than the series, which is what a single-series bar chart and a doughnut both are. */
-    public val slots: List<Double>? = null,
-    /** Semantic colour, for a series that IS a state. Mutually exclusive with slot/slots; passing both warns in development and tone wins, because a chart carries identity or meaning, never both. */
+    public val colorId: Double? = null,
+    /** Per-mark identity override, one ramp slot each. Wins over `colorId`. For a chart whose marks are the identities rather than the series, which is what a single-series bar chart and a doughnut both are. */
+    public val colorIds: List<Double>? = null,
+    /** Semantic colour, for a series that IS a state. Mutually exclusive with colorId/colorIds; passing both warns in development and tone wins, because a chart carries identity or meaning, never both. */
     public val tone: ArenaSeriesTone? = null,
 )
 
-/** For a series that IS a state (error rate, pass/fail) rather than an identity. A chart carries identity or meaning, never both; passing tone alongside slot/slots warns in development and tone wins. */
+/** For a series that IS a state (error rate, pass/fail) rather than an identity. A chart carries identity or meaning, never both; passing tone alongside colorId/colorIds warns in development and tone wins. */
 public enum class ArenaSeriesTone(public val value: String) {
     Success("success"),
     Warning("warning"),
@@ -667,29 +522,6 @@ public enum class ArenaSeriesTone(public val value: String) {
 
     public companion object {
         public fun from(value: String): ArenaSeriesTone? = entries.firstOrNull { it.value == value }
-    }
-}
-
-/** Which edge the panel is anchored to. Checked against every enum already declared here before it was added; nothing carries this set. ArenaToastPlacement is the near miss and is a different question: a stack of notices names a CORNER and needs both axes, where a sheet spans the edge it is attached to and names one. There is no top: a panel spanning the top edge of a page is a banner, which is what ArenaAlert already is, and a sheet is a working surface a reader keeps open beside the page. The inline pair is start/end rather than left/right so a right-to-left reading flips it with the document. */
-public enum class ArenaSheetPlacement(public val value: String) {
-    Bottom("bottom"),
-    Start("start"),
-    End("end");
-
-    public companion object {
-        public fun from(value: String): ArenaSheetPlacement? = entries.firstOrNull { it.value == value }
-    }
-}
-
-/** The shape the placeholder reserves: a single text line, a stack of lines, a block, or a circle. */
-public enum class ArenaSkeletonVariant(public val value: String) {
-    Text("text"),
-    Line("line"),
-    Block("block"),
-    Circle("circle");
-
-    public companion object {
-        public fun from(value: String): ArenaSkeletonVariant? = entries.firstOrNull { it.value == value }
     }
 }
 
@@ -703,18 +535,6 @@ public enum class ArenaSortDirection(public val value: String) {
     }
 }
 
-/** Colour for an indeterminate wait. 'accent' on a page surface, 'on-accent' inside a filled button. There is deliberately no success/warning/danger: a wait has no state to report, and a spinner tinted --danger would read as a failure that has not happened. */
-public enum class ArenaSpinnerTone(public val value: String) {
-    Accent("accent"),
-    Gold("gold"),
-    Neutral("neutral"),
-    OnAccent("on-accent");
-
-    public companion object {
-        public fun from(value: String): ArenaSpinnerTone? = entries.firstOrNull { it.value == value }
-    }
-}
-
 /** How a metric moved. Preformatted: ArenaStatCard never formats. The pill's colour says whether the change was GOOD, not which way it points, which is why direction and tone are separate fields. */
 public data class ArenaStatDelta(
     /** Preformatted, e.g. "+12%" or "-340ms". */
@@ -725,20 +545,7 @@ public data class ArenaStatDelta(
     public val tone: ArenaDeltaTone? = null,
 )
 
-/** The switch's overall size, from a dense sm to a prominent 2xl. */
-public enum class ArenaSwitchSize(public val value: String) {
-    Sm("sm"),
-    Md("md"),
-    Lg("lg"),
-    Xl("xl"),
-    Size2xl("2xl");
-
-    public companion object {
-        public fun from(value: String): ArenaSwitchSize? = entries.firstOrNull { it.value == value }
-    }
-}
-
-/** How an ArenaTable column's cells render in card mode: `row` is a label/value pair, `block` is a full-width strip with no label whose contents sit at the end of it, which is the shape an actions cell wants. A long value takes `row` or a cell of its own: set to `block` it draws with the whole gap on its leading side. Checked against every enum already declared here; nothing carries this pair. ArenaSkeletonVariant is the only other declaration containing the value `block`, and it names a shape of placeholder rather than a layout. */
+/** How an ArenaTable column's cells render in card mode: `row` is a label/value pair, `block` is a full-width strip with no label whose contents sit at the end of it, which is the shape an actions cell wants. A long value takes `row` or a cell of its own: set to `block` it draws with the whole gap on its leading side. Checked against every enum already declared here; nothing carries this pair. The `arena-skeleton-block` shape class is the only other declaration containing the word `block`, and it names a shape of placeholder rather than a layout. */
 public enum class ArenaTableCellLayout(public val value: String) {
     Row("row"),
     Block("block");
@@ -752,12 +559,10 @@ public enum class ArenaTableCellLayout(public val value: String) {
 public data class ArenaTableColumn(
     /** The column's label, drawn in the header row. */
     public val header: String,
-    /** How this column's cells align. */
-    public val align: ArenaCellAlign = ArenaCellAlign.Left,
-    /** A fixed width for the column. Omit to let the table distribute. */
-    public val width: String? = null,
-    /** Draw this column's cells in the mono face, figure-aligned, and in the gold ink -- for identifiers and figures. The ink is the half that does not travel outside a table: gold reads as an identifier, so a sale total in gold inside a card says the wrong thing. Each layer offers the face and the digit alignment on their own, for a figure the consumer draws elsewhere, and its usage document says how. */
-    public val mono: Boolean = false,
+    /** The name this column's width and alignment are set under, as --arena-column-<key>-width and --arena-column-<key>-align on the table or a container of yours. Letters, digits, hyphens and underscores; a column without one takes the table's own layout. */
+    public val key: String? = null,
+    /** The column holds figures: the mono face, tabular numerals and the gold ink, and figure-aligned in the card layout. */
+    public val numeric: Boolean = false,
     /** Whether this column's header is an activation target. A declared boolean rather than "is sortChange bound?", because Arena never derives what it draws from what a consumer listens for, the same reason ArenaTableRow.interactive is one. It costs no tab stop: the header row is already row 0 of the grid's roving cursor, so a sortable header is activated with Enter or Space on the cell the user is already on. Without ArenaTable.sort no header is a target however many columns declare it, because a control that draws a direction it does not know is worse than no control. */
     public val sortable: Boolean = false,
     /** How this column renders in card mode: a label/value pair, or a full-width strip with no label whose contents sit at its end, which suits an actions cell rather than a long value. */
@@ -794,7 +599,7 @@ public data class ArenaTableSlice(
 
 /** Which column the rows are ordered by, and which way. Controlled: ArenaTable draws the affordance and announces the order, and the consumer does the ordering, because ArenaTable does not hold the rows and pretending otherwise would be the error. Absent, no header is a sort target however many columns declare `sortable`. */
 public data class ArenaTableSort(
-    /** Which column, as its index in `columns`. An index rather than a key, because an ArenaTable's cells are already positional -- the nth ArenaTableCell takes the nth column -- so a key would be a second identity for a thing that already has one, and a required one on every column that a caller would have to invent. */
+    /** Which column, as its index in `columns`. An index rather than a key, because an ArenaTable's cells are already positional -- the nth ArenaTableCell takes the nth column -- so the index is the identity a column already has, and the optional `key` names a column's properties, not its identity. */
     public val column: Double,
     /** Which way that column is ordered. */
     public val direction: ArenaSortDirection,
@@ -810,10 +615,9 @@ public enum class ArenaTableSortControl(public val value: String) {
     }
 }
 
-/** The tag's emphasis colour, per the ArenaBadge/ArenaTag tone taxonomy. */
+/** The state a tag reports, per the ArenaBadge/ArenaTag tone taxonomy. */
 public enum class ArenaTagTone(public val value: String) {
     Neutral("neutral"),
-    Primary("primary"),
     Success("success"),
     Warning("warning"),
     Danger("danger");
@@ -823,24 +627,11 @@ public enum class ArenaTagTone(public val value: String) {
     }
 }
 
-/** Which corner the stack of notices is pinned to, block edge first. Checked against every enum already declared here before it was added; nothing carries this set. ArenaMenuAlign is the near miss and is a different question: it names which edge of a trigger a panel lines up with, on one axis, where this names a corner of the viewport and needs both. The inline half is `start`/`end` rather than left/right so a right-to-left reading flips it with the document. */
-public enum class ArenaToastPlacement(public val value: String) {
-    TopStart("top-start"),
-    TopEnd("top-end"),
-    BottomStart("bottom-start"),
-    BottomEnd("bottom-end");
-
-    public companion object {
-        public fun from(value: String): ArenaToastPlacement? = entries.firstOrNull { it.value == value }
-    }
-}
-
 /** The side bar's colour. Narrower than ArenaTone: a toast reports an outcome, and there is no informational outcome a toast should interrupt for. */
 public enum class ArenaToastTone(public val value: String) {
     Neutral("neutral"),
     Success("success"),
-    Danger("danger"),
-    Gold("gold");
+    Danger("danger");
 
     public companion object {
         public fun from(value: String): ArenaToastTone? = entries.firstOrNull { it.value == value }
@@ -850,8 +641,6 @@ public enum class ArenaToastTone(public val value: String) {
 /** What state a value IS in right now, as against how it moved. ArenaBadge's vocabulary, so one set of tone names covers the system rather than a second set that is nearly the same. */
 public enum class ArenaTone(public val value: String) {
     Neutral("neutral"),
-    Accent("accent"),
-    Gold("gold"),
     Success("success"),
     Warning("warning"),
     Danger("danger"),

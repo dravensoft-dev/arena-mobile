@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,8 +29,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
-import org.dravensoft.arena.api.ArenaButtonVariant
-import org.dravensoft.arena.api.ArenaControlSize
 import org.dravensoft.arena.theme.ArenaTheme
 import org.dravensoft.arena.tokens.ArenaColorScheme
 import org.dravensoft.arena.tokens.ArenaContrast
@@ -39,34 +36,19 @@ import org.dravensoft.arena.tokens.ArenaControl
 import org.dravensoft.arena.tokens.ArenaScale
 import org.dravensoft.arena.tokens.ArenaTokens
 import org.dravensoft.arena.tokens.accent
-import org.dravensoft.arena.tokens.borderStrong
 import org.dravensoft.arena.tokens.danger
 import org.dravensoft.arena.tokens.focusRing
 import org.dravensoft.arena.tokens.onAccent
-import org.dravensoft.arena.tokens.surfaceCard
-import org.dravensoft.arena.tokens.textStrong
 
 public object ArenaButtonPaint {
-    public fun fill(variant: ArenaButtonVariant, colors: ArenaColorScheme): Color = when (variant) {
-        ArenaButtonVariant.Primary -> colors.accent
-        ArenaButtonVariant.Secondary -> colors.surfaceCard
-        ArenaButtonVariant.Ghost -> Color.Transparent
-        ArenaButtonVariant.Danger -> Color.Transparent
-    }
+    public fun fill(destructive: Boolean, colors: ArenaColorScheme): Color =
+        if (destructive) Color.Transparent else colors.accent
 
-    public fun ink(variant: ArenaButtonVariant, colors: ArenaColorScheme): Color = when (variant) {
-        ArenaButtonVariant.Primary -> colors.onAccent
-        ArenaButtonVariant.Secondary -> colors.textStrong
-        ArenaButtonVariant.Ghost -> colors.textStrong
-        ArenaButtonVariant.Danger -> colors.danger
-    }
+    public fun ink(destructive: Boolean, colors: ArenaColorScheme): Color =
+        if (destructive) colors.danger else colors.onAccent
 
-    public fun edge(variant: ArenaButtonVariant, colors: ArenaColorScheme): Color = when (variant) {
-        ArenaButtonVariant.Primary -> colors.accent
-        ArenaButtonVariant.Secondary -> colors.borderStrong
-        ArenaButtonVariant.Ghost -> Color.Transparent
-        ArenaButtonVariant.Danger -> colors.danger
-    }
+    public fun edge(destructive: Boolean, colors: ArenaColorScheme): Color =
+        if (destructive) colors.danger else colors.accent
 }
 
 @Composable
@@ -74,18 +56,16 @@ public fun ArenaButton(
     content: String,
     click: () -> Unit,
     modifier: Modifier = Modifier,
-    variant: ArenaButtonVariant = ArenaButtonVariant.Primary,
-    size: ArenaControlSize = ArenaControlSize.Md,
+    destructive: Boolean = false,
     disabled: Boolean = false,
     loading: Boolean = false,
-    full: Boolean = false,
     increasedContrast: Boolean = false,
     targetFloor: Dp? = null,
 ) {
     val colors = ArenaTheme.colors
     val density = ArenaTheme.density
     val inactive = disabled || loading
-    val painted = ArenaScale.control(ArenaControl.height(size, density), LocalDensity.current.fontScale)
+    val painted = ArenaScale.control(ArenaControl.height(density), LocalDensity.current.fontScale)
     val box = if (targetFloor == null) painted else ArenaControl.target(painted, targetFloor)
     val shape = RoundedCornerShape(ArenaControl.radius)
     val ring = ArenaContrast.focusWidth(increasedContrast)
@@ -93,7 +73,6 @@ public fun ArenaButton(
     var focused by remember { mutableStateOf(false) }
     Box(
         modifier = modifier
-            .then(if (full) Modifier.fillMaxWidth() else Modifier)
             .onFocusChanged { focused = it.isFocused }
             .sizeIn(minHeight = box)
             .clickable(enabled = !inactive, onClick = click)
@@ -107,13 +86,12 @@ public fun ArenaButton(
     ) {
         Row(
             modifier = Modifier
-                .then(if (full) Modifier.fillMaxWidth() else Modifier)
-                .border(ring, if (focused) colors.focusRing else Color.Transparent, RoundedCornerShape(ArenaControl.radius + gutter))
+                    .border(ring, if (focused) colors.focusRing else Color.Transparent, RoundedCornerShape(ArenaControl.radius + gutter))
                 .padding(gutter)
                 .sizeIn(minHeight = painted)
                 .clip(shape)
-                .background(ArenaButtonPaint.fill(variant, colors))
-                .border(ArenaContrast.border(increasedContrast), ArenaButtonPaint.edge(variant, colors), shape)
+                .background(ArenaButtonPaint.fill(destructive, colors))
+                .border(ArenaContrast.border(increasedContrast), ArenaButtonPaint.edge(destructive, colors), shape)
                 .padding(horizontal = ArenaControl.padding),
             horizontalArrangement = Arrangement.spacedBy(ArenaControl.gap, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
@@ -121,8 +99,8 @@ public fun ArenaButton(
             BasicText(
                 text = content,
                 style = TextStyle(
-                    color = ArenaButtonPaint.ink(variant, colors),
-                    fontSize = ArenaControl.text(size, density),
+                    color = ArenaButtonPaint.ink(destructive, colors),
+                    fontSize = ArenaControl.text(density),
                     fontWeight = ArenaControl.weight,
                     fontFamily = ArenaTheme.fonts.body,
                 ),

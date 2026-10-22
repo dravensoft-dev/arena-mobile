@@ -1,37 +1,33 @@
 import { test, expect } from 'bun:test';
 import {
-  COLLAPSED, COMPOSITION, KOTLIN_CONSTANT, KOTLIN_RUNG, KOTLIN_RUNG_HEAD, KOTLIN_TARGET, RUNGS,
-  SWIFT_CONSTANT, SWIFT_RUNG, SWIFT_RUNG_HEAD, SWIFT_TARGET, axisProblems, collapsedHere,
+  COLLAPSED, COMPOSITION, KOTLIN_CONSTANT, KOTLIN_RUNG, KOTLIN_TARGET, RUNGS,
+  SWIFT_CONSTANT, SWIFT_RUNG, SWIFT_TARGET, axisProblems, collapsedHere,
   compositionProblems, constantsIn, controlRoles, coverageProblems, missingSeamProblems,
-  operandProblems, parityProblems, partitionProblems, rungProblems, rungsIn, targetIn,
+  operandProblems, parityProblems, partitionProblems, rungProblems, targetIn,
   zeroMemberProblem, zeroRoleProblem, node,
 } from './check-control.ts';
 import { LAYERS } from '../../lib/arena/behaviour-obligations.ts';
 
 const emitted = new Map([['sp.3', 'sp3'], ['sp.2', 'sp2'], ['r.sm', 'rSm'], ['fw.semibold', 'fwSemibold'],
-  ['dz.ctl-h', 'ctlH'], ['dz.ctl-h-sm', 'ctlHSm'], ['dz.ctl-h-lg', 'ctlHLg'], ['dz.text', 'text'], ['dz.text-md', 'textMd']]);
+  ['dz.ctl-h', 'ctlH'], ['dz.text', 'text']]);
 
 const kotlin = [
   '    public val padding: Dp = ArenaTokens.sp3',
-  '    public fun height(size: ArenaControlSize, density: ArenaDensityScale): Dp = when (size) {',
-  '        ArenaControlSize.Sm -> density.ctlHSm',
-  '    }',
+  '    public fun height(density: ArenaDensityScale): Dp = density.ctlH',
   '    public fun target(painted: Dp, floor: Dp): Dp = max(floor, painted)',
 ].join('\n');
 
 const swift = [
   '    public static let padding: CGFloat = ArenaTokens.sp3',
-  '    public static func height(_ size: ArenaControlSize, _ density: ArenaDensityScale) -> CGFloat {',
-  '        case .sm: density.ctlHSm',
-  '    }',
+  '    public static func height(_ density: ArenaDensityScale) -> CGFloat { density.ctlH }',
   '    public static func target(_ painted: CGFloat, floor: CGFloat) -> CGFloat { max(floor, painted) }',
 ].join('\n');
 
-test('the seam is read out of both idioms into one vocabulary, and a Kotlin case folds to its Swift spelling', () => {
+test('the seam is read out of both idioms into one vocabulary', () => {
   expect(constantsIn(kotlin, KOTLIN_CONSTANT)).toEqual(new Map([['padding', 'sp3']]));
   expect(constantsIn(swift, SWIFT_CONSTANT)).toEqual(new Map([['padding', 'sp3']]));
-  expect(rungsIn(kotlin, KOTLIN_RUNG_HEAD, KOTLIN_RUNG)).toEqual(new Map([['height.sm', 'ctlHSm']]));
-  expect(rungsIn(swift, SWIFT_RUNG_HEAD, SWIFT_RUNG)).toEqual(new Map([['height.sm', 'ctlHSm']]));
+  expect(constantsIn(kotlin, KOTLIN_RUNG)).toEqual(new Map([['height', 'ctlH']]));
+  expect(constantsIn(swift, SWIFT_RUNG)).toEqual(new Map([['height', 'ctlH']]));
 });
 
 test('the control roles come off the contract by the mark in their own names, never off a list here', () => {
@@ -58,11 +54,11 @@ test('a step that looks right and is not is reported against the role that named
 test('every rung is answered, off the density member the contract names', () => {
   const all = new Map([...RUNGS].map(([key, rung]) => [key, emitted.get(rung.token) as string]));
   expect(rungProblems(all, emitted, 'Compose')).toEqual([]);
-  expect(rungProblems(new Map(), emitted, 'Compose')[0]).toContain('answers no height.lg rung');
-  expect(rungProblems(new Map([...all, ['height.xl', 'ctlH']]), emitted, 'Compose').at(-1))
+  expect(rungProblems(new Map(), emitted, 'Compose')[0]).toContain('answers no height rung');
+  expect(rungProblems(new Map([...all, ['width', 'ctlH']]), emitted, 'Compose').at(-1))
     .toContain('RUNGS names no density token for it');
-  expect(rungProblems(new Map([...all, ['height.sm', 'ctlH']]), emitted, 'Compose')[0])
-    .toContain('reads density.ctlH for height.sm');
+  expect(rungProblems(new Map([...all, ['text', 'ctlH']]), emitted, 'Compose')[0])
+    .toContain('reads density.ctlH for text');
 });
 
 test('a length is geometry and a label is type, so each is held to its own axis', () => {

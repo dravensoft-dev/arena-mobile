@@ -4,7 +4,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.max
-import org.dravensoft.arena.api.ArenaControlSize
 
 public object ArenaControl {
     public val padding: Dp = ArenaTokens.sp3
@@ -15,17 +14,9 @@ public object ArenaControl {
 
     public val weight: FontWeight = ArenaTokens.fwSemibold
 
-    public fun height(size: ArenaControlSize, density: ArenaDensityScale): Dp = when (size) {
-        ArenaControlSize.Sm -> density.ctlHSm
-        ArenaControlSize.Md -> density.ctlH
-        ArenaControlSize.Lg -> density.ctlHLg
-    }
+    public fun height(density: ArenaDensityScale): Dp = density.ctlH
 
-    public fun text(size: ArenaControlSize, density: ArenaDensityScale): TextUnit = when (size) {
-        ArenaControlSize.Sm -> density.textMd
-        ArenaControlSize.Md -> density.text
-        ArenaControlSize.Lg -> density.text
-    }
+    public fun text(density: ArenaDensityScale): TextUnit = density.text
 
     public fun target(painted: Dp, floor: Dp): Dp = max(floor, painted)
 }

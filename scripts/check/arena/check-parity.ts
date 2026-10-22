@@ -2,7 +2,8 @@
  * computes. The two renders never meet, because neither toolkit is the other's authority, and
  * what makes that an agreement is transitive: check:members holds one surface, the composition
  * gates hold one value behind it, and this holds each layer's drawing against that value. The
- * matrix is derived from the contract's own enum members rather than written here, both suites
+ * matrix is derived from the contract's own enum and boolean members rather than written here, a
+ * boolean crossing as the two cases false and true, both suites
  * carry it as a literal, and AXES names the claim the two of them spell alike beside the
  * authority it measures against. A claim found in a source is one that is WRITTEN and never one
  * applied to the right node, which is the admission check:behaviour makes about a symbol; what
@@ -94,29 +95,25 @@ export const UNREACHED = new Map<string, string>([
     + "UIKit's own, so the two would be measuring two different things"],
 ]);
 
-const GHOST_PAINTS_NOTHING = 'a ghost paints neither ground nor boundary, so no painted pixel bounds the column '
-  + 'and none sits at the corner. What is drawn there is the label, whose extent a face decides';
-
 const PRIMARY_EDGE_IS_ITS_FILL = 'a primary edge and its fill are one colour, so a run counted inward from the '
   + 'first column does not end where the boundary does';
 
 export const UNDECIDABLE = new Map<string, string>([
-  ['ghost.sm:paintedHeight', GHOST_PAINTS_NOTHING],
-  ['ghost.md:paintedHeight', GHOST_PAINTS_NOTHING],
-  ['ghost.lg:paintedHeight', GHOST_PAINTS_NOTHING],
-  ['ghost.sm:cornerRadius', GHOST_PAINTS_NOTHING],
-  ['ghost.md:cornerRadius', GHOST_PAINTS_NOTHING],
-  ['ghost.lg:cornerRadius', GHOST_PAINTS_NOTHING],
-  ['primary.sm:boundaryWidth', PRIMARY_EDGE_IS_ITS_FILL],
-  ['primary.md:boundaryWidth', PRIMARY_EDGE_IS_ITS_FILL],
-  ['primary.lg:boundaryWidth', PRIMARY_EDGE_IS_ITS_FILL],
+  ['false.false.false:boundaryWidth', PRIMARY_EDGE_IS_ITS_FILL],
+  ['false.false.true:boundaryWidth', PRIMARY_EDGE_IS_ITS_FILL],
+  ['false.true.false:boundaryWidth', PRIMARY_EDGE_IS_ITS_FILL],
+  ['false.true.true:boundaryWidth', PRIMARY_EDGE_IS_ITS_FILL],
 ]);
 
 export const UNENUMERATED = new Map<string, string>([]);
 
 export const CASE_BLOCKS: Record<Layer, { opens: RegExp; closes: RegExp; reference: RegExp }> = {
-  compose: { opens: /^\s*private val CASES\b.*\($/, closes: /^\s*\)/, reference: /\b\w+\.([A-Z]\w*)\b/g },
-  swiftui: { opens: /^\s*private let cases\b.*\[$/, closes: /^\s*\]/, reference: /\.([a-z]\w*)\b/g },
+  compose: {
+    opens: /^\s*private val CASES\b.*\($/,
+    closes: /^\s*\)/,
+    reference: /\b(?:\w+\.([A-Z]\w*)|(false|true))\b/g,
+  },
+  swiftui: { opens: /^\s*private let cases\b.*\[$/, closes: /^\s*\]/, reference: /(?:\.([a-z]\w*)|\b(false|true))\b/g },
 };
 
 export const UNITS: Record<Layer, { pattern: RegExp; why: string }> = {
@@ -148,6 +145,10 @@ export const node = {
 };
 
 export type Case = ReturnType<typeof enumCases>[number];
+
+export const BOOLEAN_CASES: Case[] = [false, true].map((value) => ({
+  value: String(value), stem: String(value), kotlin: String(value), swift: String(value), literal: String(value),
+}));
 export type EnumAxis = { member: string; type: string; cases: Case[] };
 
 export function memberFieldsOf(contract: { api?: Record<string, ComponentMember> }) {
@@ -163,6 +164,7 @@ export function enumAxesOf(
   return [...answers].flatMap(([member, answer]) => {
     if (!isAnswered(answer)) return [];
     const field = fields.get(member);
+    if (field?.form === 'primitive' && field.type === 'boolean') return [{ member, type: 'boolean', cases: BOOLEAN_CASES }];
     if (!field || field.form !== 'enum') return [];
     const type = types.find((one) => one.name === field.type);
     if (!type) return [];
@@ -196,7 +198,7 @@ export function caseLinesIn(source: string, block: { opens: RegExp; closes: RegE
 }
 
 export function tupleOf(line: string, axes: readonly EnumAxis[], layer: Layer, blocks = CASE_BLOCKS) {
-  const spellings = [...line.matchAll(blocks[layer].reference)].map((found) => found[1]);
+  const spellings = [...line.matchAll(blocks[layer].reference)].map((found) => found[1] ?? found[2]);
   if (spellings.length !== axes.length) return null;
   const values = axes.map((axis, at) => axis.cases.find((one) => spellingOf(one, layer) === spellings[at])?.value);
   if (values.some((one) => one === undefined)) return null;
@@ -216,7 +218,7 @@ export function matrixProblems(
   for (const line of lines) {
     const key = tupleOf(line, axes, layer);
     if (key === null) {
-      errs.push(`${suite} spells a case this gate cannot resolve against the ${axes.length} enum member(s) the `
+      errs.push(`${suite} spells a case this gate cannot resolve against the ${axes.length} member(s) the `
         + `contract crosses: ${JSON.stringify(line)}. A case list the gate reads as noise is a matrix nobody holds`);
       continue;
     }
@@ -324,7 +326,7 @@ export function zeroAxisProblem(counted: number) {
 
 export function zeroMatrixProblem(component: string, counted: number) {
   if (counted > 0) return null;
-  return `${component} crosses no enum member at all, so its matrix is one empty case and every suite below is `
+  return `${component} crosses no enum or boolean member at all, so its matrix is one empty case and every suite below is `
     + 'held against it';
 }
 

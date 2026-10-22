@@ -13,7 +13,6 @@ import org.dravensoft.arena.api.ArenaCatSlot
 import org.dravensoft.arena.api.ArenaInputType
 import org.dravensoft.arena.api.ArenaLocale
 import org.dravensoft.arena.api.ArenaMenuItem
-import org.dravensoft.arena.api.ArenaSwitchSize
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -23,7 +22,6 @@ class ArenaApiTest {
     fun aCaseCarriesTheContractsOwnLiteralAndNotItsMangledName() {
         assertEquals("danger", ArenaAlertTone.Danger.value)
         assertEquals("datetime-local", ArenaInputType.DatetimeLocal.value)
-        assertEquals("2xl", ArenaSwitchSize.Size2xl.value)
         assertEquals(1, ArenaCatSlot.Slot1.value)
         assertEquals(8, ArenaCatSlot.Slot8.value)
     }
@@ -32,7 +30,6 @@ class ArenaApiTest {
     fun fromWalksBackToTheEntry() {
         assertEquals(ArenaAlertTone.Danger, ArenaAlertTone.from("danger"))
         assertEquals(ArenaInputType.DatetimeLocal, ArenaInputType.from("datetime-local"))
-        assertEquals(ArenaSwitchSize.Size2xl, ArenaSwitchSize.from("2xl"))
         assertEquals(ArenaCatSlot.Slot8, ArenaCatSlot.from(8))
     }
 
@@ -48,7 +45,6 @@ class ArenaApiTest {
     fun everyCaseIsReachedByItsOwnLiteral() {
         for (entry in ArenaAlertTone.entries) assertEquals(entry, ArenaAlertTone.from(entry.value))
         for (entry in ArenaInputType.entries) assertEquals(entry, ArenaInputType.from(entry.value))
-        for (entry in ArenaSwitchSize.entries) assertEquals(entry, ArenaSwitchSize.from(entry.value))
         for (entry in ArenaCatSlot.entries) assertEquals(entry, ArenaCatSlot.from(entry.value))
     }
 

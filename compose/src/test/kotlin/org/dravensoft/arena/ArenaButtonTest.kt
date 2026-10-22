@@ -24,8 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.height
 import androidx.compose.ui.unit.max
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.dravensoft.arena.api.ArenaButtonVariant
-import org.dravensoft.arena.api.ArenaControlSize
 import org.dravensoft.arena.components.ArenaButton
 import org.dravensoft.arena.components.ArenaButtonPaint
 import org.dravensoft.arena.theme.ArenaTheme
@@ -40,11 +38,8 @@ import org.dravensoft.arena.tokens.ArenaScale
 import org.dravensoft.arena.tokens.ArenaTokens
 import org.dravensoft.arena.tokens.accent
 import org.dravensoft.arena.tokens.bg
-import org.dravensoft.arena.tokens.borderStrong
 import org.dravensoft.arena.tokens.danger
 import org.dravensoft.arena.tokens.onAccent
-import org.dravensoft.arena.tokens.surfaceCard
-import org.dravensoft.arena.tokens.textStrong
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
@@ -64,18 +59,14 @@ class ArenaButtonTest {
     private val TOUCH_FLOOR: Dp = 48.dp
 
     private val CASES = listOf(
-        ArenaButtonVariant.Primary to ArenaControlSize.Sm,
-        ArenaButtonVariant.Primary to ArenaControlSize.Md,
-        ArenaButtonVariant.Primary to ArenaControlSize.Lg,
-        ArenaButtonVariant.Secondary to ArenaControlSize.Sm,
-        ArenaButtonVariant.Secondary to ArenaControlSize.Md,
-        ArenaButtonVariant.Secondary to ArenaControlSize.Lg,
-        ArenaButtonVariant.Ghost to ArenaControlSize.Sm,
-        ArenaButtonVariant.Ghost to ArenaControlSize.Md,
-        ArenaButtonVariant.Ghost to ArenaControlSize.Lg,
-        ArenaButtonVariant.Danger to ArenaControlSize.Sm,
-        ArenaButtonVariant.Danger to ArenaControlSize.Md,
-        ArenaButtonVariant.Danger to ArenaControlSize.Lg,
+        Triple(false, false, false),
+        Triple(false, false, true),
+        Triple(false, true, false),
+        Triple(false, true, true),
+        Triple(true, false, false),
+        Triple(true, false, true),
+        Triple(true, true, false),
+        Triple(true, true, true),
     )
 
     private val colors = ArenaDarkColors
@@ -85,13 +76,13 @@ class ArenaButtonTest {
             Column(modifier = Modifier.background(colors.bg)) {
                 for ((density, floor, contrast) in configurations) {
                     ArenaTheme(colors = colors, density = density) {
-                        for ((variant, size) in CASES) {
+                        for ((destructive, loading, disabled) in CASES) {
                             ArenaButton(
                                 content = "Send",
                                 click = {},
-                                variant = variant,
-                                size = size,
-                                full = true,
+                                destructive = destructive,
+                                loading = loading,
+                                disabled = disabled,
                                 increasedContrast = contrast,
                                 targetFloor = floor,
                             )
@@ -122,16 +113,15 @@ class ArenaButtonTest {
     fun paintedHeightIsTheRungTheDensityNamesAndNeverTheFloor() {
         render(listOf(Triple(ArenaBaseDensity, TOUCH_FLOOR, false)))
         for ((at, case) in CASES.withIndex()) {
-            val (variant, size) = case
-            if (variant == ArenaButtonVariant.Ghost) continue
+            val (destructive) = case
             val pixels = pixelsAt(at)
-            val paintedHeight = paintedRun(pixels, ArenaButtonPaint.fill(variant, colors), ArenaButtonPaint.edge(variant, colors))
+            val paintedHeight = paintedRun(pixels, ArenaButtonPaint.fill(destructive, colors), ArenaButtonPaint.edge(destructive, colors))
             val rung = with(compose.density) {
-                ArenaScale.control(ArenaControl.height(size, ArenaBaseDensity), 1f).roundToPx()
+                ArenaScale.control(ArenaControl.height(ArenaBaseDensity), 1f).roundToPx()
             }
             assertTrue(
                 abs(paintedHeight - rung) <= 1,
-                "$variant $size draws $paintedHeight row(s) of its own paint and the rung it is born at is $rung, so the floor grew the drawing rather than the box",
+                "$case draws $paintedHeight row(s) of its own paint and the rung it is born at is $rung, so the floor grew the drawing rather than the box",
             )
         }
     }
@@ -142,9 +132,9 @@ class ArenaButtonTest {
         render(floors.map { Triple(ArenaBaseDensity, it, false) })
         for ((configuration, floor) in floors.withIndex()) {
             for ((index, case) in CASES.withIndex()) {
-                val (variant, size) = case
+                val (destructive) = case
                 val at = configuration * CASES.size + index
-                val painted = ArenaScale.control(ArenaControl.height(size, ArenaBaseDensity), 1f)
+                val painted = ArenaScale.control(ArenaControl.height(ArenaBaseDensity), 1f)
                 val activationBox = if (floor == null) painted else ArenaControl.target(painted, floor)
                 val gutter = ArenaTokens.focusOffset + ArenaContrast.focusWidth(false)
                 val offered = with(compose.density) { controlAt(at).getUnclippedBoundsInRoot().height.roundToPx() }
@@ -152,7 +142,7 @@ class ArenaButtonTest {
                 assertEquals(
                     expected,
                     offered,
-                    "$variant $size asked for ${floor ?: "no floor"} offers $offered and its seam composes $expected",
+                    "$case asked for ${floor ?: "no floor"} offers $offered and its seam composes $expected",
                 )
             }
         }
@@ -162,15 +152,15 @@ class ArenaButtonTest {
     fun groundInkIsWhatThePaintNamesOrTheDeclaredGround() {
         render(listOf(Triple(ArenaComfortableDensity, null, false)))
         for ((at, case) in CASES.withIndex()) {
-            val (variant, size) = case
+            val (destructive) = case
             val pixels = pixelsAt(at)
-            val fill = ArenaButtonPaint.fill(variant, colors)
+            val fill = ArenaButtonPaint.fill(destructive, colors)
             val inward = gutterPx(false) + with(compose.density) { ArenaControl.padding.roundToPx() } / 2
             val groundInk = pixels[inward, pixels.height / 2]
             assertEquals(
                 if (fill == Color.Transparent) colors.bg else fill,
                 groundInk,
-                "$variant $size paints $groundInk past its boundary and short of its label, and ArenaButtonPaint.fill names $fill",
+                "$case paints $groundInk past its boundary and short of its label, and ArenaButtonPaint.fill names $fill",
             )
         }
     }
@@ -181,10 +171,10 @@ class ArenaButtonTest {
         render(contrasts.map { Triple(ArenaComfortableDensity, null, it) })
         for ((configuration, contrast) in contrasts.withIndex()) {
             for ((index, case) in CASES.withIndex()) {
-                val (variant, size) = case
-                if (variant == ArenaButtonVariant.Primary) continue
+                val (destructive) = case
+                if (!destructive) continue
                 val pixels = pixelsAt(configuration * CASES.size + index)
-                val edge = ArenaButtonPaint.edge(variant, colors)
+                val edge = ArenaButtonPaint.edge(destructive, colors)
                 val ladder = with(compose.density) { ArenaContrast.border(contrast).roundToPx() }
                 val from = gutterPx(contrast)
                 val row = pixels.height / 2
@@ -192,7 +182,7 @@ class ArenaButtonTest {
                 val expected = if (edge == Color.Transparent) 0 else ladder
                 assertTrue(
                     abs(boundaryWidth - expected) <= 1,
-                    "$variant $size under increased contrast $contrast draws $boundaryWidth column(s) of its edge and ArenaContrast.border names $expected",
+                    "$case under increased contrast $contrast draws $boundaryWidth column(s) of its edge and ArenaContrast.border names $expected",
                 )
             }
         }
@@ -202,16 +192,16 @@ class ArenaButtonTest {
     fun boundaryInkIsWhatThePaintNamesOrTheDeclaredGround() {
         render(listOf(Triple(ArenaComfortableDensity, null, false)))
         for ((at, case) in CASES.withIndex()) {
-            val (variant, size) = case
+            val (destructive) = case
             val pixels = pixelsAt(at)
-            val edge = ArenaButtonPaint.edge(variant, colors)
+            val edge = ArenaButtonPaint.edge(destructive, colors)
             val ladder = with(compose.density) { ArenaContrast.border(false).roundToPx() }
             val inward = gutterPx(false) + if (edge == Color.Transparent) 0 else ladder / 2
             val boundaryInk = pixels[inward, pixels.height / 2]
             assertEquals(
                 if (edge == Color.Transparent) colors.bg else edge,
                 boundaryInk,
-                "$variant $size draws $boundaryInk at its first column, and ArenaButtonPaint.edge names $edge",
+                "$case draws $boundaryInk at its first column, and ArenaButtonPaint.edge names $edge",
             )
         }
     }
@@ -220,53 +210,34 @@ class ArenaButtonTest {
     fun cornerRadiusIsTheStepTheControlRoleCollapsesOnto() {
         render(listOf(Triple(ArenaComfortableDensity, null, false)))
         for ((at, case) in CASES.withIndex()) {
-            val (variant, size) = case
-            if (variant == ArenaButtonVariant.Ghost) continue
+            val (destructive) = case
             val pixels = pixelsAt(at)
-            val fill = ArenaButtonPaint.fill(variant, colors)
-            val edge = ArenaButtonPaint.edge(variant, colors)
+            val fill = ArenaButtonPaint.fill(destructive, colors)
+            val edge = ArenaButtonPaint.edge(destructive, colors)
             val from = gutterPx(false)
             val top = (0 until pixels.height).first { isPainted(pixels[pixels.width / 2, it], fill, edge) }
             val cornerRadius = (from until pixels.width).takeWhile { !isPainted(pixels[it, top], fill, edge) }.count()
             val step = with(compose.density) { ArenaControl.radius.roundToPx() }
             assertTrue(
                 abs(cornerRadius - step) <= 1,
-                "$variant $size leaves $cornerRadius column(s) unpainted at the top row of its rectangle and ArenaControl.radius names $step",
+                "$case leaves $cornerRadius column(s) unpainted at the top row of its rectangle and ArenaControl.radius names $step",
             )
         }
     }
 
     @Test
-    fun dangerIsAnOutlineAndNeverAFill() {
+    fun destructiveIsAnOutlineAndNeverAFill() {
         for (scheme in listOf(ArenaDarkColors, ArenaLightColors)) {
-            assertEquals(Color.Transparent, ArenaButtonPaint.fill(ArenaButtonVariant.Danger, scheme))
-            assertEquals(scheme.danger, ArenaButtonPaint.edge(ArenaButtonVariant.Danger, scheme))
-            assertEquals(scheme.danger, ArenaButtonPaint.ink(ArenaButtonVariant.Danger, scheme))
+            assertEquals(Color.Transparent, ArenaButtonPaint.fill(true, scheme))
+            assertEquals(scheme.danger, ArenaButtonPaint.edge(true, scheme))
+            assertEquals(scheme.danger, ArenaButtonPaint.ink(true, scheme))
         }
     }
 
     @Test
-    fun primaryIsTheOneVariantThatCarriesTheAccentAsAGround() {
-        assertEquals(colors.accent, ArenaButtonPaint.fill(ArenaButtonVariant.Primary, colors))
-        assertEquals(colors.onAccent, ArenaButtonPaint.ink(ArenaButtonVariant.Primary, colors))
-        assertEquals(colors.accent, ArenaButtonPaint.edge(ArenaButtonVariant.Primary, colors))
-        for (variant in listOf(ArenaButtonVariant.Secondary, ArenaButtonVariant.Ghost, ArenaButtonVariant.Danger)) {
-            assertEquals(false, ArenaButtonPaint.fill(variant, colors) == colors.accent)
-        }
-    }
-
-    @Test
-    fun aGhostDrawsNoGroundAndNoBoundary() {
-        val scheme = ArenaLightColors
-        assertEquals(Color.Transparent, ArenaButtonPaint.fill(ArenaButtonVariant.Ghost, scheme))
-        assertEquals(Color.Transparent, ArenaButtonPaint.edge(ArenaButtonVariant.Ghost, scheme))
-        assertEquals(scheme.textStrong, ArenaButtonPaint.ink(ArenaButtonVariant.Ghost, scheme))
-    }
-
-    @Test
-    fun secondaryIsTheSurfaceAndTheBoundaryThatCarriesMeaning() {
-        assertEquals(colors.surfaceCard, ArenaButtonPaint.fill(ArenaButtonVariant.Secondary, colors))
-        assertEquals(colors.borderStrong, ArenaButtonPaint.edge(ArenaButtonVariant.Secondary, colors))
-        assertEquals(colors.textStrong, ArenaButtonPaint.ink(ArenaButtonVariant.Secondary, colors))
+    fun anActionThatDestroysNothingCarriesTheAccentAsAGround() {
+        assertEquals(colors.accent, ArenaButtonPaint.fill(false, colors))
+        assertEquals(colors.onAccent, ArenaButtonPaint.ink(false, colors))
+        assertEquals(colors.accent, ArenaButtonPaint.edge(false, colors))
     }
 }

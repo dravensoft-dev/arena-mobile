@@ -34,10 +34,8 @@ const NO_ICON = 'a Phosphor class name, which is a font a stylesheet names and n
 export const MEMBERS = new Map<string, Map<string, Answer>>([
   ['ArenaButton', new Map<string, Answer>([
     ['content', { parameter: 'content' }],
-    ['variant', { parameter: 'variant' }],
-    ['size', { parameter: 'size' }],
+    ['destructive', { parameter: 'destructive' }],
     ['loading', { parameter: 'loading' }],
-    ['full', { parameter: 'full' }],
     ['disabled', { parameter: 'disabled' }],
     ['click', { parameter: 'click' }],
     ['icon', { excepted: NO_ICON }],

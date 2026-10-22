@@ -11,7 +11,6 @@ test('CASE_NAMES is asserted by literal value, so the map and this case move in 
   expect([...CASE_NAMES.keys()]).toEqual([
     'ArenaCatSlot.1', 'ArenaCatSlot.2', 'ArenaCatSlot.3', 'ArenaCatSlot.4',
     'ArenaCatSlot.5', 'ArenaCatSlot.6', 'ArenaCatSlot.7', 'ArenaCatSlot.8',
-    'ArenaSwitchSize.2xl',
   ]);
   for (const [, { name, why }] of CASE_NAMES) {
     expect(name).toMatch(/^[a-z][A-Za-z0-9]*$/);
@@ -21,9 +20,9 @@ test('CASE_NAMES is asserted by literal value, so the map and this case move in 
 
 test('REPHRASED is asserted by literal value, and every entry carries the contract text it replaces', () => {
   expect([...REPHRASED.keys()]).toEqual([
-    'ArenaActivityItem.dateTime', 'ArenaCatSlot', 'ArenaCommand.route', 'ArenaControlSize',
-    'ArenaCrumb.href', 'ArenaHeadingLevel', 'ArenaKeyValueRow.term', 'ArenaKeyValueRow.value',
-    'ArenaMenuItem.icon', 'ArenaOnboardingAnchor', 'ArenaTableColumn.width', 'ArenaTableSlice',
+    'ArenaActivityItem.dateTime', 'ArenaCatSlot', 'ArenaCommand.route', 'ArenaCrumb.href',
+    'ArenaHeadingLevel', 'ArenaKeyValueRow.term', 'ArenaKeyValueRow.value', 'ArenaMenuItem.icon',
+    'ArenaOnboardingAnchor', 'ArenaTableSlice',
     'ArenaTableSlice.offset', 'ArenaTableSlice.total', 'ArenaTableSort',
   ]);
   for (const [, { was, text, why }] of REPHRASED) {
@@ -36,7 +35,6 @@ test('REPHRASED is asserted by literal value, and every entry carries the contra
 test('a value that mangles to no identifier is named, and one that is not named fails the emit', () => {
   expect(caseStemFor('ArenaAlertTone', 'danger')).toBe('danger');
   expect(caseStemFor('ArenaInputType', 'datetime-local')).toBe('datetimeLocal');
-  expect(caseStemFor('ArenaSwitchSize', '2xl')).toBe('size2xl');
   expect(caseStemFor('ArenaCatSlot', 1)).toBe('slot1');
   expect(() => caseStemFor('ArenaGhost', '2xl')).toThrow(/Name it in CASE_NAMES/);
   expect(() => caseStemFor('ArenaGhost', 7)).toThrow(/compiles in neither language/);
@@ -123,7 +121,7 @@ test('a rephrasing fails when the text it was written against moves, which is wh
 
 test('a case name for a value the payload no longer declares names nothing', () => {
   expect(staleCaseNameProblems([])[0]).toContain('no enum in the payload declares that value');
-  const carried = [anEnum('ArenaSwitchSize', ['2xl']), anEnum('ArenaCatSlot', [1, 2, 3, 4, 5, 6, 7, 8])];
+  const carried = [anEnum('ArenaCatSlot', [1, 2, 3, 4, 5, 6, 7, 8])];
   expect(staleCaseNameProblems(carried)).toEqual([]);
 });
 

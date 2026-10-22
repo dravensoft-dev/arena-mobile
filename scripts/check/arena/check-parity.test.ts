@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test';
 import {
-  AXES, CASE_BLOCKS, CONSIDERED, UNDECIDABLE, UNENUMERATED, UNITS, UNREACHED, caseLinesIn, claimProblems,
+  AXES, BOOLEAN_CASES, CASE_BLOCKS, CONSIDERED, UNDECIDABLE, UNENUMERATED, UNITS, UNREACHED, caseLinesIn, claimProblems,
   enumAxesOf, enumerationProblems, keyOf, matrixOf, matrixProblems, node, partitionProblems,
   staleUndecidableProblems, staleUnenumeratedProblems, tupleOf, unitProblems, zeroAxisProblem,
   zeroCaseProblem, zeroComponentProblem, zeroMatrixProblem, type EnumAxis,
@@ -24,19 +24,25 @@ const size = {
 const axes = [variant, size];
 const matrix = matrixOf(axes);
 
-test('the matrix is the cross product of the contract own enum members and nothing else', () => {
+test('the matrix is the cross product of the contract own enum and boolean members and nothing else', () => {
   expect(matrix.map(keyOf)).toEqual(['primary.sm', 'ghost.sm']);
   const fields = new Map([
-    ['variant', { form: 'enum', type: 'ArenaButtonVariant' }],
-    ['size', { form: 'enum', type: 'ArenaControlSize' }],
-    ['full', { form: 'primitive', type: 'boolean' }],
+    ['content', { form: 'slot' }],
+    ['destructive', { form: 'primitive', type: 'boolean' }],
+    ['loading', { form: 'primitive', type: 'boolean' }],
+    ['disabled', { form: 'primitive', type: 'boolean' }],
   ]);
-  const types = [
-    { name: 'ArenaButtonVariant', kind: 'enum', values: ['primary', 'ghost'] },
-    { name: 'ArenaControlSize', kind: 'enum', values: ['sm'] },
-  ];
-  expect(enumAxesOf('ArenaButton', fields, types).map((one) => one.member)).toEqual(['variant', 'size']);
-  expect(enumAxesOf('ArenaButton', fields, types)[1]?.cases.map((one) => one.value)).toEqual(['sm']);
+  const found = enumAxesOf('ArenaButton', fields, []);
+  expect(found.map((one) => one.member)).toEqual(['destructive', 'loading', 'disabled']);
+  expect(found[0]?.cases.map((one) => one.value)).toEqual(['false', 'true']);
+  expect(matrixOf(found).map(keyOf)).toHaveLength(8);
+});
+
+test('a boolean case is spelled false and true in both languages', () => {
+  const flags = [{ member: 'destructive', type: 'boolean', cases: BOOLEAN_CASES }];
+  expect(tupleOf('listOf(true),', flags, 'compose')).toBe('true');
+  expect(tupleOf('(true),', flags, 'swiftui')).toBe('true');
+  expect(tupleOf('Triple(true, false),', flags, 'compose')).toBe(null);
 });
 
 test('a case list is read out of each suite in its own idiom', () => {
@@ -86,10 +92,11 @@ test('AXES and UNREACHED partition the declared set of axes, disjointly', () => 
 });
 
 test('UNDECIDABLE is live, over the derived matrix and the axes that are measured', () => {
-  const crossed = ['ghost.sm', 'ghost.md', 'ghost.lg', 'primary.sm', 'primary.md', 'primary.lg'];
+  const crossed = ['false.false.false', 'false.false.true', 'false.true.false', 'false.true.true', 'true.false.false'];
   expect(staleUndecidableProblems(crossed)).toEqual([]);
-  expect(staleUndecidableProblems(crossed.filter((one) => one !== 'ghost.md'))[0]).toContain('crosses no ghost.md');
-  expect(staleUndecidableProblems(crossed, AXES, new Map([['ghost.sm:labelInk', 'a reason']]))[0])
+  expect(staleUndecidableProblems(crossed.filter((one) => one !== 'false.true.false'))[0])
+    .toContain('crosses no false.true.false');
+  expect(staleUndecidableProblems(crossed, AXES, new Map([['true.false.false:labelInk', 'a reason']]))[0])
     .toContain('measures no labelInk');
 });
 
@@ -105,7 +112,7 @@ test('nothing closes over nothing', () => {
   expect(zeroComponentProblem(1)).toBe(null);
   expect(zeroComponentProblem(0)).toContain('found no component');
   expect(zeroAxisProblem(0)).toContain('AXES measures nothing');
-  expect(zeroMatrixProblem('ArenaButton', 0)).toContain('crosses no enum member');
+  expect(zeroMatrixProblem('ArenaButton', 0)).toContain('crosses no enum or boolean member');
   expect(zeroCaseProblem(0)).toContain('read no case');
 });
 

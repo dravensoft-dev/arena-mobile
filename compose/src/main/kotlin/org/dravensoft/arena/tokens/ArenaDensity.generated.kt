@@ -18,10 +18,16 @@ public data class ArenaDensityScale(
     public val ctlHSm: Dp,
     /** glyph-tight line height: the control reset. Unlike every other dz member this is unitless, so it carries its own $type override: a line height is a number, not a dimension, the same distinction that puts lh in typography.json to begin with. Used wherever a box must be exactly its glyph (an icon inside a button, a standalone icon, an icon-only close/remove control), so the line box never throws the surrounding control out of alignment. */
     public val lh: Float,
+    /** the least height a row takes: nothing at base, the touch target where density asks for one */
+    public val rowMin: Dp,
     /** row horizontal padding */
     public val rowPx: Dp,
     /** table/list row vertical padding */
     public val rowPy: Dp,
+    /** the factor a row's horizontal padding is multiplied by; 1 at base, and density restates it in the proportion row-px does */
+    public val rowScaleX: Float,
+    /** the factor a row's vertical padding is multiplied by; 1 at base, and density restates it in the proportion row-py does */
+    public val rowScaleY: Float,
     /** gap between stacked items */
     public val stack: Dp,
     /** control text: buttons, inputs, selects, menu items, table cells */
@@ -43,8 +49,11 @@ public val ArenaBaseDensity: ArenaDensityScale = ArenaDensityScale(
     ctlHLg = 48.dp,
     ctlHSm = 32.dp,
     lh = 1f,
+    rowMin = 0.dp,
     rowPx = 16.dp,
     rowPy = 12.dp,
+    rowScaleX = 1f,
+    rowScaleY = 1f,
     stack = 12.dp,
     text = 14.sp,
     text2xs = 10.sp,
@@ -59,8 +68,11 @@ public val ArenaCompactDensity: ArenaDensityScale = ArenaDensityScale(
     ctlHLg = 40.dp,
     ctlHSm = 26.dp,
     lh = 1f,
+    rowMin = 0.dp,
     rowPx = 12.dp,
     rowPy = 7.dp,
+    rowScaleX = 0.75f,
+    rowScaleY = 0.5833f,
     stack = 8.dp,
     text = 13.sp,
     text2xs = 10.sp,
@@ -75,8 +87,11 @@ public val ArenaComfortableDensity: ArenaDensityScale = ArenaDensityScale(
     ctlHLg = 56.dp,
     ctlHSm = 44.dp,
     lh = 1f,
+    rowMin = 48.dp,
     rowPx = 20.dp,
     rowPy = 16.dp,
+    rowScaleX = 1.25f,
+    rowScaleY = 1.3333f,
     stack = 16.dp,
     text = 14.sp,
     text2xs = 10.sp,

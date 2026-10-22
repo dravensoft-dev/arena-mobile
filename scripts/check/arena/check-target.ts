@@ -40,7 +40,7 @@ export const FLOOR_PATTERNS: Record<Layer, RegExp> = {
   swiftui: /^\s*private let touchFloor: CGFloat = (\d+)$/,
 };
 
-export const HEIGHT_MARK = 'height.';
+export const HEIGHT_MARK = 'height';
 
 export const ARGUED = new Map<Layer, { token: string; density: Density; why: string }>([
   ['compose', {

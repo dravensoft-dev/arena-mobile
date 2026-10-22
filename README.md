@@ -81,11 +81,11 @@ against the source that claims it. A member the contract declares that does not 
 excepted with the reason it does not, never dropped.
 
 ```kotlin
-ArenaButton("Save", click = { save() }, variant = ArenaButtonVariant.Primary)
+ArenaButton("Save", click = { save() }, destructive = false)
 ```
 
 ```swift
-ArenaButton("Save", variant: .primary) { save() }
+ArenaButton("Save") { save() }
 ```
 
 **A control's geometry, over the contracted step each role is born at.** Arena asks a control's
